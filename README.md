@@ -19,8 +19,8 @@ This is an extremely simple PHP [statsd](https://github.com/etsy/statsd.git) cli
 To count things:
 
 ``` php
-$numPoints = getNumberOfPoints();
-Stats::counting('numpoints', $numPoints);
+$stats = new StatsD();
+$stats->counting('numpoints', 123);
 ```
 
 ### Timing
@@ -28,8 +28,8 @@ Stats::counting('numpoints', $numPoints);
 Record timings:
 
 ``` php
-$timing = getTiming();
-Stats::timing('timething', $timing);
+$stats = new StatsD();
+$stats->timing('timething', 123);
 ```
 
 ### Time Block
@@ -37,7 +37,8 @@ Stats::timing('timething', $timing);
 And a convenience mechanism for timing:
 
 ``` php
-Stats::time_this('timething', function() {
+$stats = new StatsD();
+$stats->time_this('timething', function() {
     sleep(1);
 });
 ```
@@ -47,8 +48,7 @@ Stats::time_this('timething', function() {
 ### Host and Port
 
 ``` php
-Stats::setHost('localhost'); // default localhost
-Stats::setPort(7000); // default 8125
+$stats = new StatsD('localhost', 7000); // default localhost:8125
 ```
 
 ### Sample Rate
@@ -56,7 +56,15 @@ Stats::setPort(7000); // default 8125
 Any of the methods descriped in the usage section can take an optional third argument `$rate`, which is the sample rate:
 
 ``` php
-Stats::counting('numpoints', 123, 0.1);
+$stats = new StatsD();
+$stats->counting('numpoints', 123, 0.1);
+```
+
+## As a CodeIgniter library
+
+``` php
+$this->load->library('statsd');
+$this->statsd->counting('numpoints', 123);
 ```
 
 ## Author

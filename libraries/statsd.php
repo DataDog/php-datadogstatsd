@@ -6,44 +6,36 @@
  */
 class StatsD {
 
-    // Default host
-    private static $host = 'localhost';
+    private $host, $port;
 
-    // Default port
-    private static $port = 8125;
- 
-    // Set host
-    public static function setHost($host) {
-        self::$host = $host;
-    }
-
-    // Set port
-    public static function setPort($port) {
-        self::$port = $port;
+    // Instantiate a new client
+    public function __construct($host = 'localhost', $port = 8125) {
+        $this->host = $host;
+        $this->port = $port;
     }
 
     // Record timing
-    public static function timing($key, $time, $rate = 1) {
-        self::send("$key:$time|ms", $rate);
+    public function timing($key, $time, $rate = 1) {
+        $this->send("$key:$time|ms", $rate);
     }
 
     // Time something
-    public static function time_this($key, $callback, $rate = 1) {
+    public function time_this($key, $callback, $rate = 1) {
         $begin = microtime(true);
         $callback();
-        $time = floor((microtime(true) - $begin) / 1000);
+        $time = floor((microtime(true) - $begin) * 1000);
         // And record
-        self::timing($key, $time, $rate);
+        $this->timing($key, $time, $rate);
     }
 
     // Record counting
-    public static function counting($key, $amount = 1, $rate = 1) {
-        self::send("$key:$amount|c", $rate);
+    public function counting($key, $amount = 1, $rate = 1) {
+        $this->send("$key:$amount|c", $rate);
     }
 
     // Send
-    private static function send($value, $rate) {
-        $fp = fsockopen('udp://' . self::$host, self::$port, $errno, $errstr);
+    private function send($value, $rate) {
+        $fp = fsockopen('udp://' . $this->host, $this->port, $errno, $errstr);
         // Will show warning if not opened, and return false
         if ($fp) {
             fwrite($fp, "$value|@$rate");
