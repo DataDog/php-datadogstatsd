@@ -61,7 +61,7 @@ Stats::counting('numpoints', 123, 0.1);
 
 ## Author
 
-* John Crepezzi - john.crepezzi@gmail.com
+John Crepezzi - john.crepezzi@gmail.com
 
 ## License
 
