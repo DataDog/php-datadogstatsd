@@ -1,81 +1,56 @@
-# PHP StatsD Client
+# PHP DataDog StatsD Client
 
-This is an extremely simple PHP [statsd](https://github.com/etsy/statsd.git) client and [CI spark](http://getsparks.org).
+This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) client
 
 ## Installation
 
-1.  _With Sparks_ - `$ php tools/spark install statsd`
-2.  _Without Sparks_ - Clone repository at [github.com/seejohnrun/php-statsd](https://github.com/seejohnrun/php-statsd)
+Clone repository at [github.com/anthroprose/php-datadogstatsd](https://github.com/anthroprose/php-datadogstatsd)
 
 ## Setup
 
-1.  _With Sparks_ - `$this->load->spark('statsd');`
-2.  _Without Sparks_ - `require './libraries/statsd.php';`
-
+`require './libraries/datadogstatsd.php';`
+ 
 ## Usage
 
-### Counting
+### Increment
 
-To count things:
+To increment things:
 
 ``` php
-$stats = new StatsD();
-$stats->counting('numpoints', 123);
+DataDogStatsD::increment('your.data.point');
+DataDogStatsD::increment('your.data.point', .5);
+DataDogStatsD::increment('your.data.point', 1, array('tagname' => 'value'));
+```
+
+### Decrement
+
+To decrement things:
+
+``` php
+DataDogStatsD::decrement('your.data.point');
 ```
 
 ### Timing
 
-Record timings:
+To time things:
 
 ``` php
-$stats = new StatsD();
-$stats->timing('timething', 123);
-```
+$start_time = microtime(true);
+run_function();
+DataDogStatsD::timing('your.data.point', microtime(true) - $start_time);
 
-### Time Block
-
-And a convenience mechanism for timing:
-
-``` php
-$stats = new StatsD();
-$stats->time_this('timething', function() {
-    sleep(1);
-});
-```
-
-## Configuration
-
-### Host and Port
-
-``` php
-$stats = new StatsD('localhost', 7000); // default localhost:8125
-```
-
-### Sample Rate
-
-Any of the methods descriped in the usage section can take an optional third argument `$rate`, which is the sample rate:
-
-``` php
-$stats = new StatsD();
-$stats->counting('numpoints', 123, 0.1);
-```
-
-## As a CodeIgniter library
-
-``` php
-$this->load->library('statsd');
-$this->statsd->counting('numpoints', 123);
+DataDogStatsD::timing('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
 ```
 
 ## Author
 
-John Crepezzi - john.crepezzi@gmail.com
+Alex Corley - anthroprose@gmail.com
 
 ## License
 
 (The MIT License)
 
-Copyright © 2012 John Crepezzi
+Copyright © 2012 Alex Corley
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ‘Software’), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
