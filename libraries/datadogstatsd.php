@@ -158,7 +158,7 @@ class Datadogstatsd {
 				
 			} elseif (isset($tags) && !empty($tags)) {
 				
-				$value .= '|#' . $tag;
+				$value .= '|#' . $tags;
 				
 			}
         	
