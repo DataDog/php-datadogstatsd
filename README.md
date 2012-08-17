@@ -63,6 +63,10 @@ DataDogStatsD::event('Now it is fixed.', array(
 ));
 ```
 
+This is what you'd see your Datadog event stream:
+
+![screenshot](https://img.skitch.com/20120817-c6pi1e55rs2xjt3ktp2k1h67e7.png)
+
 You can find your api and app keys in the [API tab](https://app.datadoghq.com/account/settings#api).
 
 For more documentation on the optional values of events, see [http://api.datadoghq.com/events/](http://api.datadoghq.com/events/).
