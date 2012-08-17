@@ -44,6 +44,8 @@ DataDogStatsD::timing('your.data.point', microtime(true) - $start_time, 1, array
 
 ### Submitting events
 
+Requires PHP >= 5.3.0 and the [PECL http](http://www.php.net/manual/en/http.install.php) extension
+
 To submit events, you'll need to first configure the library with your
 Datadog credentials, since the event function submits directly to Datadog
 instead of sending to a local dogstatsd instance.
