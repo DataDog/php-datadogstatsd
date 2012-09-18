@@ -58,6 +58,20 @@ class Datadogstatsd {
     }
 
     /**
+     * Set
+     *
+     * @param string $stat The metric
+     * @param float $value The value
+     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     **/
+    public static function set($stat, $value, $sampleRate = 1, array $tags = null) {
+
+        static::send(array($stat => "$value|s"), $sampleRate, $tags);
+
+    }
+
+
+    /**
      * Increments one or more stats counters
      *
      * @param string|array $stats The metric(s) to increment.
