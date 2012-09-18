@@ -71,7 +71,7 @@ This is what you'd see your Datadog event stream:
 
 You can find your api and app keys in the [API tab](https://app.datadoghq.com/account/settings#api).
 
-For more documentation on the optional values of events, see [http://api.datadoghq.com/events/](http://api.datadoghq.com/events/).
+For more documentation on the optional values of events, see [http://docs.datadoghq.com/api/#events/](http://docs.datadoghq.com/api/#events/).
 
 Note that while sending metrics with this library is fast since it's sending
 locally over UDP, sending events will be slow because it's sending data
