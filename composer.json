@@ -1,0 +1,6 @@
+{
+    "name": "DataDog/php-datadogstatsd",
+    "type": "library",
+    "description": "This is an extremely simple PHP datadogstatsd client",
+    "keywords": ["DataDog", "PHP"]
+}
