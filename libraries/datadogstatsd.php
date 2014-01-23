@@ -32,6 +32,21 @@ class Datadogstatsd {
     }
 
     /**
+     * Log timing information.  Same as timing above, but converts to milliseconds
+     * Convenient when time is taken with microtime(true)
+     *
+     * @param string $stats The metric to in log timing info for.
+     * @param float $time The ellapsed time (ms) to log
+     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     **/
+    public static function microtiming($stat, $time, $sampleRate = 1, array $tags = null) {
+
+        $microtime = round($time * 1000);
+        static::send(array($stat => "$microtime|ms"), $sampleRate, $tags);
+
+    }
+
+    /**
      * Gauge
      *
      * @param string $stat The metric
