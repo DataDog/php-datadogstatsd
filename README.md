@@ -4,7 +4,7 @@ This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) clien
 
 ## Installation
 
-Clone repository at [github.com/anthroprose/php-datadogstatsd](https://github.com/anthroprose/php-datadogstatsd)
+Clone repository at [github.com/DataDog/php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd)
 
 ## Setup
 
@@ -44,7 +44,7 @@ DataDogStatsD::timing('your.data.point', microtime(true) - $start_time, 1, array
 
 ### Submitting events
 
-Requires PHP >= 5.3.0 and the [PECL http](http://www.php.net/manual/en/http.install.php) extension
+Requires PHP >= 5.3.0 with the [PECL http version 1.7.6](http://www.php.net/manual/en/http.install.php) extension
 
 To submit events, you'll need to first configure the library with your
 Datadog credentials, since the event function submits directly to Datadog
