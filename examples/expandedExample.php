@@ -2,15 +2,17 @@
 
 require '../libraries/datadogstatsd.php';
 
-$apiKey = 'apikey_2'; 
+$apiKey = '046a22167c96272932f7f95753ceb81013e1fcac'; 
 $appKey = '2167c96272932f013e1fcac7f95753ceb81046a2';
+DataDogStatsD::configure($apiKey, $appKey);
 
 $runFor = 5; // Set to five minutes. Increase or decrease to have script run longer or shorter.
 $scriptStartTime = time(); 
 
 echo "Script starting.\n";
 
-while ( time() < $scriptStartTime + ($runFor * 60) ) { // Run for 5 minutes.
+// Send metrics and events for 5 minutes.
+while ( time() < $scriptStartTime + ($runFor * 60) ) { 
 
 	$startTime1 = microtime(true);
 	DataDogStatsD::increment('web.page_views');
@@ -30,7 +32,7 @@ function runFunction() {
 
 	global $apiKey;
 	global $appKey;
-
+	
 	$startTime = microtime(true);
 
 	$testArray = array();
@@ -39,8 +41,8 @@ function runFunction() {
 
 		// Simulate an event at every 1000000th element
 		if($i % 1000000 == 0) {
+			
 			echo "Event simulated.\n";
-			DataDogStatsD::configure($apiKey, $appKey);
 			DataDogStatsD::event('A thing broke!', array(
 			    'alert_type'      => 'error',
 			    'aggregation_key' => 'test_aggr'
@@ -50,6 +52,7 @@ function runFunction() {
 			    'aggregation_key' => 'test_aggr'
 			));
 		}
+
 	}
 	unset($testArray);
 	DataDogStatsD::timing('test.data.point', microtime(true) - $startTime, 1, array('tagname' => 'php_example_tag_2'));
