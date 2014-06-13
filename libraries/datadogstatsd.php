@@ -12,7 +12,7 @@
  
 class Datadogstatsd {
 
-	static private $__server = 'localhost';
+	static protected $__server = 'localhost';
     static private $__datadogHost;
     static private $__eventUrl = '/api/v1/events';
     static private $__apiKey;
@@ -156,10 +156,6 @@ class Datadogstatsd {
 
         if (empty($sampledData)) { return; }
 	
-		// Non - Blocking UDP I/O - Use IP Addresses!
-		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-		socket_set_nonblock($socket);
-		
         foreach ($sampledData as $stat => $value) {
 
 			if ($tags !== NULL && is_array($tags) && count($tags) > 0) {
@@ -179,11 +175,23 @@ class Datadogstatsd {
 				$value .= '|#' . $tags;
 				
 			}
-        	
-			socket_sendto($socket, "$stat:$value", strlen("$stat:$value"), 0, static::$__server, 8125);
-			
+
+            static::report_metric("$stat:$value");
+
 		}
 
+
+    }
+
+    public static function report_metric($udp_message) {
+        static::flush($udp_message);
+    }
+
+    public static function flush($udp_message) {
+		// Non - Blocking UDP I/O - Use IP Addresses!
+		$socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+		socket_set_nonblock($socket);
+        socket_sendto($socket, $udp_message, strlen($udp_message), 0, static::$__server, 8125);
 		socket_close($socket);
 		
     }
@@ -238,4 +246,24 @@ class Datadogstatsd {
 
 }
 
+class BatchedDatadogstatsd extends Datadogstatsd {
+
+    static private $__buffer = array();
+    static private $__buffer_length = 0;
+    static public $max_buffer_length = 50;
+
+    public static function report_metric($udp_message) {
+        static::$__buffer[] = $udp_message;
+        static::$__buffer_length++;
+        if(static::$__buffer_length > static::$max_buffer_length) {
+            static::flush_buffer();
+        }
+    }
+
+    public static function flush_buffer() {
+        static::flush(join("\n",static::$__buffer));
+        static::$__buffer = array();
+        static::$__buffer_length = 0;
+    }
+}
 ?>
