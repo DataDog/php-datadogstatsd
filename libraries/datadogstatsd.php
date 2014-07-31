@@ -205,7 +205,7 @@ class Datadogstatsd {
     /**
      * Send an event to the Datadog HTTP api. Potentially slow, so avoid
      * making many call in a row if you don't want to stall your app.
-     * Requires PHP >= 5.3.0 and the PECL extension pecl_http
+     * Requires PHP >= 5.3.0 and the curl extension
      *
      * @param string $title Title of the event
      * @param array $vals Optional values of the event. See
