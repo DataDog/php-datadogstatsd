@@ -8,6 +8,8 @@
  * I did make it the most effecient UDP process possible, and add tagging.
  * 
  * @author Alex Corley <anthroprose@gmail.com>
+ *
+ * Updated by Matt Williams <m@technovangelist.com> to remove dependency on any PECL extensions
  **/
  
 class Datadogstatsd {
@@ -207,6 +209,8 @@ class Datadogstatsd {
      * making many call in a row if you don't want to stall your app.
      * Requires PHP >= 5.3.0 and the PECL extension pecl_http
      *
+     * Updated by Matt Williams to not require any PECL extensions
+     *
      * @param string $title Title of the event
      * @param array $vals Optional values of the event. See
      *   http://api.datadoghq.com/events for the valid keys
@@ -225,21 +229,28 @@ class Datadogstatsd {
         }
 
         $body = json_encode($vals); // Added in PHP 5.3.0
-
+		$opts = array(
+			'http'=> array(
+				'method' => 'POST',
+				'header' => 'Content-Type: application/json',
+				'content' => $body
+			)
+		);
+	    $context = stream_context_create( $opts );
         // Get the url to POST to
         $url = static::$__datadogHost . static::$__eventUrl
              . '?api_key='            . static::$__apiKey
              . '&application_key='    . static::$__applicationKey;
 
         // Set up the http request. Need the PECL pecl_http extension
-        $r = new HttpRequest($url, HttpRequest::METH_POST);
-        $r->addHeaders(array('Content-Type' => 'application/json'));
-        $r->setBody($body);
-
+//        $r = new HttpRequest($url, HttpRequest::METH_POST);
+//        $r->addHeaders(array('Content-Type' => 'application/json'));
+//        $r->setBody($body);
+//
         // Send, suppressing and logging any http errors
         try {
-            $r->send();
-        } catch (HttpException $ex) {
+	        file_get_contents( $url, 0, $context );
+        } catch (Exception $ex) {
             error_log($ex);
         }
     }
