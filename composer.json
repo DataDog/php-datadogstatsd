@@ -11,6 +11,11 @@
             "name": "Alex Corley",
             "email": "anthroprose@gmail.com",
             "role": "Developer"
+        },
+        {
+            "name": "Datadog",
+            "email": "dev@datadoghq.com",
+            "role": "Developer"
         }
     ],
     "support": {
