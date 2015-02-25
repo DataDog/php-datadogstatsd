@@ -2,5 +2,26 @@
     "name": "DataDog/php-datadogstatsd",
     "type": "library",
     "description": "This is an extremely simple PHP datadogstatsd client",
-    "keywords": ["DataDog", "PHP"]
+    "keywords": ["DataDog", "PHP"],
+    "version": "1.0",
+    "homepage": "https://www.datadoghq.com/",
+    "license": "MIT",
+    "authors": [
+    	{
+            "name": "Alex Corley",
+            "email": "anthroprose@gmail.com",
+            "role": "Developer"
+        },
+        {
+            "name": "Datadog",
+            "email": "dev@datadoghq.com",
+            "role": "Developer"
+        }
+    ],
+    "support": {
+    	"email": "package@datadoghq.com",
+    	"irc": "irc://irc.freenode.net/datadog",
+    	"issues": "https://github.com/DataDog/php-datadogstatsd/issues",
+    	"source": "https://github.com/DataDog/php-datadogstatsd"
+    }
 }
