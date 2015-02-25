@@ -1,9 +1,8 @@
 {
-    "name": "DataDog/php-datadogstatsd",
+    "name": "datadog/php-datadogstatsd",
     "type": "library",
     "description": "This is an extremely simple PHP datadogstatsd client",
     "keywords": ["DataDog", "PHP"],
-    "version": "1.0",
     "homepage": "https://www.datadoghq.com/",
     "license": "MIT",
     "authors": [
