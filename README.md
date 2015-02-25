@@ -4,11 +4,22 @@ This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) clien
 
 ## Installation
 
+### Composer
+
+Add the following to your `composer.json`:
+
+```
+"datadog/php-datadogstatsd": "0.0.*"
+```
+
+Note: The first version shipped in composer is 0.0.3
+
+
+### Or manually 
+
 Clone repository at [github.com/DataDog/php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd)
 
-## Setup
-
-`require './libraries/datadogstatsd.php';`
+Setup: `require './libraries/datadogstatsd.php';`
  
 ## Usage
 
