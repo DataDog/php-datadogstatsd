@@ -18,6 +18,11 @@ class Datadogstatsd {
     static private $__apiKey;
     static private $__applicationKey;
 
+    const OK        = 0;
+    const WARNING   = 1;
+    const CRITICAL  = 2;
+    const UNKNOWN   = 3;
+
     /**
      * Log timing information
      *
@@ -152,9 +157,49 @@ class Datadogstatsd {
             static::report_metric("$stat:$value");
         }
     }
+    /**
+     * Send a custom service check status over UDP
+     * @param string $name service check name
+     * @param int $status service check status code (see static::OK, static::WARNING,...)
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param int $timestamp timestamp for the service check status (defaults to now)
+     * @param string $hostname hostname to associate with this service check status
+     * @param string $message message to associate with this service check status
+     *
+     * @return null
+     **/
+    public static function service_check($name, $status, array $tags = null,
+                                        $hostname = null, $message = null, $timestamp = null) {
+        $msg = "_sc|$name|$status";
+
+        if ($timestamp !== null) {
+            $msg .= sprintf("|t:%s", $timestamp);
+        }
+        if ($hostname !== null) {
+            $msg .= sprintf("|h:%s", $hostname);
+        }
+        if ($tags !== null && is_array($tags) && count($tags) > 0) {
+            $msg .= sprintf('|#%s', join(',', $tags));
+        } elseif (isset($tags) && !empty($tags)) {
+            $msg .= sprintf('|#%s', $tags);
+        }
+        if ($message !== null) {
+            $msg .= sprintf('|m:%s', static::escape_sc_message($message));
+        }
+
+        static::report($msg);
+    }
+
+    private static function escape_sc_message($msg) {
+        return str_replace("m:", "m\:", str_replace("\n", "\\n", $msg));
+    }
+
+    public static function report($udp_message) {
+        static::flush($udp_message);
+    }
 
     public static function report_metric($udp_message) {
-        static::flush($udp_message);
+        static::report($udp_message);
     }
 
     public static function flush($udp_message) {
@@ -221,12 +266,16 @@ class BatchedDatadogstatsd extends Datadogstatsd {
     static private $__buffer_length = 0;
     static public $max_buffer_length = 50;
 
-    public static function report_metric($udp_message) {
+    public static function report($udp_message) {
         static::$__buffer[] = $udp_message;
         static::$__buffer_length++;
         if(static::$__buffer_length > static::$max_buffer_length) {
             static::flush_buffer();
         }
+    }
+
+    public static function report_metric($udp_message) {
+        report($udp_message);
     }
 
     public static function flush_buffer() {

@@ -7,6 +7,7 @@ require '../libraries/datadogstatsd.php';
 DataDogStatsD::increment('web.page_views');
 DataDogStatsD::histogram('web.render_time', 15);
 DataDogStatsD::set('web.uniques', 3 /* a unique user id */);
+DataDogStatsD::service_check('my.service.check', DataDogStatsD::CRITICAL);
 
 
 //All the following metrics will be sent in a single UDP packet to the statsd server
