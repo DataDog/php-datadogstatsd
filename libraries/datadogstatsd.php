@@ -162,18 +162,18 @@ class Datadogstatsd {
      * @param string $name service check name
      * @param int $status service check status code (see static::OK, static::WARNING,...)
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     * @param int $timestamp timestamp for the service check status (defaults to now)
      * @param string $hostname hostname to associate with this service check status
      * @param string $message message to associate with this service check status
+     * @param int $timestamp timestamp for the service check status (defaults to now)
      *
      * @return null
      **/
     public static function service_check($name, $status, array $tags = null,
-                                        $hostname = null, $message = null, $timestamp = null) {
+                                         $hostname = null, $message = null, $timestamp = null) {
         $msg = "_sc|$name|$status";
 
         if ($timestamp !== null) {
-            $msg .= sprintf("|t:%s", $timestamp);
+            $msg .= sprintf("|d:%s", $timestamp);
         }
         if ($hostname !== null) {
             $msg .= sprintf("|h:%s", $hostname);
