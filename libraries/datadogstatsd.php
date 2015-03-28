@@ -10,7 +10,7 @@
  * @author Alex Corley <anthroprose@gmail.com>
  **/
 
-class Datadogstatsd {
+class DataDogStatsD {
 
     static protected $__server = 'localhost';
     static private $__datadogHost;
@@ -260,7 +260,7 @@ class Datadogstatsd {
     }
 }
 
-class BatchedDatadogstatsd extends Datadogstatsd {
+class BatchedDataDogStatsD extends DataDogStatsD {
 
     static private $__buffer = array();
     static private $__buffer_length = 0;
