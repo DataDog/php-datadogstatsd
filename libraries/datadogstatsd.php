@@ -9,6 +9,8 @@
  *
  * @author Alex Corley <anthroprose@gmail.com>
  **/
+ 
+namespace Datadog; 
 
 class Datadogstatsd {
 
@@ -22,6 +24,16 @@ class Datadogstatsd {
     const WARNING   = 1;
     const CRITICAL  = 2;
     const UNKNOWN   = 3;
+    
+    const EVENT_OPTION_TEXT             = 'text';
+    const EVENT_OPTION_TITLE            = 'title';
+    const EVENT_OPTION_SOURCE_TYPE_NAME = 'source_type_name';
+    const EVENT_OPTION_TAGS             = 'tags';
+    const EVENT_OPTION_DATE_HAPPENED    = 'date_happened';
+    const EVENT_OPTION_HOST             = 'host';
+    const EVENT_OPTION_PRIORITY         = 'priority';
+    const EVENT_OPTION_ALERT_TYPE       = 'alert_type';
+    const EVENT_OPTION_AGGREGATION_KEY  = 'aggregation_key';
 
     /**
      * Log timing information
