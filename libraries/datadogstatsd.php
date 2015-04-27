@@ -24,12 +24,25 @@ class Datadogstatsd {
     /**
      * Log timing information
      *
-     * @param string $stats The metric to in log timing info for.
+     * @param string $stat The metric to in log timing info for.
      * @param float $time The ellapsed time (ms) to log
      * @param float|1 $sampleRate the rate (0-1) for sampling.
      **/
     public static function timing($stat, $time, $sampleRate = 1, array $tags = null) {
         static::send(array($stat => "$time|ms"), $sampleRate, $tags);
+    }
+
+    /**
+     * A convenient alias for the timing function when used with microtiming
+     *
+     * @param string $stat The metric name
+     * @param float $time The ellapsed time to log, IN SECONDS
+     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     **/
+    public static function microtiming($stat, $time, $sampleRate = 1, array $tags = null) {
+
+        static::timing($stat, $time*1000, $sampleRate, $tags);
+
     }
 
     /**
