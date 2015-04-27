@@ -22,5 +22,8 @@
     	"irc": "irc://irc.freenode.net/datadog",
     	"issues": "https://github.com/DataDog/php-datadogstatsd/issues",
     	"source": "https://github.com/DataDog/php-datadogstatsd"
+    },
+    "autoload": {
+        "classmap": ["libraries/"]
     }
 }
