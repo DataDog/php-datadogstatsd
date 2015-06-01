@@ -6,10 +6,6 @@
  * Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
  *
  * I did make it the most effecient UDP process possible, and add tagging.
- *
- * @author Alex Corley <anthroprose@gmail.com>
- *
- * Updated by Matt Williams <m@technovangelist.com> to remove dependency on any PECL extensions
  **/
 
 class Datadogstatsd {
@@ -210,9 +206,7 @@ class Datadogstatsd {
     /**
      * Send an event to the Datadog HTTP api. Potentially slow, so avoid
      * making many call in a row if you don't want to stall your app.
-     * Requires PHP >= 5.3.0 and the PECL extension pecl_http
-     *
-     * Updated by Matt Williams to not require any PECL extensions
+     * Requires PHP >= 5.3.0
      *
      * @param string $title Title of the event
      * @param array $vals Optional values of the event. See

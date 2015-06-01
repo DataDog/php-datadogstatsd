@@ -15,12 +15,12 @@ Add the following to your `composer.json`:
 Note: The first version shipped in composer is 0.0.3
 
 
-### Or manually 
+### Or manually
 
 Clone repository at [github.com/DataDog/php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd)
 
 Setup: `require './libraries/datadogstatsd.php';`
- 
+
 ## Usage
 
 ### Increment
@@ -87,9 +87,3 @@ For more documentation on the optional values of events, see [http://docs.datado
 Note that while sending metrics with this library is fast since it's sending
 locally over UDP, sending events will be slow because it's sending data
 directly to Datadog over HTTP. We'd like to improve this in the near future.
-
-## Author
-
-Alex Corley - anthroprose@gmail.com
-
-Matt Williams - m@technovangelist.com removed dependency on PECL extension
