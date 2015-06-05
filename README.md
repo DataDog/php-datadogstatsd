@@ -9,7 +9,7 @@ This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) clien
 Add the following to your `composer.json`:
 
 ```
-"datadog/php-datadogstatsd": "0.1.*"
+"datadog/php-datadogstatsd": "0.2.*"
 ```
 
 Note: The first version shipped in composer is 0.0.3
