@@ -211,9 +211,9 @@ class Datadogstatsd {
     }
 
     public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com') {
-        static::$__apiKey = $apiKey;
-        static::$__applicationKey = $applicationKey;
-        static::$__datadogHost = $datadogHost;
+        self::$__apiKey = $apiKey;
+        self::$__applicationKey = $applicationKey;
+        self::$__datadogHost = $datadogHost;
     }
 
     /**
@@ -250,9 +250,9 @@ class Datadogstatsd {
         $context = stream_context_create($opts);
 
         // Get the url to POST to
-        $url = static::$__datadogHost . static::$__eventUrl
-             . '?api_key='            . static::$__apiKey
-             . '&application_key='    . static::$__applicationKey;
+        $url = self::$__datadogHost . self::$__eventUrl
+             . '?api_key='          . self::$__apiKey
+             . '&application_key='  . self::$__applicationKey;
 
         // Send, suppressing and logging any http errors
         try {
