@@ -29,9 +29,9 @@ Setup: `require './libraries/datadogstatsd.php';`
 To increment things:
 
 ``` php
-DataDogStatsD::increment('your.data.point');
-DataDogStatsD::increment('your.data.point', .5);
-DataDogStatsD::increment('your.data.point', 1, array('tagname' => 'value'));
+Datadogstatsd::increment('your.data.point');
+Datadogstatsd::increment('your.data.point', .5);
+Datadogstatsd::increment('your.data.point', 1, array('tagname' => 'value'));
 ```
 
 ### Decrement
@@ -39,7 +39,7 @@ DataDogStatsD::increment('your.data.point', 1, array('tagname' => 'value'));
 To decrement things:
 
 ``` php
-DataDogStatsD::decrement('your.data.point');
+Datadogstatsd::decrement('your.data.point');
 ```
 
 ### Timing
@@ -49,9 +49,9 @@ To time things:
 ``` php
 $start_time = microtime(true);
 run_function();
-DataDogStatsD::timing('your.data.point', microtime(true) - $start_time);
+Datadogstatsd::timing('your.data.point', microtime(true) - $start_time);
 
-DataDogStatsD::timing('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
+Datadogstatsd::timing('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
 ```
 
 ### Submitting events
@@ -64,12 +64,12 @@ instead of sending to a local dogstatsd instance.
 $apiKey = 'myApiKey';
 $appKey = 'myAppKey';
 
-DataDogStatsD::configure($apiKey, $appKey);
-DataDogStatsD::event('A thing broke!', array(
+Datadogstatsd::configure($apiKey, $appKey);
+Datadogstatsd::event('A thing broke!', array(
 	'alert_type'      => 'error',
 	'aggregation_key' => 'test_aggr'
 ));
-DataDogStatsD::event('Now it is fixed.', array(
+Datadogstatsd::event('Now it is fixed.', array(
 	'alert_type'      => 'success',
 	'aggregation_key' => 'test_aggr'
 ));
