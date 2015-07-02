@@ -17,6 +17,9 @@
             "role": "Developer"
         }
     ],
+    "require": {
+      "php": ">=5.3.0"
+    },
     "support": {
     	"email": "package@datadoghq.com",
     	"irc": "irc://irc.freenode.net/datadog",
