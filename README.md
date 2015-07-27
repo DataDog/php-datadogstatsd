@@ -3,6 +3,8 @@
 This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) client.
 Requires PHP >= 5.3.0.
 
+See [CHANGELOG.md](CHANGELOG.md) for changes.
+
 ## Installation
 
 ### Composer
@@ -10,7 +12,7 @@ Requires PHP >= 5.3.0.
 Add the following to your `composer.json`:
 
 ```
-"datadog/php-datadogstatsd": "0.2.*"
+"datadog/php-datadogstatsd": "0.3.*"
 ```
 
 Note: The first version shipped in composer is 0.0.3
