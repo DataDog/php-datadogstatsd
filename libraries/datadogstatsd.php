@@ -278,7 +278,7 @@ class BatchedDatadogstatsd extends Datadogstatsd {
     }
 
     public static function report_metric($udp_message) {
-        report($udp_message);
+        static::report($udp_message);
     }
 
     public static function flush_buffer() {
