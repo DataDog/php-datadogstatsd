@@ -3,6 +3,8 @@
 This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) client.
 Requires PHP >= 5.3.0.
 
+See [CHANGELOG.md](CHANGELOG.md) for changes.
+
 ## Installation
 
 ### Composer
@@ -10,7 +12,7 @@ Requires PHP >= 5.3.0.
 Add the following to your `composer.json`:
 
 ```
-"datadog/php-datadogstatsd": "0.2.*"
+"datadog/php-datadogstatsd": "0.3.*"
 ```
 
 Note: The first version shipped in composer is 0.0.3
@@ -74,10 +76,6 @@ Datadogstatsd::event('Now it is fixed.', array(
 	'aggregation_key' => 'test_aggr'
 ));
 ```
-
-This is what you'd see your Datadog event stream:
-
-![screenshot](https://img.skitch.com/20120817-c6pi1e55rs2xjt3ktp2k1h67e7.png)
 
 You can find your api and app keys in the [API tab](https://app.datadoghq.com/account/settings#api).
 
