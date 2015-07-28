@@ -210,10 +210,11 @@ class Datadogstatsd {
 
     }
 
-    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com') {
+    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com', $server = 'localhost') {
         self::$__apiKey = $apiKey;
         self::$__applicationKey = $applicationKey;
         self::$__datadogHost = $datadogHost;
+        self::$__server = $server;
     }
 
     /**
