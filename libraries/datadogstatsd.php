@@ -17,6 +17,16 @@ class Datadogstatsd {
     static private $__applicationKey;
 
     /**
+     * @var int Config pass-through for CURLOPT_SSL_VERIFYHOST
+     */
+    static private $__apiCurlSslVerifyHost;
+
+    /**
+     * @var int Config pass-through for CURLOPT_SSL_VERIFYPEER
+     */
+    static private $__apiCurlSslVerifyPeer;
+
+    /**
      * @var string Config for submitting events via 'TCP' vs 'UDP'; default 'UDP'
      */
     static private $__submitEventsOver = 'UDP';
@@ -215,11 +225,14 @@ class Datadogstatsd {
 
     }
 
-    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com') {
+    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com',
+                                     $submitEventsOver = 'TCP', $curlVerifySslHost = 2, $curlVerifySslPeer = 1 ) {
         self::$__apiKey = $apiKey;
         self::$__applicationKey = $applicationKey;
         self::$__datadogHost = $datadogHost;
         self::$__submitEventsOver = $submitEventsOver;
+        self::$__apiCurlSslVerifyHost = $curlVerifySslHost;
+        self::$__apiCurlSslVerifyPeer = $curlVerifySslPeer;
     }
 
     /**
@@ -250,28 +263,69 @@ class Datadogstatsd {
             }
         }
 
-        $body = json_encode($vals); // Added in PHP 5.3.0
-        $opts = array(
-            'http'=> array(
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $body
-            )
-        );
-
-        $context = stream_context_create($opts);
+        /**
+         * @var boolean Flag for returning success
+         */
+        $success = false;
 
         // Get the url to POST to
         $url = self::$__datadogHost . self::$__eventUrl
              . '?api_key='          . self::$__apiKey
              . '&application_key='  . self::$__applicationKey;
 
-        // Send, suppressing and logging any http errors
+        $curl = curl_init($url);
+
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, self::$__apiCurlSslVerifyPeer);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, self::$__apiCurlSslVerifyHost);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($vals));
+
+        // Nab response and HTTP code
+        $response_body = curl_exec($curl);
+        $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         try {
-            file_get_contents($url, 0, $context);
-        } catch (Exception $ex) {
-            error_log($ex);
+
+            // Check for cURL errors
+            if ($curlErrorNum = curl_errno($curl)) {
+                throw new Exception('Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl));
+            }
+
+            // Check response code is 202
+            if ($response_code !== 200 && $response_code !== 202) {
+                throw new Exception('Datadog event API call HTTP response not OK - ' . $response_code . '; response body: ' . $response_body);
+            }
+
+            // Check for empty response body
+            if (!$response_body) {
+                throw new Exception('Datadog event API call did not return a body');
+            }
+
+            // Decode JSON response
+            if (!$decodedJson = json_decode($response_body, true)) {
+                throw new Exception('Datadog event API call did not return a body that could be decoded via json_decode');
+            }
+
+            // Check JSON decoded "status" is OK from the Datadog API
+            if ($decodedJson['status'] !== 'ok') {
+                throw new Exception('Datadog event API response  status not "ok"; response body: ' . $response_body);
+            }
+
+        } catch (Exception $e) {
+
+            $success = false;
+
+            // Use error_log for API submission errors to avoid warnings/etc.
+            error_log($e->getMessage());
         }
+
+        curl_close($curl);
+        return $success;
+    }
+
     /**
      * Formats $vals array into event for submission to Datadog via UDP
      * @param array $vals Optional values of the event. See
