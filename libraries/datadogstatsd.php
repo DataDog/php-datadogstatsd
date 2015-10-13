@@ -1,11 +1,17 @@
 <?php
 /**
  * Datadog implementation of StatsD
- * Added the ability to Tag!
+ * - Added the ability to Tag!
+ * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
+ * - I did make it the most efficient UDP process possible, and add tagging.
  *
- * Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
+ * UDP events + cURL implementation (following notes to be moved to CHANGELOG.md on potential PR approval)
+ * - Added the ability to send events via both TCP and UDP (default is UDP)
+ * - Updated file_get_contents to cURL for better TCP event submission reliability
+ * - Added ability to configure SSL verification for cURL request (default validates host/peer)
+ * - Random code cleaning (spellchecking, fixing invalid typing, etc.)
+ * - folkhack, baweinbe 10.13.2015
  *
- * I did make it the most effecient UDP process possible, and add tagging.
  **/
 
 class Datadogstatsd {
