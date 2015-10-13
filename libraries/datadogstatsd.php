@@ -16,6 +16,11 @@ class Datadogstatsd {
     static private $__apiKey;
     static private $__applicationKey;
 
+    /**
+     * @var string Config for submitting events via 'TCP' vs 'UDP'; default 'UDP'
+     */
+    static private $__submitEventsOver = 'UDP';
+
     const OK        = 0;
     const WARNING   = 1;
     const CRITICAL  = 2;
@@ -214,6 +219,7 @@ class Datadogstatsd {
         self::$__apiKey = $apiKey;
         self::$__applicationKey = $applicationKey;
         self::$__datadogHost = $datadogHost;
+        self::$__submitEventsOver = $submitEventsOver;
     }
 
     /**
@@ -229,6 +235,12 @@ class Datadogstatsd {
     public static function event($title, $vals = array()) {
         // Assemble the request
         $vals['title'] = $title;
+
+        // If sending events via UDP
+        if (self::$__submitEventsOver === 'UDP') {
+            return self::eventUdp($vals);
+        }
+
         // Convert a comma-separated string of tags into an array
         if (array_key_exists('tags', $vals) && is_string($vals['tags'])) {
             $tags = explode(',', $vals['tags']);
@@ -260,6 +272,35 @@ class Datadogstatsd {
         } catch (Exception $ex) {
             error_log($ex);
         }
+    /**
+     * Formats $vals array into event for submission to Datadog via UDP
+     * @param array $vals Optional values of the event. See
+     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
+     * @return null
+     */
+    private static function eventUdp($vals) {
+
+        // Format required values title and text
+        $title = isset($vals['title']) ? (string) $vals['title'] : '';
+        $text = isset($vals['text']) ? (string) $vals['text'] : '';
+
+        // Format fields into string that follows Datadog event submission via UDP standards
+        //   http://docs.datadoghq.com/guides/dogstatsd/#events
+        $fields = '';
+        $fields .= ($title) ? $title : '';
+        $fields .= ($text) ? '|' . $text : '|';
+        $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
+        $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
+        $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
+        $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
+        $fields .= (isset($vals['tags'])) ? '|#' . implode(',', $vals['tags']) : '';
+
+        $title_length = strlen($title);
+        $text_length = strlen($text);
+
+        self::report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
+
+        return null;
     }
 }
 
