@@ -40,21 +40,23 @@ class Datadogstatsd {
      * Log timing information
      *
      * @param string $stat The metric to in log timing info for.
-     * @param float $time The ellapsed time (ms) to log
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
-     **/
-    public static function timing($stat, $time, $sampleRate = 1, array $tags = null) {
+     * @param float $time The elapsed time (ms) to log
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     */
+    public static function timing($stat, $time, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
     /**
-     * A convenient alias for the timing function when used with microtiming
+     * A convenient alias for the timing function when used with micro-timing
      *
      * @param string $stat The metric name
-     * @param float $time The ellapsed time to log, IN SECONDS
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $time The elapsed time to log, IN SECONDS
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function microtiming($stat, $time, $sampleRate = 1, array $tags = null) {
+    public static function microtiming($stat, $time, $sampleRate = 1.0, array $tags = null) {
 
         static::timing($stat, $time*1000, $sampleRate, $tags);
 
@@ -65,9 +67,10 @@ class Datadogstatsd {
      *
      * @param string $stat The metric
      * @param float $value The value
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function gauge($stat, $value, $sampleRate = 1, array $tags = null) {
+    public static function gauge($stat, $value, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -76,9 +79,10 @@ class Datadogstatsd {
      *
      * @param string $stat The metric
      * @param float $value The value
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function histogram($stat, $value, $sampleRate = 1, array $tags = null) {
+    public static function histogram($stat, $value, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -87,9 +91,10 @@ class Datadogstatsd {
      *
      * @param string $stat The metric
      * @param float $value The value
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function set($stat, $value, $sampleRate = 1, array $tags = null) {
+    public static function set($stat, $value, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -98,10 +103,11 @@ class Datadogstatsd {
      * Increments one or more stats counters
      *
      * @param string|array $stats The metric(s) to increment.
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function increment($stats, $sampleRate = 1, array $tags = null) {
+    public static function increment($stats, $sampleRate = 1.0, array $tags = null) {
         static::updateStats($stats, 1, $sampleRate, $tags);
     }
 
@@ -109,10 +115,11 @@ class Datadogstatsd {
      * Decrements one or more stats counters.
      *
      * @param string|array $stats The metric(s) to decrement.
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function decrement($stats, $sampleRate = 1, array $tags = null) {
+    public static function decrement($stats, $sampleRate = 1.0, array $tags = null) {
         static::updateStats($stats, -1, $sampleRate, $tags);
     }
 
@@ -120,13 +127,13 @@ class Datadogstatsd {
      * Updates one or more stats counters by arbitrary amounts.
      *
      * @param string|array $stats The metric(s) to update. Should be either a string or array of metrics.
-     * @param int|1 $delta The amount to increment/decrement each metric by.
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param int $delta The amount to increment/decrement each metric by.
+     * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      *
      * @return boolean
      **/
-    public static function updateStats($stats, $delta = 1, $sampleRate = 1, array $tags = null) {
+    public static function updateStats($stats, $delta = 1, $sampleRate = 1.0, array $tags = null) {
         if (!is_array($stats)) { $stats = array($stats); }
         $data = array();
         foreach($stats as $stat) {
@@ -138,12 +145,12 @@ class Datadogstatsd {
     /**
      * Squirt the metrics over UDP
      * @param array $data Incoming Data
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      *
      * @return null
      **/
-    public static function send($data, $sampleRate = 1, array $tags = null) {
+    public static function send($data, $sampleRate = 1.0, array $tags = null) {
         // sampling
         $sampledData = array();
         if ($sampleRate < 1) {
@@ -171,6 +178,7 @@ class Datadogstatsd {
             static::report_metric("$stat:$value");
         }
     }
+
     /**
      * Send a custom service check status over UDP
      * @param string $name service check name
@@ -242,10 +250,11 @@ class Datadogstatsd {
      *
      * @param string $title Title of the event
      * @param array $vals Optional values of the event. See
-     *   http://api.datadoghq.com/events for the valid keys
+     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
      * @return null
      **/
     public static function event($title, $vals = array()) {
+
         // Assemble the request
         $vals['title'] = $title;
 
