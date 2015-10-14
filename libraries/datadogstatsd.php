@@ -281,7 +281,7 @@ class Datadogstatsd {
         /**
          * @var boolean Flag for returning success
          */
-        $success = false;
+        $success = true;
 
         // Get the url to POST to
         $url = self::$__datadogHost . self::$__eventUrl
