@@ -17,6 +17,7 @@
 class Datadogstatsd {
 
     static protected $__server = 'localhost';
+    static protected $__serverPort = 8125;
     static private $__datadogHost;
     static private $__eventUrl = '/api/v1/events';
     static private $__apiKey;
@@ -234,7 +235,7 @@ class Datadogstatsd {
         // Non - Blocking UDP I/O - Use IP Addresses!
         $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         socket_set_nonblock($socket);
-        socket_sendto($socket, $udp_message, strlen($udp_message), 0, static::$__server, 8125);
+        socket_sendto($socket, $udp_message, strlen($udp_message), 0, static::$__server, static::$__serverPort);
         socket_close($socket);
 
     }
