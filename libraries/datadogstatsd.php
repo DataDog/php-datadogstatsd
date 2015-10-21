@@ -240,15 +240,15 @@ class Datadogstatsd {
     }
 
     public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com',
-                                     $submitEventsOver = 'TCP', $curlVerifySslHost = 2, $curlVerifySslPeer = 1,
-                                     $localStatsDserver = 'localhost' ) {
+                                     $submitEventsOver = 'TCP', $localStatsdServer = 'localhost', $curlVerifySslHost = 2,
+									 $curlVerifySslPeer = 1 ) {
         self::$__apiKey = $apiKey;
         self::$__applicationKey = $applicationKey;
         self::$__datadogHost = $datadogHost;
         self::$__submitEventsOver = $submitEventsOver;
         self::$__apiCurlSslVerifyHost = $curlVerifySslHost;
         self::$__apiCurlSslVerifyPeer = $curlVerifySslPeer;
-        self::$__server = $localStatsDserver;
+        self::$__server = $localStatsdServer;
     }
 
     /**
