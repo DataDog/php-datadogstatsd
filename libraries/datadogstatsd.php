@@ -1,11 +1,17 @@
 <?php
 /**
  * Datadog implementation of StatsD
- * Added the ability to Tag!
+ * - Added the ability to Tag!
+ * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
+ * - I did make it the most efficient UDP process possible, and add tagging.
  *
- * Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
+ * UDP events + cURL implementation (following notes to be moved to CHANGELOG.md on potential PR approval)
+ * - Added the ability to send events via both TCP and UDP (default is UDP)
+ * - Updated file_get_contents to cURL for better TCP event submission reliability
+ * - Added ability to configure SSL verification for cURL request (default validates host/peer)
+ * - Random code cleaning (spellchecking, fixing invalid typing, etc.)
+ * - folkhack, baweinbe 10.13.2015
  *
- * I did make it the most effecient UDP process possible, and add tagging.
  **/
 
 class Datadogstatsd {
@@ -17,6 +23,21 @@ class Datadogstatsd {
     static private $__apiKey;
     static private $__applicationKey;
 
+    /**
+     * @var int Config pass-through for CURLOPT_SSL_VERIFYHOST
+     */
+    static private $__apiCurlSslVerifyHost;
+
+    /**
+     * @var int Config pass-through for CURLOPT_SSL_VERIFYPEER
+     */
+    static private $__apiCurlSslVerifyPeer;
+
+    /**
+     * @var string Config for submitting events via 'TCP' vs 'UDP'; default 'UDP'
+     */
+    static private $__submitEventsOver = 'UDP';
+
     const OK        = 0;
     const WARNING   = 1;
     const CRITICAL  = 2;
@@ -26,21 +47,23 @@ class Datadogstatsd {
      * Log timing information
      *
      * @param string $stat The metric to in log timing info for.
-     * @param float $time The ellapsed time (ms) to log
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
-     **/
-    public static function timing($stat, $time, $sampleRate = 1, array $tags = null) {
+     * @param float $time The elapsed time (ms) to log
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     */
+    public static function timing($stat, $time, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
     /**
-     * A convenient alias for the timing function when used with microtiming
+     * A convenient alias for the timing function when used with micro-timing
      *
      * @param string $stat The metric name
-     * @param float $time The ellapsed time to log, IN SECONDS
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $time The elapsed time to log, IN SECONDS
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function microtiming($stat, $time, $sampleRate = 1, array $tags = null) {
+    public static function microtiming($stat, $time, $sampleRate = 1.0, array $tags = null) {
 
         static::timing($stat, $time*1000, $sampleRate, $tags);
 
@@ -51,9 +74,10 @@ class Datadogstatsd {
      *
      * @param string $stat The metric
      * @param float $value The value
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function gauge($stat, $value, $sampleRate = 1, array $tags = null) {
+    public static function gauge($stat, $value, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -62,9 +86,10 @@ class Datadogstatsd {
      *
      * @param string $stat The metric
      * @param float $value The value
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function histogram($stat, $value, $sampleRate = 1, array $tags = null) {
+    public static function histogram($stat, $value, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -73,9 +98,10 @@ class Datadogstatsd {
      *
      * @param string $stat The metric
      * @param float $value The value
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function set($stat, $value, $sampleRate = 1, array $tags = null) {
+    public static function set($stat, $value, $sampleRate = 1.0, array $tags = null) {
         static::send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -84,10 +110,11 @@ class Datadogstatsd {
      * Increments one or more stats counters
      *
      * @param string|array $stats The metric(s) to increment.
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function increment($stats, $sampleRate = 1, array $tags = null) {
+    public static function increment($stats, $sampleRate = 1.0, array $tags = null) {
         static::updateStats($stats, 1, $sampleRate, $tags);
     }
 
@@ -95,10 +122,11 @@ class Datadogstatsd {
      * Decrements one or more stats counters.
      *
      * @param string|array $stats The metric(s) to decrement.
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function decrement($stats, $sampleRate = 1, array $tags = null) {
+    public static function decrement($stats, $sampleRate = 1.0, array $tags = null) {
         static::updateStats($stats, -1, $sampleRate, $tags);
     }
 
@@ -106,13 +134,13 @@ class Datadogstatsd {
      * Updates one or more stats counters by arbitrary amounts.
      *
      * @param string|array $stats The metric(s) to update. Should be either a string or array of metrics.
-     * @param int|1 $delta The amount to increment/decrement each metric by.
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param int $delta The amount to increment/decrement each metric by.
+     * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      *
      * @return boolean
      **/
-    public static function updateStats($stats, $delta = 1, $sampleRate = 1, array $tags = null) {
+    public static function updateStats($stats, $delta = 1, $sampleRate = 1.0, array $tags = null) {
         if (!is_array($stats)) { $stats = array($stats); }
         $data = array();
         foreach($stats as $stat) {
@@ -124,12 +152,12 @@ class Datadogstatsd {
     /**
      * Squirt the metrics over UDP
      * @param array $data Incoming Data
-     * @param float|1 $sampleRate the rate (0-1) for sampling.
+     * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      *
      * @return null
      **/
-    public static function send($data, $sampleRate = 1, array $tags = null) {
+    public static function send($data, $sampleRate = 1.0, array $tags = null) {
         // sampling
         $sampledData = array();
         if ($sampleRate < 1) {
@@ -157,6 +185,7 @@ class Datadogstatsd {
             static::report_metric("$stat:$value");
         }
     }
+
     /**
      * Send a custom service check status over UDP
      * @param string $name service check name
@@ -211,10 +240,16 @@ class Datadogstatsd {
 
     }
 
-    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com') {
+    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com',
+                                     $submitEventsOver = 'TCP', $curlVerifySslHost = 2, $curlVerifySslPeer = 1,
+                                     $localStatsDserver = 'localhost' ) {
         self::$__apiKey = $apiKey;
         self::$__applicationKey = $applicationKey;
         self::$__datadogHost = $datadogHost;
+        self::$__submitEventsOver = $submitEventsOver;
+        self::$__apiCurlSslVerifyHost = $curlVerifySslHost;
+        self::$__apiCurlSslVerifyPeer = $curlVerifySslPeer;
+        self::$__server = $localStatsDserver;
     }
 
     /**
@@ -224,12 +259,19 @@ class Datadogstatsd {
      *
      * @param string $title Title of the event
      * @param array $vals Optional values of the event. See
-     *   http://api.datadoghq.com/events for the valid keys
+     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
      * @return null
      **/
     public static function event($title, $vals = array()) {
+
         // Assemble the request
         $vals['title'] = $title;
+
+        // If sending events via UDP
+        if (self::$__submitEventsOver === 'UDP') {
+            return self::eventUdp($vals);
+        }
+
         // Convert a comma-separated string of tags into an array
         if (array_key_exists('tags', $vals) && is_string($vals['tags'])) {
             $tags = explode(',', $vals['tags']);
@@ -239,28 +281,98 @@ class Datadogstatsd {
             }
         }
 
-        $body = json_encode($vals); // Added in PHP 5.3.0
-        $opts = array(
-            'http'=> array(
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $body
-            )
-        );
-
-        $context = stream_context_create($opts);
+        /**
+         * @var boolean Flag for returning success
+         */
+        $success = true;
 
         // Get the url to POST to
         $url = self::$__datadogHost . self::$__eventUrl
              . '?api_key='          . self::$__apiKey
              . '&application_key='  . self::$__applicationKey;
 
-        // Send, suppressing and logging any http errors
+        $curl = curl_init($url);
+
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, self::$__apiCurlSslVerifyPeer);
+        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, self::$__apiCurlSslVerifyHost);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_HEADER, 0);
+        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($vals));
+
+        // Nab response and HTTP code
+        $response_body = curl_exec($curl);
+        $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
+
         try {
-            file_get_contents($url, 0, $context);
-        } catch (Exception $ex) {
-            error_log($ex);
+
+            // Check for cURL errors
+            if ($curlErrorNum = curl_errno($curl)) {
+                throw new Exception('Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl));
+            }
+
+            // Check response code is 202
+            if ($response_code !== 200 && $response_code !== 202) {
+                throw new Exception('Datadog event API call HTTP response not OK - ' . $response_code . '; response body: ' . $response_body);
+            }
+
+            // Check for empty response body
+            if (!$response_body) {
+                throw new Exception('Datadog event API call did not return a body');
+            }
+
+            // Decode JSON response
+            if (!$decodedJson = json_decode($response_body, true)) {
+                throw new Exception('Datadog event API call did not return a body that could be decoded via json_decode');
+            }
+
+            // Check JSON decoded "status" is OK from the Datadog API
+            if ($decodedJson['status'] !== 'ok') {
+                throw new Exception('Datadog event API response  status not "ok"; response body: ' . $response_body);
+            }
+
+        } catch (Exception $e) {
+
+            $success = false;
+
+            // Use error_log for API submission errors to avoid warnings/etc.
+            error_log($e->getMessage());
         }
+
+        curl_close($curl);
+        return $success;
+    }
+
+    /**
+     * Formats $vals array into event for submission to Datadog via UDP
+     * @param array $vals Optional values of the event. See
+     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
+     * @return null
+     */
+    private static function eventUdp($vals) {
+
+        // Format required values title and text
+        $title = isset($vals['title']) ? (string) $vals['title'] : '';
+        $text = isset($vals['text']) ? (string) $vals['text'] : '';
+
+        // Format fields into string that follows Datadog event submission via UDP standards
+        //   http://docs.datadoghq.com/guides/dogstatsd/#events
+        $fields = '';
+        $fields .= ($title) ? $title : '';
+        $fields .= ($text) ? '|' . $text : '|';
+        $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
+        $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
+        $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
+        $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
+        $fields .= (isset($vals['tags'])) ? '|#' . implode(',', $vals['tags']) : '';
+
+        $title_length = strlen($title);
+        $text_length = strlen($text);
+
+        self::report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
+
+        return null;
     }
 }
 
