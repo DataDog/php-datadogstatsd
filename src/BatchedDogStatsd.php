@@ -8,23 +8,18 @@ class BatchedDogStatsd extends DogStatsd
     private static $bufferLength = 0;
     public static $maxBufferLength = 50;
 
-    public static function report($udp_message)
+    public function report($udp_message)
     {
         static::$buffer[] = $udp_message;
         static::$bufferLength++;
         if (static::$bufferLength > static::$maxBufferLength) {
-            static::flushBuffer();
+            $this->flushBuffer();
         }
     }
 
-    public static function reportMetric($udp_message)
+    public function flushBuffer()
     {
-        static::report($udp_message);
-    }
-
-    public static function flushBuffer()
-    {
-        static::flush(implode("\n", static::$buffer));
+        $this->flush(implode("\n", static::$buffer));
         static::$buffer = array();
         static::$bufferLength = 0;
     }
