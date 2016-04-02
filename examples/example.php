@@ -16,6 +16,4 @@ DogStatsd::serviceCheck('my.service.check', DogStatsd::CRITICAL);
 BatchedDogStatsd::increment('web.page_views');
 BatchedDogStatsd::histogram('web.render_time', 15);
 BatchedDogStatsd::set('web.uniques', 3 /* a unique user id */);
-BatchedDogStatsd::fl(); // Necessary
-
-?>
+BatchedDogStatsd::flushBuffer(); // Necessary
