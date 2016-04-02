@@ -4,6 +4,8 @@ require '../vendor/autoload.php';
 
 use DataDog\DogStatsd;
 use DataDog\BatchedDogStatsd;
+
+
 $statsd = new DogStatsd();
 $statsd->increment('web.page_views');
 $statsd->histogram('web.render_time', 15);
