@@ -13,7 +13,6 @@ class Datadogstatsd {
     static protected $__server = 'localhost';
     static protected $__serverPort = 8125;
     static private $__datadogHost;
-    static private $__eventUrl = '/api/v1/events';
     static private $__apiKey;
     static private $__applicationKey;
 
@@ -218,18 +217,16 @@ class Datadogstatsd {
     }
 
     /**
-     * Send an event to the Datadog HTTP api. Potentially slow, so avoid
-     * making many call in a row if you don't want to stall your app.
-     * Requires PHP >= 5.3.0
      *
-     * @param string $title Title of the event
-     * @param array $vals Optional values of the event. See
-     *   http://api.datadoghq.com/events for the valid keys
-     * @return null
-     **/
-    public static function event($title, $vals = array()) {
-        // Assemble the request
-        $vals['title'] = $title;
+     * Fromat and send an event.
+     * >>> statsd.event('Man down!', 'This server needs assistance.')
+     *
+     * @param $title
+     * @param array $vals
+     * @throws \Exception
+     */
+    public static function event($title, array $vals = [])
+    {
         // Convert a comma-separated string of tags into an array
         if (array_key_exists('tags', $vals) && is_string($vals['tags'])) {
             $tags = explode(',', $vals['tags']);
@@ -238,29 +235,33 @@ class Datadogstatsd {
                 $vals['tags'][] = trim($tag);
             }
         }
-
-        $body = json_encode($vals); // Added in PHP 5.3.0
-        $opts = array(
-            'http'=> array(
-                'method' => 'POST',
-                'header' => 'Content-Type: application/json',
-                'content' => $body
-            )
-        );
-
-        $context = stream_context_create($opts);
-
-        // Get the url to POST to
-        $url = self::$__datadogHost . self::$__eventUrl
-             . '?api_key='          . self::$__apiKey
-             . '&application_key='  . self::$__applicationKey;
-
-        // Send, suppressing and logging any http errors
-        try {
-            file_get_contents($url, 0, $context);
-        } catch (Exception $ex) {
-            error_log($ex);
+        $text = isset($vals['text']) ? $vals['text'] : '';
+        $string = sprintf('_e{%d,%d}:%s|%s', strlen($title), strlen($text), $title, $text);
+        if (isset($vals['date_happened'])) {
+            $string = sprintf('%s|d:%d', $string, $vals['date_happened']);
         }
+        if (isset($vals['hostname'])) {
+            $string = sprintf('%s|h:%s', $string, $vals['hostname']);
+        }
+        if (isset($vals['aggregation_key'])) {
+            $string = sprintf('%s|k:%s', $string, $vals['aggregation_key']);
+        }
+        if ($vals['priority']) {
+            $string = sprintf('%s|p:%s', $string, $vals['priority']);
+        }
+        if (isset($vals['source_type_name'])) {
+            $string = sprintf('%s|s:%s', $string, $vals['source_type_name']);
+        }
+        if (isset($vals['alert_type'])) {
+            $string = sprintf('%s|t:%s', $string, $vals['alert_type']);
+        }
+        if (isset($tags)) {
+            $string = sprintf('%s|#%s', $string, implode(',', $tags));
+        }
+        if (strlen($string) > 8 * 1024) {
+            throw new \Exception(sprintf('Event "%s" payload is too big (more that 8KB), event discarded', $title));
+        }
+        self::send($string);
     }
 }
 
