@@ -27,6 +27,8 @@
     	"source": "https://github.com/DataDog/php-datadogstatsd"
     },
     "autoload": {
-        "classmap": ["libraries/"]
+        "psr-4": {
+            "DataDog": "src/"
+        }
     }
 }
