@@ -43,22 +43,19 @@ class DogStatsd
     private $useMs;
 
     /**
-     * DogStatsd constructor.
-     * @param string $host
-     * @param int $port
-     * @param int $maxBufferSize
-     * @param string $namespace
-     * @param array $constantTags
-     * @param bool $useMs
+     * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
+     *  host, port, max_buffer_size, namespace, constant_tags, use_ms
+     * 
+     * @param array $config
      */
-    public function __construct($host = 'localhost', $port = 8125, $maxBufferSize = 50, $namespace = null, $constantTags = [], $useMs = false)
+    public function __construct(array $config = [])
     {
-        $this->host = $host;
-        $this->port = $port;
-        $this->maxBufferSize = $maxBufferSize;
-        $this->namespace = $namespace;
-        $this->constantTags = $constantTags;
-        $this->useMs = $useMs;
+        $this->host = isset($config['host']) ? $config['host'] : 'localhost';
+        $this->port = isset($config['port']) ? $config['port'] : 8125;
+        $this->maxBufferSize = isset($config['max_buffer_size']) ? $config['max_buffer_size'] : 50;
+        $this->namespace = isset($config['namespace']) ? $config['namespace'] : null;
+        $this->constantTags = isset($config['constant_tags']) ? $config['constant_tags'] : [];
+        $this->useMs = isset($config['use_ms']) ? $config['use_ms'] : false;
     }
 
     /**
@@ -263,58 +260,52 @@ class DogStatsd
     }
 
     /**
+     * Format and send an event.
+     * >>> $statsd->event('Man down!', 'This server needs assistance.', $args)
+     * Where $args is an associative array containing any of the following event values:
+     *  alert_type, aggregation_key, source_type_name, date_happened, priority, hostname.
      *
-     * Fromat and send an event.
-     * >>> statsd.event('Man down!', 'This server needs assistance.')
-     * @param $title
-     * @param $text
-     * @param null $tags
-     * @param null $alertType
-     * @param null $aggregationKey
-     * @param null $sourceTypeName
-     * @param null $dateHappened
-     * @param null $priority
-     * @param null $hostname
-     * @throws \Exception
+     * @param string $title
+     * @param string $text
+     * @param array $args
+     * @throws \Exception tags
      */
-    public function event($title, $text, $tags = null, $alertType = null, $aggregationKey = null, $sourceTypeName = null, $dateHappened = null, $priority = null, $hostname = null)
+    public function event($title, $text, array $args = [])
     {
-        # Append all client level tags to every event
+        // Append all client level tags to every event
         if (!empty($this->constantTags)) {
-            if (isset($tags)) {
-                $tags = array_merge($tags, $this->constantTags);
+            if (isset($args['tags'])) {
+                $tags = array_merge($args['tags'], $this->constantTags);
             }
             else {
-
                 $tags = $this->constantTags;
             }
-
         }
 
         $string = sprintf('_e{%d,%d}:%s|%s', strlen($title), strlen($text), $title, $text);
 
-        if (isset($dateHappened)) {
-            $string = sprintf('%s|d:%d', $string, $dateHappened);
+        if (isset($args['date_happened'])) {
+            $string = sprintf('%s|d:%d', $string, $args['date_happened']);
         }
 
-        if (isset($hostname)) {
-            $string = sprintf('%s|h:%s', $string, $hostname);
+        if (isset($args['hostname'])) {
+            $string = sprintf('%s|h:%s', $string, $args['hostname']);
         }
 
-        if (isset($aggregationKey)) {
-            $string = sprintf('%s|k:%s', $string, $aggregationKey);
+        if (isset($args['aggregation_key'])) {
+            $string = sprintf('%s|k:%s', $string, $args['aggregation_key']);
         }
 
-        if ($priority) {
-            $string = sprintf('%s|p:%s', $string, $priority);
+        if (isset($args['priority'])) {
+            $string = sprintf('%s|p:%s', $string, $args['priority']);
         }
 
-        if (isset($sourceTypeName)) {
-            $string = sprintf('%s|s:%s', $string, $sourceTypeName);
+        if (isset($args['source_type_name'])) {
+            $string = sprintf('%s|s:%s', $string, $args['source_type_name']);
         }
 
-        if (isset($alertType)) {
-            $string = sprintf('%s|t:%s', $string, $alertType);
+        if (isset($args['alert_type'])) {
+            $string = sprintf('%s|t:%s', $string, $args['alert_type']);
         }
 
         if (isset($tags)) {
@@ -322,7 +313,6 @@ class DogStatsd
         }
 
         if (strlen($string) > 8 * 1024) {
-
             throw new \Exception(sprintf('Event "%s" payload is too big (more that 8KB), event discarded', $title));
         }
 
