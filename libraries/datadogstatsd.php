@@ -1,17 +1,7 @@
 <?php
 /**
  * Datadog implementation of StatsD
- * - Added the ability to Tag!
  * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
- * - I did make it the most efficient UDP process possible, and add tagging.
- *
- * UDP events + cURL implementation (following notes to be moved to CHANGELOG.md on potential PR approval)
- * - Added the ability to send events via both TCP and UDP (default is UDP)
- * - Updated file_get_contents to cURL for better TCP event submission reliability
- * - Added ability to configure SSL verification for cURL request (default validates host/peer)
- * - Random code cleaning (spellchecking, fixing invalid typing, etc.)
- * - folkhack, baweinbe 10.13.2015
- *
  **/
 
 class Datadogstatsd {
@@ -360,7 +350,7 @@ class Datadogstatsd {
         // Format fields into string that follows Datadog event submission via UDP standards
         //   http://docs.datadoghq.com/guides/dogstatsd/#events
         $fields = '';
-        $fields .= ($title) ? $title : '';
+        $fields .= ($title);
         $fields .= ($text) ? '|' . $text : '|';
         $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
         $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
