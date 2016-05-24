@@ -1,6 +1,15 @@
 CHANGELOG
 =========
 
+
+# 0.4.0 / 2016-05-24
+* Add the ability to send events via both TCP and UDP (default is UDP)
+* Update file_get_contents to cURL for better TCP event submission reliability
+* Add ability to configure SSL verification for cURL request (default validates host/peer)
+* Random code cleaning (spellchecking, fixing invalid typing, etc.)
+* Many thanks to [@folkhack][], [@jmparks-ebates][], [@Amaroq1][] and [@baweinbe][] for this ([#41][]).
+
+
 # 0.3.0 / 2015-07-27
 * [BUGFIX] Fix `report_metric` bad reference to `report` method in `BatchedDatadogstatsd` class, [#27][]
 * [BUGFIX] Reference private variables with `self::` instead of `static::`, [#24][] (thanks [@shadowhand][])
@@ -21,6 +30,11 @@ CHANGELOG
 [#26]: https://github.com/DataDog/php-datadogstatsd/issues/26
 [#27]: https://github.com/DataDog/php-datadogstatsd/issues/27
 [#28]: https://github.com/DataDog/php-datadogstatsd/issues/28
+[#41]: https://github.com/DataDog/php-datadogstatsd/pull/41
 [@bigthyme]: https://github.com/bigthyme
 [@obradovic]: https://github.com/obradovic
 [@shadowhand]: https://github.com/shadowhand
+[@folkhack]: https://github.com/folkhack
+[@baweinbe]: https://github.com/baweinbe
+[@jmparks-ebates]: https://github.com/jmparks-ebates
+[@Amaroq1]: https://github.com/Amaroq1
