@@ -58,11 +58,44 @@ Datadogstatsd::timing('your.data.point', microtime(true) - $start_time, 1, array
 
 ### Submitting events
 
-To submit events, you'll need to first configure the library with your
+For documentation on the values of events, see 
+[http://docs.datadoghq.com/api/#events/](http://docs.datadoghq.com/api/#events/).
+
+**Submitting events via TCP vs UDP**
+
+* **TCP** - High-confidence event submission. Will log errors on event submission error.
+* **UDP** - "Fire and forget" event submission. Will **not** log errors on event submission error. No acknowledgement 
+of submitted event from Datadog.
+
+_[Differences between TCP/UDP](http://stackoverflow.com/a/5970545)_
+
+##### UDP Submission to local dogstatsd
+
+Since the UDP method uses the a local dogstatsd instance we don't need to setup any additional application/api access.
+
+```php
+Datadogstatsd::event('Fire and forget!', array(
+    'text'       => 'Sending errors via UDP is faster but less reliable!',
+	'alert_type' => 'success'
+));
+```
+
+* Default method
+* No configuration
+* Faster
+* Less reliable
+* No logging on communication errors with Datadog (fire and forget)
+
+
+##### TCP Submission to Datadog API
+
+To submit events via TCP, you'll need to first configure the library with your
 Datadog credentials, since the event function submits directly to Datadog
 instead of sending to a local dogstatsd instance.
 
-``` php
+You can find your api and app keys in the [API tab](https://app.datadoghq.com/account/settings#api).
+
+```php
 $apiKey = 'myApiKey';
 $appKey = 'myAppKey';
 
@@ -77,10 +110,14 @@ Datadogstatsd::event('Now it is fixed.', array(
 ));
 ```
 
-You can find your api and app keys in the [API tab](https://app.datadoghq.com/account/settings#api).
+* Slower
+* More reliable
+* Logging on communication errors with Datadog (uses cURL for API request)
+* Logs via error_log and try/catch block to not throw warnings/errors on communication issues with API
 
-For more documentation on the optional values of events, see [http://docs.datadoghq.com/api/#events/](http://docs.datadoghq.com/api/#events/).
 
-Note that while sending metrics with this library is fast since it's sending
-locally over UDP, sending events will be slow because it's sending data
-directly to Datadog over HTTP. We'd like to improve this in the near future.
+## Roadmap
+
+* Add a configurable timeout for event submission via TCP
+* Write unit tests
+* Document service check functionality
