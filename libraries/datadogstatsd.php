@@ -41,7 +41,7 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      */
-    public static function timing($stat, $time, $sampleRate = 1.0, array $tags = null) {
+    public static function timing($stat, $time, $sampleRate = 1.0, $tags = null) {
         static::send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
@@ -53,7 +53,7 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function microtiming($stat, $time, $sampleRate = 1.0, array $tags = null) {
+    public static function microtiming($stat, $time, $sampleRate = 1.0, $tags = null) {
 
         static::timing($stat, $time*1000, $sampleRate, $tags);
 
@@ -67,7 +67,7 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function gauge($stat, $value, $sampleRate = 1.0, array $tags = null) {
+    public static function gauge($stat, $value, $sampleRate = 1.0, $tags = null) {
         static::send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -79,7 +79,7 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function histogram($stat, $value, $sampleRate = 1.0, array $tags = null) {
+    public static function histogram($stat, $value, $sampleRate = 1.0, $tags = null) {
         static::send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -91,7 +91,7 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function set($stat, $value, $sampleRate = 1.0, array $tags = null) {
+    public static function set($stat, $value, $sampleRate = 1.0, $tags = null) {
         static::send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -104,7 +104,7 @@ class Datadogstatsd {
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function increment($stats, $sampleRate = 1.0, array $tags = null) {
+    public static function increment($stats, $sampleRate = 1.0, $tags = null) {
         static::updateStats($stats, 1, $sampleRate, $tags);
     }
 
@@ -116,7 +116,7 @@ class Datadogstatsd {
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function decrement($stats, $sampleRate = 1.0, array $tags = null) {
+    public static function decrement($stats, $sampleRate = 1.0, $tags = null) {
         static::updateStats($stats, -1, $sampleRate, $tags);
     }
 
@@ -130,7 +130,7 @@ class Datadogstatsd {
      *
      * @return boolean
      **/
-    public static function updateStats($stats, $delta = 1, $sampleRate = 1.0, array $tags = null) {
+    public static function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null) {
         if (!is_array($stats)) { $stats = array($stats); }
         $data = array();
         foreach($stats as $stat) {
@@ -147,7 +147,7 @@ class Datadogstatsd {
      *
      * @return null
      **/
-    public static function send($data, $sampleRate = 1.0, array $tags = null) {
+    public static function send($data, $sampleRate = 1.0, $tags = null) {
         // sampling
         $sampledData = array();
         if ($sampleRate < 1) {
@@ -163,13 +163,13 @@ class Datadogstatsd {
         if (empty($sampledData)) { return; }
 
         foreach ($sampledData as $stat => $value) {
-            if ($tags !== NULL && is_array($tags) && count($tags) > 0) {
-                $value .= '|';
+            if (is_array($tags) && count($tags) > 0) {
+                $value .= '|#';
                 foreach ($tags as $tag_key => $tag_val) {
-                    $value .= '#' . $tag_key . ':' . $tag_val . ',';
+                    $value .= $tag_key . ':' . $tag_val . ',';
                 }
                 $value = substr($value, 0, -1);
-            } elseif (isset($tags) && !empty($tags)) {
+            } elseif (!empty($tags)) {
                 $value .= '|#' . $tags;
             }
             static::report_metric("$stat:$value");
@@ -187,7 +187,7 @@ class Datadogstatsd {
      *
      * @return null
      **/
-    public static function service_check($name, $status, array $tags = null,
+    public static function service_check($name, $status, $tags = null,
                                          $hostname = null, $message = null, $timestamp = null) {
         $msg = "_sc|$name|$status";
 
@@ -197,9 +197,9 @@ class Datadogstatsd {
         if ($hostname !== null) {
             $msg .= sprintf("|h:%s", $hostname);
         }
-        if ($tags !== null && is_array($tags) && count($tags) > 0) {
+        if (is_array($tags) && count($tags) > 0) {
             $msg .= sprintf('|#%s', join(',', $tags));
-        } elseif (isset($tags) && !empty($tags)) {
+        } elseif (!empty($tags)) {
             $msg .= sprintf('|#%s', $tags);
         }
         if ($message !== null) {
