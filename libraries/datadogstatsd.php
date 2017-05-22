@@ -147,7 +147,13 @@ class Datadogstatsd {
             if ($tags !== NULL && is_array($tags) && count($tags) > 0) {
                 $value .= '|';
                 foreach ($tags as $tag_key => $tag_val) {
-                    $value .= '#' . $tag_key . ':' . $tag_val . ',';
+                    if(is_array($tag_val)){
+                        foreach($tag_val as $val){
+                            $value .= '#' . $tag_key . ':' . $val . ',';
+                        }
+                     } else {
+                        $value .= '#' . $tag_key . ':' . $tag_val . ',';
+                     }
                 }
                 $value = substr($value, 0, -1);
             } elseif (isset($tags) && !empty($tags)) {
