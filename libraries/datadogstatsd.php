@@ -4,29 +4,29 @@
  * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
  **/
 
-class Datadogstatsd {
-
-    static protected $__server = 'localhost';
-    static protected $__serverPort = 8125;
-    static private $__datadogHost;
-    static private $__eventUrl = '/api/v1/events';
-    static private $__apiKey;
-    static private $__applicationKey;
+class Datadogstatsd
+{
+    protected static $__server = 'localhost';
+    protected static $__serverPort = 8125;
+    private static $__datadogHost;
+    private static $__eventUrl = '/api/v1/events';
+    private static $__apiKey;
+    private static $__applicationKey;
 
     /**
      * @var int Config pass-through for CURLOPT_SSL_VERIFYHOST
      */
-    static private $__apiCurlSslVerifyHost;
+    private static $__apiCurlSslVerifyHost;
 
     /**
      * @var int Config pass-through for CURLOPT_SSL_VERIFYPEER
      */
-    static private $__apiCurlSslVerifyPeer;
+    private static $__apiCurlSslVerifyPeer;
 
     /**
      * @var string Config for submitting events via 'TCP' vs 'UDP'; default 'UDP'
      */
-    static private $__submitEventsOver = 'UDP';
+    private static $__submitEventsOver = 'UDP';
 
     const OK        = 0;
     const WARNING   = 1;
@@ -41,7 +41,8 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      */
-    public static function timing($stat, $time, $sampleRate = 1.0, $tags = null) {
+    public static function timing($stat, $time, $sampleRate = 1.0, $tags = null)
+    {
         static::send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
@@ -53,10 +54,9 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function microtiming($stat, $time, $sampleRate = 1.0, $tags = null) {
-
+    public static function microtiming($stat, $time, $sampleRate = 1.0, $tags = null)
+    {
         static::timing($stat, $time*1000, $sampleRate, $tags);
-
     }
 
     /**
@@ -67,7 +67,8 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function gauge($stat, $value, $sampleRate = 1.0, $tags = null) {
+    public static function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
+    {
         static::send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -79,7 +80,8 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function histogram($stat, $value, $sampleRate = 1.0, $tags = null) {
+    public static function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
+    {
         static::send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -91,7 +93,8 @@ class Datadogstatsd {
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      **/
-    public static function set($stat, $value, $sampleRate = 1.0, $tags = null) {
+    public static function set($stat, $value, $sampleRate = 1.0, $tags = null)
+    {
         static::send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -104,7 +107,8 @@ class Datadogstatsd {
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function increment($stats, $sampleRate = 1.0, $tags = null) {
+    public static function increment($stats, $sampleRate = 1.0, $tags = null)
+    {
         static::updateStats($stats, 1, $sampleRate, $tags);
     }
 
@@ -116,7 +120,8 @@ class Datadogstatsd {
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @return boolean
      **/
-    public static function decrement($stats, $sampleRate = 1.0, $tags = null) {
+    public static function decrement($stats, $sampleRate = 1.0, $tags = null)
+    {
         static::updateStats($stats, -1, $sampleRate, $tags);
     }
 
@@ -130,10 +135,13 @@ class Datadogstatsd {
      *
      * @return boolean
      **/
-    public static function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null) {
-        if (!is_array($stats)) { $stats = array($stats); }
+    public static function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
+    {
+        if (!is_array($stats)) {
+            $stats = array($stats);
+        }
         $data = array();
-        foreach($stats as $stat) {
+        foreach ($stats as $stat) {
             $data[$stat] = "$delta|c";
         }
         static::send($data, $sampleRate, $tags);
@@ -146,7 +154,8 @@ class Datadogstatsd {
      *
      * @return string
      **/
-    private static function serialize_tags($tags) {
+    private static function serialize_tags($tags)
+    {
         if (is_array($tags) && count($tags) > 0) {
             $data = array();
             foreach ($tags as $tag_key => $tag_val) {
@@ -171,7 +180,8 @@ class Datadogstatsd {
      *
      * @return null
      **/
-    public static function send($data, $sampleRate = 1.0, $tags = null) {
+    public static function send($data, $sampleRate = 1.0, $tags = null)
+    {
         // sampling
         $sampledData = array();
         if ($sampleRate < 1) {
@@ -184,7 +194,9 @@ class Datadogstatsd {
             $sampledData = $data;
         }
 
-        if (empty($sampledData)) { return; }
+        if (empty($sampledData)) {
+            return;
+        }
 
         foreach ($sampledData as $stat => $value) {
             $value .= static::serialize_tags($tags);
@@ -203,8 +215,14 @@ class Datadogstatsd {
      *
      * @return null
      **/
-    public static function service_check($name, $status, $tags = null,
-                                         $hostname = null, $message = null, $timestamp = null) {
+    public static function service_check(
+        $name,
+        $status,
+        $tags = null,
+        $hostname = null,
+        $message = null,
+        $timestamp = null
+    ) {
         $msg = "_sc|$name|$status";
 
         if ($timestamp !== null) {
@@ -221,30 +239,40 @@ class Datadogstatsd {
         static::report($msg);
     }
 
-    private static function escape_sc_message($msg) {
+    private static function escape_sc_message($msg)
+    {
         return str_replace("m:", "m\:", str_replace("\n", "\\n", $msg));
     }
 
-    public static function report($udp_message) {
+    public static function report($udp_message)
+    {
         static::flush($udp_message);
     }
 
-    public static function report_metric($udp_message) {
+    public static function report_metric($udp_message)
+    {
         static::report($udp_message);
     }
 
-    public static function flush($udp_message) {
+    public static function flush($udp_message)
+    {
         // Non - Blocking UDP I/O - Use IP Addresses!
         $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
         socket_set_nonblock($socket);
         socket_sendto($socket, $udp_message, strlen($udp_message), 0, static::$__server, static::$__serverPort);
         socket_close($socket);
-
     }
 
-    public static function configure($apiKey, $applicationKey, $datadogHost = 'https://app.datadoghq.com',
-                                     $submitEventsOver = 'TCP', $localStatsdServer = 'localhost', $localStatsdPort = 8125,
-									 $curlVerifySslHost = 2, $curlVerifySslPeer = 1 ) {
+    public static function configure(
+        $apiKey,
+        $applicationKey,
+        $datadogHost = 'https://app.datadoghq.com',
+        $submitEventsOver = 'TCP',
+        $localStatsdServer = 'localhost',
+        $localStatsdPort = 8125,
+        $curlVerifySslHost = 2,
+        $curlVerifySslPeer = 1
+    ) {
         self::$__apiKey = $apiKey;
         self::$__applicationKey = $applicationKey;
         self::$__datadogHost = $datadogHost;
@@ -252,7 +280,7 @@ class Datadogstatsd {
         self::$__apiCurlSslVerifyHost = $curlVerifySslHost;
         self::$__apiCurlSslVerifyPeer = $curlVerifySslPeer;
         self::$__server = $localStatsdServer;
-		self::$__serverPort = $localStatsdPort;
+        self::$__serverPort = $localStatsdPort;
     }
 
     /**
@@ -265,7 +293,8 @@ class Datadogstatsd {
      *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
      * @return null
      **/
-    public static function event($title, $vals = array()) {
+    public static function event($title, $vals = array())
+    {
 
         // Assemble the request
         $vals['title'] = $title;
@@ -334,9 +363,7 @@ class Datadogstatsd {
             if ($decodedJson['status'] !== 'ok') {
                 throw new Exception('Datadog event API response  status not "ok"; response body: ' . $response_body);
             }
-
         } catch (Exception $e) {
-
             $success = false;
 
             // Use error_log for API submission errors to avoid warnings/etc.
@@ -353,7 +380,8 @@ class Datadogstatsd {
      *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
      * @return null
      */
-    private static function eventUdp($vals) {
+    private static function eventUdp($vals)
+    {
 
         // Format required values title and text
         $title = isset($vals['title']) ? (string) $vals['title'] : '';
@@ -381,26 +409,29 @@ class Datadogstatsd {
     }
 }
 
-class BatchedDatadogstatsd extends Datadogstatsd {
+class BatchedDatadogstatsd extends Datadogstatsd
+{
+    private static $__buffer = array();
+    private static $__buffer_length = 0;
+    public static $max_buffer_length = 50;
 
-    static private $__buffer = array();
-    static private $__buffer_length = 0;
-    static public $max_buffer_length = 50;
-
-    public static function report($udp_message) {
+    public static function report($udp_message)
+    {
         static::$__buffer[] = $udp_message;
         static::$__buffer_length++;
-        if(static::$__buffer_length > static::$max_buffer_length) {
+        if (static::$__buffer_length > static::$max_buffer_length) {
             static::flush_buffer();
         }
     }
 
-    public static function report_metric($udp_message) {
+    public static function report_metric($udp_message)
+    {
         static::report($udp_message);
     }
 
-    public static function flush_buffer() {
-        static::flush(join("\n",static::$__buffer));
+    public static function flush_buffer()
+    {
+        static::flush(join("\n", static::$__buffer));
         static::$__buffer = array();
         static::$__buffer_length = 0;
     }
