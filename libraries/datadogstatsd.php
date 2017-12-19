@@ -366,7 +366,9 @@ class Datadogstatsd {
         $fields .= ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
         $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
         $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
+        $fields .= (isset($vals['aggregation_key'])) ? '|k:' . ((string) $vals['aggregation_key']) : '';
         $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
+        $fields .= (isset($vals['source_type_name'])) ? '|s:' . ((string) $vals['source_type_name']) : '';
         $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
         $fields .= (isset($vals['tags'])) ? static::serialize_tags($vals['tags']) : '';
 
