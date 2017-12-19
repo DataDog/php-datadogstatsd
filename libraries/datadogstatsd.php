@@ -140,6 +140,30 @@ class Datadogstatsd {
     }
 
     /**
+     * Serialize tags to StatsD protocol
+     *
+     * @param string|array $tags The tags to be serialize
+     *
+     * @return string
+     **/
+    private static function serialize_tags($tags) {
+        if (is_array($tags) && count($tags) > 0) {
+            $data = array();
+            foreach ($tags as $tag_key => $tag_val) {
+                if (isset($tag_val)) {
+                    array_push($data, $tag_key . ':' . $tag_val);
+                } else {
+                    array_push($data, $tag_key);
+                }
+            }
+            return '|#'.implode(",", $data);
+        } elseif (!empty($tags)) {
+            return '|#' . $tags;
+        }
+        return "";
+    }
+
+    /**
      * Squirt the metrics over UDP
      * @param array $data Incoming Data
      * @param float $sampleRate the rate (0-1) for sampling.
@@ -163,19 +187,7 @@ class Datadogstatsd {
         if (empty($sampledData)) { return; }
 
         foreach ($sampledData as $stat => $value) {
-            if (is_array($tags) && count($tags) > 0) {
-                $value .= '|#';
-                foreach ($tags as $tag_key => $tag_val) {
-                    if (isset($tag_val)) {
-                        $value .= $tag_key . ':' . $tag_val . ',';
-                    } else {
-                        $value .= $tag_key . ',';
-                    }
-                }
-                $value = substr($value, 0, -1);
-            } elseif (!empty($tags)) {
-                $value .= '|#' . $tags;
-            }
+            $value .= static::serialize_tags($tags);
             static::report_metric("$stat:$value");
         }
     }
@@ -201,11 +213,7 @@ class Datadogstatsd {
         if ($hostname !== null) {
             $msg .= sprintf("|h:%s", $hostname);
         }
-        if (is_array($tags) && count($tags) > 0) {
-            $msg .= sprintf('|#%s', join(',', $tags));
-        } elseif (!empty($tags)) {
-            $msg .= sprintf('|#%s', $tags);
-        }
+        $msg .= static::serialize_tags($tags);
         if ($message !== null) {
             $msg .= sprintf('|m:%s', static::escape_sc_message($message));
         }
@@ -360,7 +368,7 @@ class Datadogstatsd {
         $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
         $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
         $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
-        $fields .= (isset($vals['tags'])) ? '|#' . implode(',', $vals['tags']) : '';
+        $fields .= (isset($vals['tags'])) ? static::serialize_tags($vals['tags']) : '';
 
         $title_length = strlen($title);
         $text_length = strlen($text);
