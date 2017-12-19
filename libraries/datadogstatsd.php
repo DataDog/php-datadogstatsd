@@ -166,7 +166,11 @@ class Datadogstatsd {
             if (is_array($tags) && count($tags) > 0) {
                 $value .= '|#';
                 foreach ($tags as $tag_key => $tag_val) {
-                    $value .= $tag_key . ':' . $tag_val . ',';
+                    if (isset($tag_val)) {
+                        $value .= $tag_key . ':' . $tag_val . ',';
+                    } else {
+                        $value .= $tag_key . ',';
+                    }
                 }
                 $value = substr($value, 0, -1);
             } elseif (!empty($tags)) {
