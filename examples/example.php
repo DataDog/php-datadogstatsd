@@ -15,5 +15,3 @@ BatchedDatadogstatsd::increment('web.page_views');
 BatchedDatadogstatsd::histogram('web.render_time', 15);
 BatchedDatadogstatsd::set('web.uniques', 3 /* a unique user id */);
 BatchedDatadogstatsd::flush_buffer(); // Necessary
-
-?>
