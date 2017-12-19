@@ -26,6 +26,14 @@ Setup: `require './libraries/datadogstatsd.php';`
 
 ## Usage
 
+The 'tags' argument can be a array or a string. Value can be set to `null`.
+
+```php
+# Both call will send the "app:php1" and "beta" tags.
+Datadogstatsd::increment('your.data.point', 1, array('app' => 'php1', 'beta' => null));
+Datadogstatsd::increment('your.data.point', 1, "app:php1,beta");
+```
+
 ### Increment
 
 To increment things:
