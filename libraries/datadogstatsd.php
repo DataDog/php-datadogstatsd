@@ -363,7 +363,7 @@ class Datadogstatsd {
         //   http://docs.datadoghq.com/guides/dogstatsd/#events
         $fields = '';
         $fields .= ($title);
-        $fields .= ($text) ? '|' . $text : '|';
+        $fields .= ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
         $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
         $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
         $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
