@@ -1,17 +1,20 @@
 <?php
 
+require '../vendor/autoload.php';
 
-require '../libraries/datadogstatsd.php';
+use DataDog\DogStatsd;
+use DataDog\BatchedDogStatsd;
 
-
-Datadogstatsd::increment('web.page_views');
-Datadogstatsd::histogram('web.render_time', 15);
-Datadogstatsd::set('web.uniques', 3 /* a unique user id */);
-Datadogstatsd::service_check('my.service.check', Datadogstatsd::CRITICAL);
-
+$statsd = new DogStatsd();
+$statsd->increment('web.page_views');
+$statsd->histogram('web.render_time', 15);
+$statsd->set('web.uniques', 3 /* a unique user id */);
+$statsd->service_check('my.service.check', DogStatsd::CRITICAL);
+$statsd->event("Event title", array("text"=>"Event text"));
 
 //All the following metrics will be sent in a single UDP packet to the statsd server
-BatchedDatadogstatsd::increment('web.page_views');
-BatchedDatadogstatsd::histogram('web.render_time', 15);
-BatchedDatadogstatsd::set('web.uniques', 3 /* a unique user id */);
-BatchedDatadogstatsd::flush_buffer(); // Necessary
+$batchedStatsd = new BatchedDogStatsd();
+$batchedStatsd->increment('web.page_views');
+$batchedStatsd->histogram('web.render_time', 15);
+$batchedStatsd->set('web.uniques', 3 /* a unique user id */);
+$batchedStatsd->flush_buffer(); // Necessary
