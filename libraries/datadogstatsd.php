@@ -304,13 +304,9 @@ class Datadogstatsd
             return self::eventUdp($vals);
         }
 
-        // Convert a comma-separated string of tags into an array
-        if (array_key_exists('tags', $vals) && is_string($vals['tags'])) {
-            $tags = explode(',', $vals['tags']);
-            $vals['tags'] = array();
-            foreach ($tags as $tag) {
-                $vals['tags'][] = trim($tag);
-            }
+        // Convert tags string or array into array of tags: ie ['key:value']
+        if (isset($vals['tags'])) {
+            $vals['tags'] = explode(",", substr(static::serialize_tags($vals['tags']), 2));
         }
 
         /**
