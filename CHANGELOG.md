@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+# 1.0.0 / 2017-12-20
+* Respect PSR4, huge thanks to [@onema][]
+* Library API is now object oriented 
+
 # 0.5.0 / 2017-12-20
 *  Update code to respect PSR1 and PSR2
 *  Add support for 'aggregation_key' and 'source_type_name' for UDP events
@@ -46,3 +50,4 @@ CHANGELOG
 [@baweinbe]: https://github.com/baweinbe
 [@jmparks-ebates]: https://github.com/jmparks-ebates
 [@Amaroq1]: https://github.com/Amaroq1
+[@onema]: https://github.com/onema

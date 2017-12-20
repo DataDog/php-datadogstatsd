@@ -12,7 +12,7 @@ See [CHANGELOG.md](CHANGELOG.md) for changes.
 Add the following to your `composer.json`:
 
 ```
-"datadog/php-datadogstatsd": "0.3.*"
+"datadog/php-datadogstatsd": "1.0.*"
 ```
 
 Note: The first version shipped in composer is 0.0.3
@@ -22,16 +22,44 @@ Note: The first version shipped in composer is 0.0.3
 
 Clone repository at [github.com/DataDog/php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd)
 
-Setup: `require './libraries/datadogstatsd.php';`
+Setup: `require './src/DogStatsd.php';`
 
 ## Usage
+
+### instantiation
+
+To instantiate a DogStatsd object using `composer`:
+
+```php
+require __DIR__ . '/vendor/autoload.php';
+
+use DataDog\DogStatsd;
+use DataDog\BatchedDogStatsd;
+
+$statsd = new DogStatsd();
+$statsd = new BatchedDogStatsd();
+```
+
+DogStatsd constructor, takes a configuration array. The configuration can take any of the following values (all optional):
+
+- `host`: the host of your DogStatsd server, default to `localhost`
+- `port`: the port of your DogStatsd server. default to `8125`
+
+When sending `events` over TCP the following options can be set (see [Events section](#submitting-events)):
+- `api_key`: needed to send `event` over TCP
+- `app_key`: needed to send `event` over TCP
+- `curl_ssl_verify_host`: Config pass-through for `CURLOPT_SSL_VERIFYHOST` defaults 2
+- `curl_ssl_verify_peer`: Config pass-through for `CURLOPT_SSL_VERIFYPEER` default 1
+- `datadog_host`: where to send events default `https://app.datadoghq.com`
+
+### Tags
 
 The 'tags' argument can be a array or a string. Value can be set to `null`.
 
 ```php
 # Both call will send the "app:php1" and "beta" tags.
-Datadogstatsd::increment('your.data.point', 1, array('app' => 'php1', 'beta' => null));
-Datadogstatsd::increment('your.data.point', 1, "app:php1,beta");
+$statd->increment('your.data.point', 1, array('app' => 'php1', 'beta' => null));
+$statd->increment('your.data.point', 1, "app:php1,beta");
 ```
 
 ### Increment
@@ -39,9 +67,9 @@ Datadogstatsd::increment('your.data.point', 1, "app:php1,beta");
 To increment things:
 
 ``` php
-Datadogstatsd::increment('your.data.point');
-Datadogstatsd::increment('your.data.point', .5);
-Datadogstatsd::increment('your.data.point', 1, array('tagname' => 'value'));
+$statd->increment('your.data.point');
+$statd->increment('your.data.point', .5);
+$statd->increment('your.data.point', 1, array('tagname' => 'value'));
 ```
 
 ### Decrement
@@ -49,7 +77,7 @@ Datadogstatsd::increment('your.data.point', 1, array('tagname' => 'value'));
 To decrement things:
 
 ``` php
-Datadogstatsd::decrement('your.data.point');
+$statd->decrement('your.data.point');
 ```
 
 ### Timing
@@ -59,21 +87,23 @@ To time things:
 ``` php
 $start_time = microtime(true);
 run_function();
-Datadogstatsd::timing('your.data.point', microtime(true) - $start_time);
+$statd->timing('your.data.point', microtime(true) - $start_time);
 
-Datadogstatsd::timing('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
+$statd->timing('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
 ```
 
 ### Submitting events
 
 For documentation on the values of events, see 
-[http://docs.datadoghq.com/api/#events/](http://docs.datadoghq.com/api/#events/).
+[http://docs.datadoghq.com/api/#events](http://docs.datadoghq.com/api/#events).
 
 **Submitting events via TCP vs UDP**
 
 * **TCP** - High-confidence event submission. Will log errors on event submission error.
 * **UDP** - "Fire and forget" event submission. Will **not** log errors on event submission error. No acknowledgement 
 of submitted event from Datadog.
+
+No matter wich transport is used the `event` function has the same API.
 
 _[Differences between TCP/UDP](http://stackoverflow.com/a/5970545)_
 
@@ -82,10 +112,13 @@ _[Differences between TCP/UDP](http://stackoverflow.com/a/5970545)_
 Since the UDP method uses the a local dogstatsd instance we don't need to setup any additional application/api access.
 
 ```php
-Datadogstatsd::event('Fire and forget!', array(
-    'text'       => 'Sending errors via UDP is faster but less reliable!',
-	'alert_type' => 'success'
-));
+$statsd = new DogStatsd();
+$statd->event('Fire and forget!',
+	array(
+		'text'       => 'Sending errors via UDP is faster but less reliable!',
+		'alert_type' => 'success'
+	)
+);
 ```
 
 * Default method
@@ -104,18 +137,24 @@ instead of sending to a local dogstatsd instance.
 You can find your api and app keys in the [API tab](https://app.datadoghq.com/account/settings#api).
 
 ```php
-$apiKey = 'myApiKey';
-$appKey = 'myAppKey';
+$statsd = new DogStatsd(
+    array('api_key' => 'myApiKey',
+          'app_key' => 'myAppKey',
+     )
+  );
 
-Datadogstatsd::configure($apiKey, $appKey);
-Datadogstatsd::event('A thing broke!', array(
-	'alert_type'      => 'error',
-	'aggregation_key' => 'test_aggr'
-));
-Datadogstatsd::event('Now it is fixed.', array(
-	'alert_type'      => 'success',
-	'aggregation_key' => 'test_aggr'
-));
+$statd->event('A thing broke!',
+	array(
+		'alert_type'      => 'error',
+		'aggregation_key' => 'test_aggr'
+	)
+);
+$statd->event('Now it is fixed.',
+	array(
+		'alert_type'      => 'success',
+		'aggregation_key' => 'test_aggr'
+	)
+);
 ```
 
 * Slower
