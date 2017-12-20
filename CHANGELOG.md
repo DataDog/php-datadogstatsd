@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+# 0.5.0 / 2017-12-20
+*  Update code to respect PSR1 and PSR2
+*  Add support for 'aggregation_key' and 'source_type_name' for UDP events
+*  Escape line break in event text over UDP
+*  Align tags behaviour across all function and between UDP and TCP
+*  Handle tags with no values
+*  Allow single tags to be passed as strings and format multiple tags correctly (thanks to [@krixon][])
+
 
 # 0.4.0 / 2016-05-24
 * Add the ability to send events via both TCP and UDP (default is UDP)
