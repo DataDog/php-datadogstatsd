@@ -60,7 +60,7 @@ class DogStatsd
      *
      * @param array $config
      */
-    public function __construct(array $config = [])
+    public function __construct(array $config = array())
     {
         $this->host = isset($config['host']) ? $config['host'] : 'localhost';
         $this->port = isset($config['port']) ? $config['port'] : 8125;
