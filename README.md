@@ -7,6 +7,8 @@ Requires PHP >= 5.3.0.
 
 See [CHANGELOG.md](CHANGELOG.md) for changes.
 
+*For a Laravel-specific implementation that wraps this library, check out [laravel-datadog-helper](https://github.com/chaseconey/laravel-datadog-helper).*
+
 ## Installation
 
 ### Composer
