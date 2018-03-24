@@ -91,9 +91,9 @@ To time things:
 ``` php
 $start_time = microtime(true);
 run_function();
-$statd->timing('your.data.point', microtime(true) - $start_time);
+$statd->microtiming('your.data.point', microtime(true) - $start_time);
 
-$statd->timing('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
+$statd->microtiming('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
 ```
 
 ### Submitting events
