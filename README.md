@@ -21,7 +21,6 @@ Add the following to your `composer.json`:
 
 Note: The first version shipped in composer is 0.0.3
 
-
 ### Or manually
 
 Clone repository at [github.com/DataDog/php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd)
@@ -50,6 +49,7 @@ DogStatsd constructor, takes a configuration array. The configuration can take a
 - `port`: the port of your DogStatsd server. default to `8125`
 
 When sending `events` over TCP the following options can be set (see [Events section](#submitting-events)):
+
 - `api_key`: needed to send `event` over TCP
 - `app_key`: needed to send `event` over TCP
 - `curl_ssl_verify_host`: Config pass-through for `CURLOPT_SSL_VERIFYHOST` defaults 2
@@ -62,8 +62,8 @@ The 'tags' argument can be a array or a string. Value can be set to `null`.
 
 ```php
 # Both call will send the "app:php1" and "beta" tags.
-$statd->increment('your.data.point', 1, array('app' => 'php1', 'beta' => null));
-$statd->increment('your.data.point', 1, "app:php1,beta");
+$statsd->increment('your.data.point', 1, array('app' => 'php1', 'beta' => null));
+$statsd->increment('your.data.point', 1, "app:php1,beta");
 ```
 
 ### Increment
@@ -71,9 +71,9 @@ $statd->increment('your.data.point', 1, "app:php1,beta");
 To increment things:
 
 ``` php
-$statd->increment('your.data.point');
-$statd->increment('your.data.point', .5);
-$statd->increment('your.data.point', 1, array('tagname' => 'value'));
+$statsd->increment('your.data.point');
+$statsd->increment('your.data.point', .5);
+$statsd->increment('your.data.point', 1, array('tagname' => 'value'));
 ```
 
 ### Decrement
@@ -81,7 +81,7 @@ $statd->increment('your.data.point', 1, array('tagname' => 'value'));
 To decrement things:
 
 ``` php
-$statd->decrement('your.data.point');
+$statsd->decrement('your.data.point');
 ```
 
 ### Timing
@@ -91,21 +91,20 @@ To time things:
 ``` php
 $start_time = microtime(true);
 run_function();
-$statd->microtiming('your.data.point', microtime(true) - $start_time);
+$statsd->microtiming('your.data.point', microtime(true) - $start_time);
 
-$statd->microtiming('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
+$statsd->microtiming('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
 ```
 
 ### Submitting events
 
-For documentation on the values of events, see 
+For documentation on the values of events, see
 [http://docs.datadoghq.com/api/#events](http://docs.datadoghq.com/api/#events).
 
-**Submitting events via TCP vs UDP**
+#### Submitting events via TCP vs UDP
 
-* **TCP** - High-confidence event submission. Will log errors on event submission error.
-* **UDP** - "Fire and forget" event submission. Will **not** log errors on event submission error. No acknowledgement 
-of submitted event from Datadog.
+- **TCP** - High-confidence event submission. Will log errors on event submission error.
+- **UDP** - "Fire and forget" event submission. Will **not** log errors on event submission error. No acknowledgement of submitted event from Datadog.
 
 No matter wich transport is used the `event` function has the same API.
 
@@ -117,20 +116,19 @@ Since the UDP method uses the a local dogstatsd instance we don't need to setup 
 
 ```php
 $statsd = new DogStatsd();
-$statd->event('Fire and forget!',
-	array(
-		'text'       => 'Sending errors via UDP is faster but less reliable!',
-		'alert_type' => 'success'
-	)
+$statsd->event('Fire and forget!',
+    array(
+        'text'       => 'Sending errors via UDP is faster but less reliable!',
+        'alert_type' => 'success'
+    )
 );
 ```
 
-* Default method
-* No configuration
-* Faster
-* Less reliable
-* No logging on communication errors with Datadog (fire and forget)
-
+- Default method
+- No configuration
+- Faster
+- Less reliable
+- No logging on communication errors with Datadog (fire and forget)
 
 ##### TCP Submission to Datadog API
 
@@ -147,28 +145,27 @@ $statsd = new DogStatsd(
      )
   );
 
-$statd->event('A thing broke!',
-	array(
-		'alert_type'      => 'error',
-		'aggregation_key' => 'test_aggr'
-	)
+$statsd->event('A thing broke!',
+    array(
+        'alert_type'      => 'error',
+        'aggregation_key' => 'test_aggr'
+    )
 );
-$statd->event('Now it is fixed.',
-	array(
-		'alert_type'      => 'success',
-		'aggregation_key' => 'test_aggr'
-	)
+$statsd->event('Now it is fixed.',
+    array(
+        'alert_type'      => 'success',
+        'aggregation_key' => 'test_aggr'
+    )
 );
 ```
 
-* Slower
-* More reliable
-* Logging on communication errors with Datadog (uses cURL for API request)
-* Logs via error_log and try/catch block to not throw warnings/errors on communication issues with API
-
+- Slower
+- More reliable
+- Logging on communication errors with Datadog (uses cURL for API request)
+- Logs via error_log and try/catch block to not throw warnings/errors on communication issues with API
 
 ## Roadmap
 
-* Add a configurable timeout for event submission via TCP
-* Write unit tests
-* Document service check functionality
+- Add a configurable timeout for event submission via TCP
+- Write unit tests
+- Document service check functionality
