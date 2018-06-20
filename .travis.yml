@@ -8,7 +8,6 @@ php:
   - 7.1
   - 7.2
 
-# run build against hhvm but allow them to fail
 # http://docs.travis-ci.com/user/build-configuration/#Rows-That-are-Allowed-To-Fail
 matrix:
   fast_finish: true
