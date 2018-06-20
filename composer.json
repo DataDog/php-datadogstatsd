@@ -18,9 +18,9 @@
         }
     ],
     "require": {
-      "ext-curl": "*",
-      "lib-curl": "*",
-      "php": ">=5.3.0"
+        "php": ">=5.3.0",
+        "ext-curl": "*",
+        "lib-curl": "*"
     },
     "support": {
         "email": "package@datadoghq.com",
@@ -32,5 +32,8 @@
         "psr-4": {
             "DataDog\\": "src/"
         }
+    },
+    "config": {
+        "sort-packages": true
     }
 }
