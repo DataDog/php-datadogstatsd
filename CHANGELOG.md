@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+# 1.0.1 / 2018-06-21
+
+* Fix PHP 5.3 syntax, thanks to [@zhukovra][]
+
 # 1.0.0 / 2017-12-20
 * Respect PSR4, huge thanks to [@onema][]
 * Library API is now object oriented 
