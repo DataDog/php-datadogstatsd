@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+# 1.0.2 / 2018-06-21
+
+* Keep packages sorted in composer.json, thanks to [@localheinz][]
+
 # 1.0.1 / 2018-06-21
 
 * Fix PHP 5.3 syntax, thanks to [@zhukovra][]
