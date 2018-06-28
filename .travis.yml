@@ -14,6 +14,10 @@ matrix:
   include:
     - php: 5.3
       dist: precise
+      
+before_install:
+  - source .travis/xdebug.sh
+  - xdebug-disable      
 
 script:
   # check syntax all PHP files, redirect stderr to file and return 0 if file is empty
