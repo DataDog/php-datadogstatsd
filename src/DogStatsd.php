@@ -65,8 +65,8 @@ class DogStatsd
         $this->host = isset($config['host']) ? $config['host'] : 'localhost';
         $this->port = isset($config['port']) ? $config['port'] : 8125;
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
-        $this->apiCurlSslVerifyHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
-        $this->apiCurlSslVerifyPeer = isset($config['curl_ssl_verify_peer']) ? $config['curl_ssl_verify_peer'] : 1;
+        $this->curlVerifySslHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
+        $this->curlVerifySslPeer = isset($config['curl_ssl_verify_peer']) ? $config['curl_ssl_verify_peer'] : 1;
 
         $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
