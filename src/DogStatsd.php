@@ -80,7 +80,7 @@ class DogStatsd
         $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
 
-        $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : [];
+        $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : array();
 
         if ($this->apiKey !== null) {
             $this->submitEventsOver = 'TCP';
@@ -236,7 +236,7 @@ class DogStatsd
         if (!$all_tags) {
             return '';
         }
-        $tag_strings = [];
+        $tag_strings = array();
         foreach ($all_tags as $tag => $value) {
             if ($value === null) {
                 $tag_strings[] = $tag;
