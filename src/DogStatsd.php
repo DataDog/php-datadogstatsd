@@ -49,6 +49,10 @@ class DogStatsd
      * @var int Config pass-through for CURLOPT_SSL_VERIFYPEER; default 1
      */
     private $curlVerifySslPeer;
+    /**
+     * @var array Tags to apply to all metrics
+     */
+    private $globalTags;
 
     private static $__eventUrl = '/api/v1/events';
 
@@ -75,6 +79,8 @@ class DogStatsd
 
         $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
+
+        $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : [];
 
         if ($this->apiKey !== null) {
             $this->submitEventsOver = 'TCP';
@@ -222,20 +228,56 @@ class DogStatsd
      **/
     private function serialize_tags($tags)
     {
-        if (is_array($tags) && count($tags) > 0) {
+        $all_tags = array_merge(
+            $this->normalize_tags($tags),
+            $this->normalize_tags($this->globalTags)
+        );
+
+        if (!$all_tags) {
+            return '';
+        }
+        $tag_strings = [];
+        foreach ($all_tags as $tag => $value) {
+            if ($value === null) {
+                $tag_strings[] = $tag;
+            } else {
+                $tag_strings[] = $tag . ':' . $value;
+            }
+        }
+        return '|#' . implode(',', $tag_strings);
+    }
+
+    /**
+     * Turns tags in any format into an array of tags
+     *
+     * @param mixed $tags The tags to normalize
+     * @return array
+     */
+    private function normalize_tags($tags)
+    {
+        if (is_array($tags)) {
             $data = array();
             foreach ($tags as $tag_key => $tag_val) {
                 if (isset($tag_val)) {
-                    array_push($data, $tag_key . ':' . $tag_val);
+                    $data[$tag_key] = $tag_val;
                 } else {
-                    array_push($data, $tag_key);
+                    $data[$tag_key] = null;
                 }
             }
-            return '|#'.implode(",", $data);
-        } elseif (!empty($tags)) {
-            return '|#' . $tags;
+            return $data;
+        } else {
+            $tags = explode(',', $tags);
+            $data = array();
+            foreach ($tags as $tag_string) {
+                if (false === strpos($tag_string, ':')) {
+                    $data[$tag_string] = null;
+                } else {
+                    list($key, $value) = explode(':', $tag_string, 1);
+                    $data[$key] = $value;
+                }
+            }
+            return $data;
         }
-        return "";
     }
 
     /**
