@@ -129,6 +129,19 @@ class DogStatsd
     }
 
     /**
+     * Distribution
+     *
+     * @param string $stat The metric
+     * @param float $value The value
+     * @param float $sampleRate the rate (0-1) for sampling.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     **/
+    public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
+    {
+        $this->send(array($stat => "$value|d"), $sampleRate, $tags);
+    }
+
+    /**
      * Set
      *
      * @param string $stat The metric

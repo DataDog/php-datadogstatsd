@@ -21,6 +21,7 @@ while (time() < $scriptStartTime + ($runFor * 60)) {
     $startTime1 = microtime(true);
     $statsd->increment('web.page_views');
     $statsd->histogram('web.render_time', 15);
+    $statsd->distribution('web.render_time', 15);
     $statsd->set('web.uniques', 3); // A unique user id
 
     runFunction($statsd);
