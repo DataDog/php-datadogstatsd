@@ -233,7 +233,7 @@ class DogStatsd
             $this->normalize_tags($this->globalTags)
         );
 
-        if (!$all_tags) {
+        if (count($all_tags) === 0) {
             return '';
         }
         $tag_strings = array();
