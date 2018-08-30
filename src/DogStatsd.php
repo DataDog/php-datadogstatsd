@@ -25,55 +25,21 @@ class DogStatsd
     /**
      * @var string
      */
-    private $datadogHost;
-    /**
-     * @var string
-     */
-    private $apiKey;
-    /**
-     * @var string
-     */
-    private $appKey;
-    /**
-     * @var string Config for submitting events via 'TCP' vs 'UDP'; default 'UDP'
-     */
     private $submitEventsOver = 'UDP';
     /**
      * @var int Config pass-through for CURLOPT_SSL_VERIFYHOST; defaults 2
      */
-    private $curlVerifySslHost;
-    /**
-     * @var int Config pass-through for CURLOPT_SSL_VERIFYPEER; default 1
-     */
-    private $curlVerifySslPeer;
-
-    private static $__eventUrl = '/api/v1/events';
 
     /**
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
      * host,
-     * port,
-     * datadog_host,
-     * curl_ssl_verify_host,
-     * curl_ssl_verify_peer,
-     * api_key and app_key
-     *
+     * port
      * @param array $config
      */
     public function __construct(array $config = array())
     {
-        $this->host = isset($config['host']) ? $config['host'] : 'localhost';
+        $this->host = isset($config['host']) ? $config['host'] : 'qa-statsd.caremerge.net';
         $this->port = isset($config['port']) ? $config['port'] : 8125;
-        $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
-        $this->apiCurlSslVerifyHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
-        $this->apiCurlSslVerifyPeer = isset($config['curl_ssl_verify_peer']) ? $config['curl_ssl_verify_peer'] : 1;
-
-        $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
-        $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
-
-        if ($this->apiKey !== null) {
-            $this->submitEventsOver = 'TCP';
-        }
     }
 
     /**
@@ -153,7 +119,6 @@ class DogStatsd
     {
         $this->send(array($stat => "$value|s"), $sampleRate, $tags);
     }
-
 
     /**
      * Increments one or more stats counters
