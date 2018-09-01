@@ -169,3 +169,11 @@ $statsd->event('Now it is fixed.',
 - Add a configurable timeout for event submission via TCP
 - Write unit tests
 - Document service check functionality
+
+## Contributing
+
+### Tests
+
+```bash
+composer test
+```
