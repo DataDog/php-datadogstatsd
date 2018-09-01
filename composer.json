@@ -33,7 +33,15 @@
             "DataDog\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "DataDog\\": "tests/"
+        }
+    },
     "config": {
         "sort-packages": true
+    },
+    "require-dev": {
+        "phpunit/phpunit": "5.7.27"
     }
 }
