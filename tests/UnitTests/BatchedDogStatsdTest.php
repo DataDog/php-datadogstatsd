@@ -15,7 +15,7 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
         // Flush the buffer to reset state for next test
         BatchedDogStatsd::$maxBufferLength = 50;
         $batchedDog = new BatchedDogStatsd(array());
-        $batchedDog->flush_buffer();
+        $batchedDog->flushBuffer();
 
         // Reset the SocketSpy state to get clean assertions.
         // @see \DataDog\SocketSpy

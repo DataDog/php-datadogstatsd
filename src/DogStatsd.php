@@ -3,10 +3,13 @@
 namespace DataDog;
 
 /**
+ * Class DogStatsd
+ *
  * Datadog implementation of StatsD
  * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
- **/
-
+ *
+ * @package DataDog
+ */
 class DogStatsd
 {
     const OK        = 0;
@@ -47,10 +50,11 @@ class DogStatsd
      */
     private $curlVerifySslPeer;
 
-    private static $__eventUrl = '/api/v1/events';
+    private static $eventUrl = '/api/v1/events';
 
     /**
-     * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
+     * DogStatsd constructor, takes a configuration array. The configuration can
+     * take any of the following values:
      * host,
      * port,
      * datadog_host,
@@ -79,10 +83,10 @@ class DogStatsd
     /**
      * Log timing information
      *
-     * @param string $stat The metric to in log timing info for.
-     * @param float $time The elapsed time (ms) to log
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string            $stat       The metric to in log timing info for.
+     * @param float             $time       The elapsed time (ms) to log
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      */
     public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
     {
@@ -92,23 +96,23 @@ class DogStatsd
     /**
      * A convenient alias for the timing function when used with micro-timing
      *
-     * @param string $stat The metric name
-     * @param float $time The elapsed time to log, IN SECONDS
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string            $stat       The metric name
+     * @param float             $time       The elapsed time to log, IN SECONDS
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function microtiming($stat, $time, $sampleRate = 1.0, $tags = null)
     {
-        $this->timing($stat, $time*1000, $sampleRate, $tags);
+        $this->timing($stat, $time * 1000, $sampleRate, $tags);
     }
 
     /**
      * Gauge
      *
-     * @param string $stat The metric
-     * @param float $value The value
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string            $stat       The metric
+     * @param float             $value      The value
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -118,10 +122,10 @@ class DogStatsd
     /**
      * Histogram
      *
-     * @param string $stat The metric
-     * @param float $value The value
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string            $stat       The metric
+     * @param float             $value      The value
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -131,10 +135,10 @@ class DogStatsd
     /**
      * Distribution
      *
-     * @param string $stat The metric
-     * @param float $value The value
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string            $stat       The metric
+     * @param float             $value      The value
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -144,10 +148,10 @@ class DogStatsd
     /**
      * Set
      *
-     * @param string $stat The metric
-     * @param float $value The value
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string            $stat       The metric
+     * @param float             $value      The value
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -158,11 +162,10 @@ class DogStatsd
     /**
      * Increments one or more stats counters
      *
-     * @param string|array $stats The metric(s) to increment.
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     * @param int $value the amount to increment by (default 1)
-     * @return boolean
+     * @param string|array      $stats      The metric(s) to increment.
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
+     * @param int               $value      the amount to increment by (default 1)
      **/
     public function increment($stats, $sampleRate = 1.0, $tags = null, $value = 1)
     {
@@ -172,11 +175,10 @@ class DogStatsd
     /**
      * Decrements one or more stats counters.
      *
-     * @param string|array $stats The metric(s) to decrement.
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     * @param int $value the amount to decrement by (default -1)
-     * @return boolean
+     * @param string|array      $stats      The metric(s) to decrement.
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
+     * @param int               $value      the amount to decrement by (default -1)
      **/
     public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1)
     {
@@ -189,12 +191,10 @@ class DogStatsd
     /**
      * Updates one or more stats counters by arbitrary amounts.
      *
-     * @param string|array $stats The metric(s) to update. Should be either a string or array of metrics.
-     * @param int $delta The amount to increment/decrement each metric by.
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     *
-     * @return boolean
+     * @param string|array      $stats      The metric(s) to update. Should be either a string or array of metrics.
+     * @param int               $delta      The amount to increment/decrement each metric by.
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
     {
@@ -211,11 +211,10 @@ class DogStatsd
     /**
      * Serialize tags to StatsD protocol
      *
-     * @param string|array $tags The tags to be serialize
-     *
+     * @param  string|array $tags The tags to be serialize
      * @return string
      **/
-    private function serialize_tags($tags)
+    private function serializeTags($tags)
     {
         if (is_array($tags) && count($tags) > 0) {
             $data = array();
@@ -226,7 +225,7 @@ class DogStatsd
                     array_push($data, $tag_key);
                 }
             }
-            return '|#'.implode(",", $data);
+            return '|#' . implode(",", $data);
         } elseif (!empty($tags)) {
             return '|#' . $tags;
         }
@@ -235,11 +234,10 @@ class DogStatsd
 
     /**
      * Squirt the metrics over UDP
-     * @param array $data Incoming Data
-     * @param float $sampleRate the rate (0-1) for sampling.
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      *
-     * @return null
+     * @param array             $data       Incoming Data
+     * @param float             $sampleRate the rate (0-1) for sampling.
+     * @param array|string|null $tags       Key Value array of Tag => Value, or single tag as string
      **/
     public function send($data, $sampleRate = 1.0, $tags = null)
     {
@@ -260,23 +258,22 @@ class DogStatsd
         }
 
         foreach ($sampledData as $stat => $value) {
-            $value .= $this->serialize_tags($tags);
+            $value .= $this->serializeTags($tags);
             $this->report("$stat:$value");
         }
     }
 
     /**
      * Send a custom service check status over UDP
-     * @param string $name service check name
-     * @param int $status service check status code (see OK, WARNING,...)
-     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     * @param string $hostname hostname to associate with this service check status
-     * @param string $message message to associate with this service check status
-     * @param int $timestamp timestamp for the service check status (defaults to now)
      *
-     * @return null
+     * @param string            $name      service check name
+     * @param int               $status    service check status code (see OK, WARNING,...)
+     * @param array|string|null $tags      Key Value array of Tag => Value, or single tag as string
+     * @param string|null       $hostname  hostname to associate with this service check status
+     * @param string|null       $message   message to associate with this service check status
+     * @param int|null          $timestamp timestamp for the service check status (defaults to now)
      **/
-    public function service_check(
+    public function serviceCheck(
         $name,
         $status,
         $tags = null,
@@ -292,24 +289,36 @@ class DogStatsd
         if ($hostname !== null) {
             $msg .= sprintf("|h:%s", $hostname);
         }
-        $msg .= $this->serialize_tags($tags);
+        $msg .= $this->serializeTags($tags);
         if ($message !== null) {
-            $msg .= sprintf('|m:%s', $this->escape_sc_message($message));
+            $msg .= sprintf('|m:%s', $this->escapeServiceCheckMessage($message));
         }
 
         $this->report($msg);
     }
 
-    private function escape_sc_message($msg)
+    /**
+     * Escape characters in a call to DogStatsd::service_check
+     *
+     * @param string $msg
+     * @return string
+     */
+    private function escapeServiceCheckMessage($msg)
     {
         return str_replace("m:", "m\:", str_replace("\n", "\\n", $msg));
     }
 
+    /**
+     * @param string $udp_message
+     */
     public function report($udp_message)
     {
         $this->flush($udp_message);
     }
 
+    /**
+     * @param string $udp_message
+     */
     public function flush($udp_message)
     {
         // Non - Blocking UDP I/O - Use IP Addresses!
@@ -324,9 +333,11 @@ class DogStatsd
      * making many call in a row if you don't want to stall your app.
      * Requires PHP >= 5.3.0
      *
-     * @param string $title Title of the event
-     * @param array $vals Optional values of the event. See
-     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
+     * @param  string $title Title of the event
+     * @param  array  $vals  Optional values of the event. See
+     *                       http://docs.datadoghq.com/guides/dogstatsd/#events
+     *                       for the valid keys
+     * @throws \Exception
      * @return null
      **/
     public function event($title, $vals = array())
@@ -336,13 +347,13 @@ class DogStatsd
         $vals['title'] = $title;
 
         // If sending events via UDP
-        if ($this->submitEventsOver === 'UDP') { # FIX
+        if ($this->submitEventsOver === 'UDP') { // FIX
             return $this->eventUdp($vals);
         }
 
         // Convert tags string or array into array of tags: ie ['key:value']
         if (isset($vals['tags'])) {
-            $vals['tags'] = explode(",", substr($this->serialize_tags($vals['tags']), 2));
+            $vals['tags'] = explode(",", substr($this->serializeTags($vals['tags']), 2));
         }
 
         /**
@@ -351,7 +362,7 @@ class DogStatsd
         $success = true;
 
         // Get the url to POST to
-        $url = $this->datadogHost . self::$__eventUrl
+        $url = $this->datadogHost . self::$eventUrl
              . '?api_key='          . $this->apiKey
              . '&application_key='  . $this->appKey;
 
@@ -370,15 +381,22 @@ class DogStatsd
         $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         try {
-
             // Check for cURL errors
             if ($curlErrorNum = curl_errno($curl)) {
-                throw new \Exception('Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl));
+                throw new \Exception(
+                    'Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl)
+                );
             }
 
             // Check response code is 202
             if ($response_code !== 200 && $response_code !== 202) {
-                throw new \Exception('Datadog event API call HTTP response not OK - ' . $response_code . '; response body: ' . $response_body);
+                throw new \Exception(
+                    sprintf(
+                        'Datadog event API call HTTP response not OK - %s; response body: %s',
+                        $response_code,
+                        $response_body
+                    )
+                );
             }
 
             // Check for empty response body
@@ -388,7 +406,9 @@ class DogStatsd
 
             // Decode JSON response
             if (!$decodedJson = json_decode($response_body, true)) {
-                throw new \Exception('Datadog event API call did not return a body that could be decoded via json_decode');
+                throw new \Exception(
+                    'Datadog event API call did not return a body that could be decoded via json_decode'
+                );
             }
 
             // Check JSON decoded "status" is OK from the Datadog API
@@ -408,8 +428,9 @@ class DogStatsd
 
     /**
      * Formats $vals array into event for submission to Datadog via UDP
-     * @param array $vals Optional values of the event. See
-     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
+     *
+     * @param  array $vals Optional values of the event. See
+     *                     http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
      * @return null
      */
     private function eventUdp($vals)
@@ -430,7 +451,7 @@ class DogStatsd
         $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
         $fields .= (isset($vals['source_type_name'])) ? '|s:' . ((string) $vals['source_type_name']) : '';
         $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
-        $fields .= (isset($vals['tags'])) ? $this->serialize_tags($vals['tags']) : '';
+        $fields .= (isset($vals['tags'])) ? $this->serializeTags($vals['tags']) : '';
 
         $title_length = strlen($title);
         $text_length = strlen($text);

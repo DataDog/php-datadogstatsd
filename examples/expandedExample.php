@@ -6,10 +6,11 @@ use DataDog\DogStatsd;
 
 // by setting the api_key you are switching from UDP to TCP for events
 $statsd = new DogStatsd(
-    array('api_key' => '046a22167c96272932f7f95753ceb81013e1fcac',
-          'app_key' => '2167c96272932f013e1fcac7f95753ceb81046a2',
-     )
-  );
+    array(
+        'api_key' => '046a22167c96272932f7f95753ceb81013e1fcac',
+        'app_key' => '2167c96272932f013e1fcac7f95753ceb81046a2',
+    )
+);
 
 $runFor = 5; // Set to five minutes. Increase or decrease to have script run longer or shorter.
 $scriptStartTime = time();

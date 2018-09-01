@@ -97,7 +97,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->gauge(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -130,7 +130,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->histogram(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -163,7 +163,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->distribution(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -196,7 +196,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->set(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -238,7 +238,7 @@ class SocketsTest extends SocketSpyTestCase
     ) {
         $dog = new DogStatsd(array());
 
-        $dog->service_check(
+        $dog->serviceCheck(
             $name,
             $status,
             $tags,
@@ -796,7 +796,9 @@ class SocketsTest extends SocketSpyTestCase
             ),
         );
 
+        // phpcs:disable Generic.Files.LineLength
         $expectedUdpMessage = "_e{16,34}:Some event title|Some event text\\nthat spans 2 lines|d:1535776860|h:some.host.com|k:83e2cf|p:normal|s:jenkins|t:warning|#chicken:nachos";
+        // phpcs:enable
 
         $dog = new DogStatsd(array());
 

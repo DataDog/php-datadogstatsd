@@ -177,3 +177,15 @@ $statsd->event('Now it is fixed.',
 ```bash
 composer test
 ```
+
+### Lint
+
+```bash
+composer lint
+```
+
+### Fix lint
+
+```bash
+composer fix-lint
+```
