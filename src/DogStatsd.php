@@ -4,7 +4,6 @@ namespace DataDog;
 
 /**
  * Datadog implementation of StatsD
- * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
  **/
 
 class DogStatsd
