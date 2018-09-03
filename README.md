@@ -1,6 +1,6 @@
 # PHP StatsD Client
 
-This is an extremely simple PHP StatsD client for [caremerge](http://caremerge.com/) built on top of [php-statsd](https://github.com/seejohnrun/php-statsd) and [php-datadogstatsd])(https://github.com/DataDog/php-datadogstatsd)
+This is an extremely simple PHP StatsD client for [caremerge](http://caremerge.com/) built on top of [php-statsd](https://github.com/seejohnrun/php-statsd) and [php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd)
 
 Requires PHP >= 5.3.0.
 
@@ -36,8 +36,8 @@ $statsd = new CareStats();
 
 CareStats constructor, takes a configuration array. The configuration can take any of the following values (all optional):
 
-- `host`: the host of your DogStatsd server, default to `localhost`
-- `port`: the port of your DogStatsd server. default to `8125`
+- `host`: the host of your Statsd server, default to `localhost`
+- `port`: the port of your Statsd server. default to `8125`
 
 ### Tags
 
@@ -71,9 +71,3 @@ $statsd->microtiming('your.data.point', microtime(true) - $start_time);
 
 $statsd->microtiming('your.data.point', microtime(true) - $start_time, 1, array('tagname' => 'value'));
 ```
-
-## Roadmap
-
-- Add a configurable timeout for event submission via TCP
-- Write unit tests
-- Document service check functionality
