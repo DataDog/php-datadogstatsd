@@ -1,20 +1,14 @@
 {
-    "name": "datadog/php-datadogstatsd",
+    "name": "FarrukhNaeem/php-statsd",
     "type": "library",
-    "description": "This is an extremely simple PHP datadogstatsd client",
-    "keywords": ["DataDog", "PHP"],
-    "homepage": "https://www.datadoghq.com/",
+    "description": "This is an extremely simple PHP StatsD client",
+    "keywords": ["StatsD", "PHP", "NewRelic"],
     "license": "MIT",
     "authors": [
         {
-            "name": "Alex Corley",
-            "email": "anthroprose@gmail.com",
-            "role": "Developer"
-        },
-        {
-            "name": "Datadog",
-            "email": "dev@datadoghq.com",
-            "role": "Developer"
+            "name": "Farrukh Naeem",
+            "email": "farrukh.naeem@outlook.com",
+            "role": "DevOps"
         }
     ],
     "require": {
@@ -23,14 +17,12 @@
         "lib-curl": "*"
     },
     "support": {
-        "email": "package@datadoghq.com",
-        "irc": "irc://irc.freenode.net/datadog",
-        "issues": "https://github.com/DataDog/php-datadogstatsd/issues",
-        "source": "https://github.com/DataDog/php-datadogstatsd"
+        "email": "farrukh.naeem@outlook.com",
+        "issues": "https://github.com/FarrukhNaeem/php-statsd",
     },
     "autoload": {
         "psr-4": {
-            "DataDog\\": "src/"
+            "StatsDC\\": "src/"
         }
     },
     "config": {
