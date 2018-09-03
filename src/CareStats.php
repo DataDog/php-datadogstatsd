@@ -1,13 +1,8 @@
 <?php
 
-namespace DataDog;
+namespace StatsDC;
 
-/**
- * Datadog implementation of StatsD
- * - Most of this code was stolen from: https://gist.github.com/1065177/5f7debc212724111f9f500733c626416f9f54ee6
- **/
-
-class DogStatsd
+class CareStats
 {
     const OK        = 0;
     const WARNING   = 1;
@@ -31,14 +26,14 @@ class DogStatsd
      */
 
     /**
-     * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
+     * CareStats constructor, takes a configuration array. The configuration can take any of the following values:
      * host,
      * port
      * @param array $config
      */
     public function __construct(array $config = array())
     {
-        $this->host = isset($config['host']) ? $config['host'] : 'qa-statsd.caremerge.net';
+        $this->host = isset($config['host']) ? $config['host'] : '127.0.0.1';
         $this->port = isset($config['port']) ? $config['port'] : 8125;
     }
 
@@ -277,126 +272,5 @@ class DogStatsd
         socket_set_nonblock($socket);
         socket_sendto($socket, $udp_message, strlen($udp_message), 0, $this->host, $this->port);
         socket_close($socket);
-    }
-
-    /**
-     * Send an event to the Datadog HTTP api. Potentially slow, so avoid
-     * making many call in a row if you don't want to stall your app.
-     * Requires PHP >= 5.3.0
-     *
-     * @param string $title Title of the event
-     * @param array $vals Optional values of the event. See
-     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
-     * @return null
-     **/
-    public function event($title, $vals = array())
-    {
-
-        // Assemble the request
-        $vals['title'] = $title;
-
-        // If sending events via UDP
-        if ($this->submitEventsOver === 'UDP') { # FIX
-            return $this->eventUdp($vals);
-        }
-
-        // Convert tags string or array into array of tags: ie ['key:value']
-        if (isset($vals['tags'])) {
-            $vals['tags'] = explode(",", substr($this->serialize_tags($vals['tags']), 2));
-        }
-
-        /**
-         * @var boolean Flag for returning success
-         */
-        $success = true;
-
-        // Get the url to POST to
-        $url = $this->datadogHost . self::$__eventUrl
-             . '?api_key='          . $this->apiKey
-             . '&application_key='  . $this->appKey;
-
-        $curl = curl_init($url);
-
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->curlVerifySslPeer);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->curlVerifySslHost);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($vals));
-
-        // Nab response and HTTP code
-        $response_body = curl_exec($curl);
-        $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        try {
-
-            // Check for cURL errors
-            if ($curlErrorNum = curl_errno($curl)) {
-                throw new \Exception('Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl));
-            }
-
-            // Check response code is 202
-            if ($response_code !== 200 && $response_code !== 202) {
-                throw new \Exception('Datadog event API call HTTP response not OK - ' . $response_code . '; response body: ' . $response_body);
-            }
-
-            // Check for empty response body
-            if (!$response_body) {
-                throw new \Exception('Datadog event API call did not return a body');
-            }
-
-            // Decode JSON response
-            if (!$decodedJson = json_decode($response_body, true)) {
-                throw new \Exception('Datadog event API call did not return a body that could be decoded via json_decode');
-            }
-
-            // Check JSON decoded "status" is OK from the Datadog API
-            if ($decodedJson['status'] !== 'ok') {
-                throw new \Exception('Datadog event API response  status not "ok"; response body: ' . $response_body);
-            }
-        } catch (\Exception $e) {
-            $success = false;
-
-            // Use error_log for API submission errors to avoid warnings/etc.
-            error_log($e->getMessage());
-        }
-
-        curl_close($curl);
-        return $success;
-    }
-
-    /**
-     * Formats $vals array into event for submission to Datadog via UDP
-     * @param array $vals Optional values of the event. See
-     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
-     * @return null
-     */
-    private function eventUdp($vals)
-    {
-
-        // Format required values title and text
-        $title = isset($vals['title']) ? (string) $vals['title'] : '';
-        $text = isset($vals['text']) ? (string) $vals['text'] : '';
-
-        // Format fields into string that follows Datadog event submission via UDP standards
-        //   http://docs.datadoghq.com/guides/dogstatsd/#events
-        $fields = '';
-        $fields .= ($title);
-        $fields .= ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
-        $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
-        $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
-        $fields .= (isset($vals['aggregation_key'])) ? '|k:' . ((string) $vals['aggregation_key']) : '';
-        $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
-        $fields .= (isset($vals['source_type_name'])) ? '|s:' . ((string) $vals['source_type_name']) : '';
-        $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
-        $fields .= (isset($vals['tags'])) ? $this->serialize_tags($vals['tags']) : '';
-
-        $title_length = strlen($title);
-        $text_length = strlen($text);
-
-        $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
-
-        return null;
     }
 }
