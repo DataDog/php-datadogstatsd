@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+# 1.1.0 / 2018-09-05
+
+* Add support for new "distribution" metric type
+* Allow to increment/decrement by a certain amount
+
 # 1.0.2 / 2018-06-21
 
 * Keep packages sorted in composer.json, thanks to [@localheinz][]
