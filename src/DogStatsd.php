@@ -161,11 +161,12 @@ class DogStatsd
      * @param string|array $stats The metric(s) to increment.
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param int $value the amount to increment by (default 1)
      * @return boolean
      **/
-    public function increment($stats, $sampleRate = 1.0, $tags = null)
+    public function increment($stats, $sampleRate = 1.0, $tags = null, $value = 1)
     {
-        $this->updateStats($stats, 1, $sampleRate, $tags);
+        $this->updateStats($stats, $value, $sampleRate, $tags);
     }
 
     /**
@@ -174,11 +175,15 @@ class DogStatsd
      * @param string|array $stats The metric(s) to decrement.
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param int $value the amount to decrement by (default -1)
      * @return boolean
      **/
-    public function decrement($stats, $sampleRate = 1.0, $tags = null)
+    public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1)
     {
-        $this->updateStats($stats, -1, $sampleRate, $tags);
+        if ($value > 0) {
+            $value = -$value;
+        }
+        $this->updateStats($stats, $value, $sampleRate, $tags);
     }
 
     /**
