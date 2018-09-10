@@ -33,7 +33,23 @@
             "DataDog\\": "src/"
         }
     },
+    "autoload-dev": {
+        "files": [
+            "tests/curl_and_error_log_function_stubs.php",
+            "tests/mt_rand_function_stubs.php",
+            "tests/socket_function_stubs.php"
+        ],
+        "psr-4": {
+            "DataDog\\": "tests/"
+        }
+    },
     "config": {
         "sort-packages": true
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.8.36"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit"
     }
 }
