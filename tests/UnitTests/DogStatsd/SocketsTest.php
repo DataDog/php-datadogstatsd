@@ -557,6 +557,64 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
+    public function testDecrementWithValueGreaterThanOne()
+    {
+        $stats = array(
+            'foo.metric',
+        );
+
+        $expectedUdpMessage = 'foo.metric:-9|c';
+
+        $dog = new DogStatsd(array());
+
+        $dog->decrement($stats, 1.0, null, 9);
+
+        $spy = $this->getSocketSpy();
+
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+
+        $argsPassedToSocketSendto = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSame(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendto[1],
+            'Should send the expected message'
+        );
+    }
+
+    public function testDecrementWithValueLessThanOne()
+    {
+        $stats = array(
+            'foo.metric',
+        );
+
+        $expectedUdpMessage = 'foo.metric:-47|c';
+
+        $dog = new DogStatsd(array());
+
+        $dog->decrement($stats, 1.0, null, -47);
+
+        $spy = $this->getSocketSpy();
+
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+
+        $argsPassedToSocketSendto = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSame(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendto[1],
+            'Should send the expected message'
+        );
+    }
+
     public function testUpdateStats()
     {
         $stats = array(
