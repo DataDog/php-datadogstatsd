@@ -337,7 +337,7 @@ class DogStatsd
      *
      * @param string $title Title of the event
      * @param array $vals Optional values of the event. See
-     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
+     *   https://docs.datadoghq.com/api/?lang=bash#post-an-event for the valid keys
      * @return null
      **/
     public function event($title, $vals = array())
@@ -420,7 +420,7 @@ class DogStatsd
     /**
      * Formats $vals array into event for submission to Datadog via UDP
      * @param array $vals Optional values of the event. See
-     *   http://docs.datadoghq.com/guides/dogstatsd/#events for the valid keys
+     *   https://docs.datadoghq.com/api/?lang=bash#post-an-event for the valid keys
      * @return null
      */
     private function eventUdp($vals)
