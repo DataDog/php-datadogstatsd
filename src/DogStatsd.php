@@ -325,7 +325,7 @@ class DogStatsd
     public function flush($udp_message)
     {
         // Non - Blocking UDP I/O - Use IP Addresses!
-        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP) : socket_create(AF_UNIX, SOCK_DGRAM, SOL_UDP);
+        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP) : socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_set_nonblock($socket);
 
         if (!is_null($this->socketPath)) {
