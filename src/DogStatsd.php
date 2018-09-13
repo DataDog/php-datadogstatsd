@@ -25,6 +25,10 @@ class DogStatsd
     /**
      * @var string
      */
+    private $socketPath;
+    /**
+     * @var string
+     */
     private $datadogHost;
     /**
      * @var string
@@ -62,8 +66,16 @@ class DogStatsd
      */
     public function __construct(array $config = array())
     {
-        $this->host = isset($config['host']) ? $config['host'] : 'localhost';
-        $this->port = isset($config['port']) ? $config['port'] : 8125;
+        if (isset($config['socket_path'])) {
+            $this->socketPath = $config['socket_path'];
+            $this->host = null;
+            $this->port = null;
+        } else {
+            $this->host = isset($config['host']) ? $config['host'] : 'localhost';
+            $this->port = isset($config['port']) ? $config['port'] : 8125;
+            $this->socketPath = null;
+        }
+
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
         $this->apiCurlSslVerifyHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
         $this->apiCurlSslVerifyPeer = isset($config['curl_ssl_verify_peer']) ? $config['curl_ssl_verify_peer'] : 1;
@@ -313,9 +325,15 @@ class DogStatsd
     public function flush($udp_message)
     {
         // Non - Blocking UDP I/O - Use IP Addresses!
-        $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP) : socket_create(AF_UNIX, SOCK_DGRAM, SOL_UDP);
         socket_set_nonblock($socket);
-        socket_sendto($socket, $udp_message, strlen($udp_message), 0, $this->host, $this->port);
+
+        if (!is_null($this->socketPath)) {
+            socket_sendto($socket, $udp_message, strlen($udp_message), 0, $this->socketPath);
+        } else {
+            socket_sendto($socket, $udp_message, strlen($udp_message), 0, $this->host, $this->port);
+        }
+
         socket_close($socket);
     }
 
