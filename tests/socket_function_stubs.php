@@ -58,7 +58,7 @@ function socket_set_nonblock($socket)
  * @param string $addr
  * @param int $port
  */
-function socket_sendto($socket, $buf, $len, $flags, $addr, $port)
+function socket_sendto($socket, $buf, $len, $flags, $addr, $port=null)
 {
     global $socketSpy;
 

@@ -97,7 +97,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->gauge(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -130,7 +130,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->histogram(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -163,7 +163,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->distribution(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -196,7 +196,7 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->set(
             $stat,
-            $value ,
+            $value,
             $sampleRate,
             $tags
         );
@@ -712,7 +712,7 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
-    public function testFlush()
+    public function testFlushUdp()
     {
         $expectedUdpMessage = 'foo';
 
@@ -780,6 +780,75 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
+    public function testFlushUds()
+    {
+        $expectedUdsMessage = 'foo';
+        $expectedUdsSocketPath = '/path/to/some.socket';
+
+        $dog = new Dogstatsd(array("socket_path" => $expectedUdsSocketPath));
+
+        $dog->flush($expectedUdsMessage);
+
+        $spy = $this->getSocketSpy();
+
+        $socketCreateReturnValue = $spy->socketCreateReturnValues[0];
+
+        $this->assertCount(
+            1,
+            $spy->argsFromSocketCreateCalls,
+            'Should call socket_create once'
+        );
+
+        $this->assertSame(
+            array(AF_UNIX, SOCK_DGRAM, SOL_UDP),
+            $spy->argsFromSocketCreateCalls[0],
+            'Should create a UDS socket to send datagrams over UDS'
+        );
+
+        $this->assertCount(
+            1,
+            $spy->argsFromSocketSetNonblockCalls,
+            'Should call socket_set_nonblock once'
+        );
+
+        $this->assertSame(
+            $socketCreateReturnValue,
+            $spy->argsFromSocketSetNonblockCalls[0],
+            'Should call socket_set_nonblock once with the socket previously created'
+        );
+
+        $this->assertCount(
+            1,
+            $spy->argsFromSocketSendtoCalls,
+            'Should call socket_sendto once'
+        );
+
+        $this->assertSame(
+            array(
+                $socketCreateReturnValue,
+                $expectedUdsMessage,
+                strlen($expectedUdsMessage),
+                0,
+                $expectedUdsSocketPath,
+                null
+            ),
+            $spy->argsFromSocketSendtoCalls[0],
+            'Should send the expected message to /path/to/some.socket'
+        );
+
+        $this->assertCount(
+            1,
+            $spy->argsFromSocketCloseCalls,
+            'Should call socket_close once'
+        );
+
+        $this->assertSame(
+            $socketCreateReturnValue,
+            $spy->socketCreateReturnValues[0],
+            'Should close the socket previously created'
+        );
+    }
+
     public function testEventUdp()
     {
         $eventTitle = 'Some event title';
@@ -791,7 +860,7 @@ class SocketsTest extends SocketSpyTestCase
             'priority'         => 'normal',
             'source_type_name' => 'jenkins',
             'alert_type'       => 'warning',
-            'tags'             => array (
+            'tags'             => array(
                 'chicken' => 'nachos',
             ),
         );
