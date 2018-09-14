@@ -66,15 +66,9 @@ class DogStatsd
      */
     public function __construct(array $config = array())
     {
-        if (isset($config['socket_path'])) {
-            $this->socketPath = $config['socket_path'];
-            $this->host = null;
-            $this->port = null;
-        } else {
-            $this->host = isset($config['host']) ? $config['host'] : 'localhost';
-            $this->port = isset($config['port']) ? $config['port'] : 8125;
-            $this->socketPath = null;
-        }
+        $this->host = isset($config['host']) ? $config['host'] : 'localhost';
+        $this->port = isset($config['port']) ? $config['port'] : 8125;
+        $this->socketPath = isset($config['socket_path']) ? $config['socket_path'] : null;
 
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
         $this->apiCurlSslVerifyHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
