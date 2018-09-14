@@ -800,7 +800,7 @@ class SocketsTest extends SocketSpyTestCase
         );
 
         $this->assertSame(
-            array(AF_UNIX, SOCK_DGRAM, SOL_UDP),
+            array(AF_UNIX, SOCK_DGRAM, 0),
             $spy->argsFromSocketCreateCalls[0],
             'Should create a UDS socket to send datagrams over UDS'
         );
