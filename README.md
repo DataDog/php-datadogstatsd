@@ -47,7 +47,7 @@ DogStatsd constructor, takes a configuration array. The configuration can take a
 
 - `host`: the host of your DogStatsd server, default to `localhost`
 - `port`: the port of your DogStatsd server. default to `8125`
-- `socket_path`: the path to the DogStatsd UNIX socket (overrides `host` and `port`). default to `null`
+- `socket_path`: the path to the DogStatsd UNIX socket (overrides `host` and `port`, only supported with `datadog-agent` >= 6). default to `null`
 
 When sending `events` over TCP the following options can be set (see [Events section](#submitting-events)):
 
