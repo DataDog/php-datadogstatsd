@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+# 1.2.0 / 2018-09-27
+
+* Add support for UDS socket (agent >= 6.0), thanks to [@CrshOverride][]
+
 # 1.1.0 / 2018-09-05
 
 * Add support for new "distribution" metric type
