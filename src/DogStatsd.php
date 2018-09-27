@@ -261,7 +261,11 @@ class DogStatsd
 
         foreach ($sampledData as $stat => $value) {
             $value .= $this->serialize_tags($tags);
-            $this->report("$stat:$value");
+            if (!is_int($stat)) {
+                $this->report("$stat:$value");
+                continue;
+            }
+            $this->report($value);
         }
     }
 
