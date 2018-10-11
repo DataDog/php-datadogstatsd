@@ -229,8 +229,8 @@ class DogStatsd
     private function serialize_tags($tags)
     {
         $all_tags = array_merge(
-            $this->normalize_tags($tags),
-            $this->normalize_tags($this->globalTags)
+            $this->normalize_tags($this->globalTags),
+            $this->normalize_tags($tags)
         );
 
         if (count($all_tags) === 0) {
@@ -255,6 +255,9 @@ class DogStatsd
      */
     private function normalize_tags($tags)
     {
+        if ($tags === null) {
+            return array();
+        }
         if (is_array($tags)) {
             $data = array();
             foreach ($tags as $tag_key => $tag_val) {
@@ -272,7 +275,7 @@ class DogStatsd
                 if (false === strpos($tag_string, ':')) {
                     $data[$tag_string] = null;
                 } else {
-                    list($key, $value) = explode(':', $tag_string, 1);
+                    list($key, $value) = explode(':', $tag_string, 2);
                     $data[$key] = $value;
                 }
             }
