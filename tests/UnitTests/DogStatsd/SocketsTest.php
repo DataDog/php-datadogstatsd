@@ -919,6 +919,76 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
+    public function testGlobalTags()
+    {
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+        ));
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSame(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1]
+        );
+    }
+
+    public function testGlobalTagsAreSupplementedWithLocalTags()
+    {
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+        ));
+        $dog->timing('metric', 42, 1.0, array('other_tag' => 'other_value'));
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value,other_tag:other_value';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSame(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1]
+        );
+    }
+
+
+    public function testGlobalTagsAreReplacedWithConflictingLocalTags()
+    {
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+        ));
+        $dog->timing('metric', 42, 1.0, array('my_tag' => 'other_value'));
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#my_tag:other_value';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSame(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1]
+        );
+    }
+
     /**
      * Get a timestamp created from a real date that is deterministic in nature
      *
