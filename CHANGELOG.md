@@ -1,6 +1,10 @@
 CHANGELOG
 =========
 
+# 1.3.0 / 2018-09-27
+
+* Add support for global tags, thanks to [@Firehed][]
+
 # 1.2.0 / 2018-09-27
 
 * Add support for UDS socket (agent >= 6.0), thanks to [@CrshOverride][]
