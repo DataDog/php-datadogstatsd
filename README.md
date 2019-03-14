@@ -28,7 +28,9 @@ Clone repository at [github.com/DataDog/php-datadogstatsd](https://github.com/Da
 Setup: `require './src/DogStatsd.php';`
 
 ## Usage
-
+  
+Once installed, turn on the socket extension to PHP which must be enabled at compile time by giving the `--enable-sockets` option to <b>configure</b>.  
+  
 ### instantiation
 
 To instantiate a DogStatsd object using `composer`:
