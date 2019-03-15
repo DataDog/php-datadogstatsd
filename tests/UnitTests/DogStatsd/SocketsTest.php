@@ -3,6 +3,7 @@
 namespace DataDog\UnitTests\DogStatsd;
 
 use DateTime;
+use ReflectionProperty;
 use DataDog\DogStatsd;
 use DataDog\TestHelpers\SocketSpyTestCase;
 
@@ -17,6 +18,68 @@ class SocketsTest extends SocketSpyTestCase
         global $mt_getrandmax_stub_return_value;
         $mt_rand_stub_return_value = null;
         $mt_getrandmax_stub_return_value = null;
+    }
+
+    static function getPrivate($object, $property) {
+        $reflector = new ReflectionProperty(get_class($object), $property);
+        $reflector->setAccessible(true);
+        return $reflector->getValue($object);
+    }
+
+    public function testHostAndPortFromEnvVar()
+    {
+        putenv("DD_AGENT_HOST=myenvvarhost");
+        putenv("DD_DOGSTATSD_PORT=1234");
+        $dog = new DogStatsd(array());
+        $this->assertSame(
+            'myenvvarhost',
+            self::getPrivate($dog, host),
+            'Should retrieve host from env var'
+        );
+        $this->assertSame(
+            1234,
+            self::getPrivate($dog, port),
+            'Should retrieve port from env var'
+        );
+        putenv("DD_AGENT_HOST");
+        putenv("DD_DOGSTATSD_PORT");
+    }
+
+    public function testHostAndPortFromArgs()
+    {
+        putenv("DD_AGENT_HOST=myenvvarhost");
+        putenv("DD_DOGSTATSD_PORT=1234");
+        $dog = new DogStatsd(array(
+            'host' => 'myhost',
+            'port' => 4321
+        ));
+        $this->assertSame(
+            'myhost',
+            self::getPrivate($dog, host),
+            'Should retrieve host from args not env var'
+        );
+        $this->assertSame(
+            4321,
+            self::getPrivate($dog, port),
+            'Should retrieve port from args not env var'
+        );
+        putenv("DD_AGENT_HOST");
+        putenv("DD_DOGSTATSD_PORT");
+    }
+
+    public function testDefaultHostAndPort()
+    {
+        $dog = new DogStatsd(array());
+        $this->assertSame(
+            'localhost',
+            self::getPrivate($dog, host),
+            'Should retrieve defaulthost'
+        );
+        $this->assertSame(
+            8125,
+            self::getPrivate($dog, port),
+            'Should retrieve default port'
+        );
     }
 
     public function testTiming()
@@ -940,6 +1003,31 @@ class SocketsTest extends SocketSpyTestCase
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1]
         );
+    }
+
+    public function testGlobalTagsWithEntityIdFromEnvVar()
+    {
+        putenv("DD_ENTITY_ID=04652bb7-19b7-11e9-9cc6-42010a9c016d");
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+        ));
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSame(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1]
+        );
+        putenv("DD_ENTITY_ID");
     }
 
     public function testGlobalTagsAreSupplementedWithLocalTags()
