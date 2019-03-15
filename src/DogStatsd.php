@@ -69,8 +69,8 @@ class DogStatsd
      */
     public function __construct(array $config = array())
     {
-        $this->host = isset($config['host']) ? $config['host'] : 'localhost';
-        $this->port = isset($config['port']) ? $config['port'] : 8125;
+        $this->host = isset($config['host']) ? $config['host'] : (getenv('DD_AGENT_HOST') ? getenv('DD_AGENT_HOST') : 'localhost');
+        $this->port = isset($config['port']) ? $config['port'] : (getenv('DD_DOGSTATSD_PORT') ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
         $this->socketPath = isset($config['socket_path']) ? $config['socket_path'] : null;
 
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
@@ -81,6 +81,9 @@ class DogStatsd
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
 
         $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : array();
+        if (getenv('DD_ENTITY_ID')) {
+            $this->globalTags['dd.internal.entity_id'] = getenv('DD_ENTITY_ID');
+        }
 
         if ($this->apiKey !== null) {
             $this->submitEventsOver = 'TCP';
