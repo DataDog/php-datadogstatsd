@@ -33,12 +33,12 @@ class SocketsTest extends SocketSpyTestCase
         $dog = new DogStatsd(array());
         $this->assertSame(
             'myenvvarhost',
-            self::getPrivate($dog, host),
+            self::getPrivate($dog, 'host'),
             'Should retrieve host from env var'
         );
         $this->assertSame(
             1234,
-            self::getPrivate($dog, port),
+            self::getPrivate($dog, 'port'),
             'Should retrieve port from env var'
         );
         putenv("DD_AGENT_HOST");
@@ -55,12 +55,12 @@ class SocketsTest extends SocketSpyTestCase
         ));
         $this->assertSame(
             'myhost',
-            self::getPrivate($dog, host),
+            self::getPrivate($dog, 'host'),
             'Should retrieve host from args not env var'
         );
         $this->assertSame(
             4321,
-            self::getPrivate($dog, port),
+            self::getPrivate($dog, 'port'),
             'Should retrieve port from args not env var'
         );
         putenv("DD_AGENT_HOST");
@@ -72,12 +72,12 @@ class SocketsTest extends SocketSpyTestCase
         $dog = new DogStatsd(array());
         $this->assertSame(
             'localhost',
-            self::getPrivate($dog, host),
+            self::getPrivate($dog, 'host'),
             'Should retrieve defaulthost'
         );
         $this->assertSame(
             8125,
-            self::getPrivate($dog, port),
+            self::getPrivate($dog, 'port'),
             'Should retrieve default port'
         );
     }
