@@ -1,5 +1,9 @@
 CHANGELOG
 =========
+# 1.4.0
+
+* Add the `DD_AGENT_HOST` and `DD_DOGSTATSD_PORT` environment variables support for client configuration
+* Get the `dd.internal.entity_id` tag from the `DD_ENTITY_ID` environment variable
 
 # 1.3.0 / 2018-09-27
 

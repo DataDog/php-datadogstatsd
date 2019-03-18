@@ -45,10 +45,10 @@ $statsd = new BatchedDogStatsd();
 
 DogStatsd constructor, takes a configuration array. The configuration can take any of the following values (all optional):
 
-- `host`: the host of your DogStatsd server, default to `localhost`
-- `port`: the port of your DogStatsd server. default to `8125`
+- `host`: the host of your DogStatsd server, if not set tries to get it from the `DD_AGENT_HOST` environment variable, default to `localhost`
+- `port`: the port of your DogStatsd server, if not set tries to get it from the `DD_DOGSTATSD_PORT` environment variable, default to `8125`
 - `socket_path`: the path to the DogStatsd UNIX socket (overrides `host` and `port`, only supported with `datadog-agent` >= 6). default to `null`
-- `global_tags`: tags to apply to all metrics sent
+- `global_tags`: tags to apply to all metrics sent, the `dd.internal.entity_id` tag is appended to `global_tags` from the `DD_ENTITY_ID` environment variable
 
 When sending `events` over TCP the following options can be set (see [Events section](#submitting-events)):
 
