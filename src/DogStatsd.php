@@ -482,7 +482,8 @@ class DogStatsd
         //   http://docs.datadoghq.com/guides/dogstatsd/#events
         $fields = '';
         $fields .= ($title);
-        $fields .= ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
+        $textField = ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
+        $fields .= $textField;
         $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
         $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
         $fields .= (isset($vals['aggregation_key'])) ? '|k:' . ((string) $vals['aggregation_key']) : '';
@@ -492,7 +493,7 @@ class DogStatsd
         $fields .= (isset($vals['tags'])) ? $this->serialize_tags($vals['tags']) : '';
 
         $title_length = strlen($title);
-        $text_length = strlen($text);
+        $text_length = strlen($textField)-1;
 
         $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
 
