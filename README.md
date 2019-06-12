@@ -166,7 +166,7 @@ $statsd->event('Now it is fixed.',
 - Logging on communication errors with Datadog (uses cURL for API request)
 - Logs via error_log and try/catch block to not throw warnings/errors on communication issues with API
 
-### Origin detection over UDP
+### Origin detection over UDP in Kubernetes
 
 Origin detection is a method to detect which pod DogStatsD packets are coming from in order to add the pod's tags to the tag list.
 
@@ -179,6 +179,7 @@ env:
         fieldPath: metadata.uid
 ```
 The DogStatsD client attaches an internal tag, `entity_id`. The value of this tag is the content of the `DD_ENTITY_ID` environment variable, which is the pod’s UID.
+The agent uses this tag to infer packets' origin, and tag their metrics accordingly.
 
 ## Roadmap
 
