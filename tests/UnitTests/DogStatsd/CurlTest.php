@@ -66,7 +66,7 @@ class CurlTest extends CurlSpyTestCase
             array(
                 $spy->curlInitReturnValues[0],
                 CURLOPT_SSL_VERIFYPEER,
-                null,
+                1,
             ),
             $spy->argsFromCurlSetoptCalls[0],
             'Should configure curl to verify SSL peer'
@@ -83,7 +83,7 @@ class CurlTest extends CurlSpyTestCase
             array(
                 $spy->curlInitReturnValues[0],
                 CURLOPT_SSL_VERIFYHOST,
-                null,
+                2,
             ),
             $spy->argsFromCurlSetoptCalls[1],
             'Should configure curl to verify SSL host'

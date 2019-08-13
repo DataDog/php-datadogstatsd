@@ -928,7 +928,7 @@ class SocketsTest extends SocketSpyTestCase
             ),
         );
 
-        $expectedUdpMessage = "_e{16,34}:Some event title|Some event text\\nthat spans 2 lines|d:1535776860|h:some.host.com|k:83e2cf|p:normal|s:jenkins|t:warning|#chicken:nachos";
+        $expectedUdpMessage = "_e{16,35}:Some event title|Some event text\\nthat spans 2 lines|d:1535776860|h:some.host.com|k:83e2cf|p:normal|s:jenkins|t:warning|#chicken:nachos";
 
         $dog = new DogStatsd(array());
 
