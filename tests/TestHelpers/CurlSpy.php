@@ -68,6 +68,11 @@ class CurlSpy
     public $argsFromErrorLogCalls = array();
 
     /**
+     * @var array
+     */
+    public $curlExecReturnValues = array();
+
+    /**
      * @param string $url
      */
     public function curlInitWasCalledWithArg($url)
