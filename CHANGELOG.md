@@ -1,6 +1,12 @@
 CHANGELOG
 =========
-# 1.4.0
+
+# 1.4.1 / 2019-08-13
+
+* Fix declared private fields names, thanks to [@localheinz][].
+* Fix events over UDP being truncated when newlines were escaped, thanks to [@pub007][].
+
+# 1.4.0 / 2019-03-18
 
 * Add the `DD_AGENT_HOST` and `DD_DOGSTATSD_PORT` environment variables support for client configuration
 * Get the `dd.internal.entity_id` tag from the `DD_ENTITY_ID` environment variable
