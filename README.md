@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/DataDog/php-datadogstatsd.svg?branch=master)](https://travis-ci.org/DataDog/php-datadogstatsd)
 
 This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) client.
-Requires PHP >= 5.3.0.
+Requires PHP >= 5.6.0.
 
 See [CHANGELOG.md](CHANGELOG.md) for changes.
 
