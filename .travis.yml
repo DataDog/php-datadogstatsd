@@ -13,9 +13,6 @@ cache:
 # http://docs.travis-ci.com/user/build-configuration/#Rows-That-are-Allowed-To-Fail
 matrix:
   fast_finish: true
-  include:
-    - php: 5.3
-      dist: precise
 
 script:
   # Check syntax all PHP files, redirect stderr to file and return 0 if file is empty
