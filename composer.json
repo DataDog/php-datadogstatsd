@@ -20,7 +20,8 @@
     "require": {
         "php": ">=5.6.0",
         "ext-curl": "*",
-        "lib-curl": "*"
+        "lib-curl": "*",
+        "ext-sockets": "*"
     },
     "support": {
         "email": "package@datadoghq.com",
