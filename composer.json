@@ -1,8 +1,8 @@
 {
     "name": "datadog/php-datadogstatsd",
     "type": "library",
-    "description": "This is an extremely simple PHP datadogstatsd client",
-    "keywords": ["DataDog", "PHP"],
+    "description": "An extremely simple PHP datadogstatsd client",
+    "keywords": ["datadog", "monitoring", "logging", "statsd", "error-reporting", "check", "health"],
     "homepage": "https://www.datadoghq.com/",
     "license": "MIT",
     "authors": [
@@ -26,7 +26,8 @@
         "email": "package@datadoghq.com",
         "irc": "irc://irc.freenode.net/datadog",
         "issues": "https://github.com/DataDog/php-datadogstatsd/issues",
-        "source": "https://github.com/DataDog/php-datadogstatsd"
+        "source": "https://github.com/DataDog/php-datadogstatsd",
+        "chat": "https://chat.datadoghq.com/"
     },
     "autoload": {
         "psr-4": {
