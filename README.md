@@ -1,6 +1,10 @@
 # PHP DataDog StatsD Client
 
 [![Build Status](https://travis-ci.org/DataDog/php-datadogstatsd.svg?branch=master)](https://travis-ci.org/DataDog/php-datadogstatsd)
+[![Author](https://img.shields.io/badge/author-@datadog-blue.svg?style=flat-square)](https://github.com/datadog)
+[![Packagist Version](https://img.shields.io/packagist/v/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
+[![Total Downloads](https://img.shields.io/packagist/dt/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
+
 
 This is an extremely simple PHP [datadogstatsd](http://www.datadoghq.com/) client.
 Requires PHP >= 5.6.0.
