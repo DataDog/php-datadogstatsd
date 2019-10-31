@@ -69,7 +69,7 @@ The agent uses this tag to infer packets' origin, and tag their metrics accordin
 
 ## Usage
 
-For usage of DogStatsD metrics, the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/).
+For usage of DogStatsD metrics, the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=php).
 
 ### Metrics
 
