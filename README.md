@@ -44,12 +44,7 @@ $statsd = new DogStatsd(
   );
 ```
 
-DogStatsd constructor, takes a configuration array. The configuration can take any of the following values (all optional):
-
-- `host`: the host of your DogStatsd server, if not set tries to get it from the `DD_AGENT_HOST` environment variable, default to `localhost`
-- `port`: the port of your DogStatsd server, if not set tries to get it from the `DD_DOGSTATSD_PORT` environment variable, default to `8125`
-- `socket_path`: the path to the DogStatsd UNIX socket (overrides `host` and `port`, only supported with `datadog-agent` >= 6). default to `null`
-- `global_tags`: tags to apply to all metrics sent, the `dd.internal.entity_id` tag is appended to `global_tags` from the `DD_ENTITY_ID` environment variable
+DogStatsd constructor, takes a configuration array. See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?tab=php#client-instantiation-parameters).
 
 ### Origin detection over UDP in Kubernetes
 
