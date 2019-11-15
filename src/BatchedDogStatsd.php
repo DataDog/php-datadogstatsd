@@ -19,7 +19,7 @@ class BatchedDogStatsd extends DogStatsd
 
     public function flush_buffer()
     {
-        $this->flush(join("\n", static::$buffer));
+        $this->flush(\join("\n", static::$buffer));
         static::$buffer = array();
         static::$bufferLength = 0;
     }
