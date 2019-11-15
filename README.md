@@ -22,7 +22,7 @@ Add the following to your `composer.json`:
 ```
 The first version shipped in composer is *0.0.3*
 
-Or manually clone the repository at [github.com/DataDog/php-datadogstatsd](https://github.com/DataDog/php-datadogstatsd) and set it up with `require './src/DogStatsd.php'.`
+Or manually clone this repository and set it up with `require './src/DogStatsd.php'.`
 
 Once installed, turn on the socket extension to PHP which must be enabled at compile time by giving the `--enable-sockets` option to **configure**.
 
