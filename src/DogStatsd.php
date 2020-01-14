@@ -56,6 +56,9 @@ class DogStatsd
 
     private static $__eventUrl = '/api/v1/events';
 
+    // Used for the telemetry tags
+    public static $version = '1.4.1';
+
     /**
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
      * host,
@@ -88,6 +91,43 @@ class DogStatsd
         if ($this->apiKey !== null) {
             $this->submitEventsOver = 'TCP';
         }
+
+        # by default the telemetry is disable
+        $this->disable_telemetry = isset($config["disable_telemetry"]) ? $config["disable_telemetry"] : true;
+        $transport_type = !is_null($this->socketPath) ? "uds" : "udp";
+        $this->telemetry_tags = $this->serialize_tags(array("client" => "php", "client_version" => self::$version, "client_transport" => $transport_type));
+        $this->reset_telemetry();
+    }
+
+    /**
+     * Reset the telemetry value to zero
+     */
+    private function reset_telemetry()
+    {
+        $this->metrics_sent = 0;
+        $this->events_sent = 0;
+        $this->service_checks_sent = 0;
+        $this->bytes_sent = 0;
+        $this->bytes_dropped = 0;
+        $this->packets_sent = 0;
+        $this->packets_dropped = 0;
+    }
+    /**
+     * Reset the telemetry value to zero
+     */
+    private function flush_telemetry()
+    {
+      if ($this->disable_telemetry == true) {
+        return "";
+      }
+
+      return "\ndatadog.dogstatsd.client.metrics:{$this->metrics_sent}|c{$this->telemetry_tags}"
+             . "\ndatadog.dogstatsd.client.events:{$this->events_sent}|c{$this->telemetry_tags}"
+             . "\ndatadog.dogstatsd.client.service_checks:{$this->service_checks_sent}|c{$this->telemetry_tags}"
+             . "\ndatadog.dogstatsd.client.bytes_sent:{$this->bytes_sent}|c{$this->telemetry_tags}"
+             . "\ndatadog.dogstatsd.client.bytes_dropped:{$this->bytes_dropped}|c{$this->telemetry_tags}"
+             . "\ndatadog.dogstatsd.client.packets_sent:{$this->packets_sent}|c{$this->telemetry_tags}"
+             . "\ndatadog.dogstatsd.client.packets_dropped:{$this->packets_dropped}|c{$this->telemetry_tags}";
     }
 
     /**
@@ -296,6 +336,7 @@ class DogStatsd
      **/
     public function send($data, $sampleRate = 1.0, $tags = null)
     {
+        $this->metrics_sent += count($data);
         // sampling
         $sampledData = array();
         if ($sampleRate < 1) {
@@ -350,6 +391,7 @@ class DogStatsd
             $msg .= sprintf('|m:%s', $this->escape_sc_message($message));
         }
 
+        $this->service_checks_sent += 1;
         $this->report($msg);
     }
 
@@ -358,21 +400,32 @@ class DogStatsd
         return str_replace("m:", "m\:", str_replace("\n", "\\n", $msg));
     }
 
-    public function report($udp_message)
+    public function report($message)
     {
-        $this->flush($udp_message);
+        $this->flush($message);
     }
 
-    public function flush($udp_message)
+    public function flush($message)
     {
+        $message .= $this->flush_telemetry();
+
         // Non - Blocking UDP I/O - Use IP Addresses!
         $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP) : socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_set_nonblock($socket);
 
         if (!is_null($this->socketPath)) {
-            socket_sendto($socket, $udp_message, strlen($udp_message), 0, $this->socketPath);
+            $res = socket_sendto($socket, $message, strlen($message), 0, $this->socketPath);
         } else {
-            socket_sendto($socket, $udp_message, strlen($udp_message), 0, $this->host, $this->port);
+            $res = socket_sendto($socket, $message, strlen($message), 0, $this->host, $this->port);
+        }
+
+        if ($res !== false) {
+          $this->reset_telemetry();
+          $this->bytes_sent += strlen($message);
+          $this->packets_sent += 1;
+        } else {
+          $this->bytes_dropped += strlen($message);
+          $this->packets_dropped += 1;
         }
 
         socket_close($socket);
@@ -495,6 +548,7 @@ class DogStatsd
         $title_length = strlen($title);
         $text_length = strlen($textField)-1;
 
+        $this->events_sent += 1;
         $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
 
         return null;

@@ -1,6 +1,8 @@
 CHANGELOG
 =========
 
+[//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
+
 # 1.4.1 / 2019-08-13
 
 * Fix declared private fields names, thanks to [@localheinz][].
