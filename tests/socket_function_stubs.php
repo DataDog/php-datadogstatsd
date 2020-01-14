@@ -62,7 +62,7 @@ function socket_sendto($socket, $buf, $len, $flags, $addr, $port=null)
 {
     global $socketSpy;
 
-    $socketSpy->socketSendtoWasCalledWithArgs($socket, $buf, $len, $flags, $addr, $port);
+    return $socketSpy->socketSendtoWasCalledWithArgs($socket, $buf, $len, $flags, $addr, $port);
 }
 
 /**

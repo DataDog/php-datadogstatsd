@@ -14,7 +14,7 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
 
         // Flush the buffer to reset state for next test
         BatchedDogStatsd::$maxBufferLength = 50;
-        $batchedDog = new BatchedDogStatsd(array());
+        $batchedDog = new BatchedDogStatsd();
         $batchedDog->flush_buffer();
 
         // Reset the SocketSpy state to get clean assertions.
@@ -25,7 +25,7 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
 
     public function testReportDoesNotSendIfBufferNotFilled()
     {
-        $batchedDog = new BatchedDogStatsd(array());
+        $batchedDog = new BatchedDogStatsd();
 
         $batchedDog->report('some fake UDP message');
 
@@ -40,20 +40,26 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
 
     public function testReportSendsOnceBufferIsFilled()
     {
-        $batchedDog = new BatchedDogStatsd(array());
+        $batchedDog = new BatchedDogStatsd();
 
         $batchedDog::$maxBufferLength = 2;
 
         $udpMessage = 'some fake UDP message';
-        $expectedUdpMessageOnceSent = $udpMessage . "1\n"
-            . $udpMessage . "2\n"
-            . $udpMessage . "3";
+        $expectedUdpMessageOnceSent = $udpMessage . "1:21|g\n"
+            . $udpMessage . "2:21|g\n"
+            . $udpMessage . "3:21|g";
 
-        $batchedDog->report($udpMessage . '1');
-        $batchedDog->report($udpMessage . '2');
-        $batchedDog->report($udpMessage . '3');
+        $batchedDog->gauge($udpMessage . '1', 21);
+        $batchedDog->gauge($udpMessage . '2', 21);
 
         $spy = $this->getSocketSpy();
+        $this->assertSame(
+            0,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should not have sent any message until the buffer is full'
+        );
+
+        $batchedDog->gauge($udpMessage . '3', 21);
 
         $this->assertSame(
             1,
@@ -61,10 +67,11 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
             'Should send all buffered UDP messages once buffer is filled'
         );
 
-        $this->assertSame(
+        $this->assertSameTelemetry(
             $expectedUdpMessageOnceSent,
             $spy->argsFromSocketSendtoCalls[0][1],
-            'Should concatenate UDP messages with newlines'
+            'Should concatenate UDP messages with newlines',
+            array("metrics" => 3)
         );
     }
 }
