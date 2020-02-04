@@ -97,6 +97,7 @@ class DogStatsd
      * @param float $time The elapsed time (ms) to log
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
      */
     public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
     {
@@ -110,6 +111,7 @@ class DogStatsd
      * @param float $time The elapsed time to log, IN SECONDS
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
      **/
     public function microtiming($stat, $time, $sampleRate = 1.0, $tags = null)
     {
@@ -123,6 +125,7 @@ class DogStatsd
      * @param float $value The value
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
      **/
     public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -136,6 +139,7 @@ class DogStatsd
      * @param float $value The value
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
      **/
     public function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -149,6 +153,7 @@ class DogStatsd
      * @param float $value The value
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
      **/
     public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -162,6 +167,7 @@ class DogStatsd
      * @param float $value The value
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
      **/
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
@@ -176,7 +182,7 @@ class DogStatsd
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @param int $value the amount to increment by (default 1)
-     * @return boolean
+     * @return void
      **/
     public function increment($stats, $sampleRate = 1.0, $tags = null, $value = 1)
     {
@@ -190,7 +196,7 @@ class DogStatsd
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
      * @param int $value the amount to decrement by (default -1)
-     * @return boolean
+     * @return void
      **/
     public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1)
     {
@@ -207,8 +213,7 @@ class DogStatsd
      * @param int $delta The amount to increment/decrement each metric by.
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     *
-     * @return boolean
+     * @return void
      **/
     public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
     {
@@ -226,7 +231,6 @@ class DogStatsd
      * Serialize tags to StatsD protocol
      *
      * @param string|array $tags The tags to be serialize
-     *
      * @return string
      **/
     private function serialize_tags($tags)
@@ -291,8 +295,7 @@ class DogStatsd
      * @param array $data Incoming Data
      * @param float $sampleRate the rate (0-1) for sampling.
      * @param array|string $tags Key Value array of Tag => Value, or single tag as string
-     *
-     * @return null
+     * @return void
      **/
     public function send($data, $sampleRate = 1.0, $tags = null)
     {
@@ -326,8 +329,7 @@ class DogStatsd
      * @param string $hostname hostname to associate with this service check status
      * @param string $message message to associate with this service check status
      * @param int $timestamp timestamp for the service check status (defaults to now)
-     *
-     * @return null
+     * @return void
      **/
     public function service_check(
         $name,
