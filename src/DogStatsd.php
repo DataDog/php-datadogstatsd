@@ -56,6 +56,8 @@ class DogStatsd
 
     private static $__eventUrl = '/api/v1/events';
 
+    private static $__metricsUrl = '/api/v1/series';
+
     /**
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
      * host,
@@ -129,7 +131,11 @@ class DogStatsd
      **/
     public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
     {
-        $this->send(array($stat => "$value|g"), $sampleRate, $tags);
+        if ($this->submitEventsOver === 'UDP') {
+            $this->send(array($stat => "$value|g"), $sampleRate, $tags);
+        } else {
+            $this->sendViaApi([$stat => $value], 'gauge', $tags);
+        }
     }
 
     /**
@@ -406,16 +412,96 @@ class DogStatsd
             $vals['tags'] = explode(",", substr($this->serialize_tags($vals['tags']), 2));
         }
 
-        /**
-         * @var boolean Flag for returning success
-         */
-        $success = true;
-
         // Get the url to POST to
         $url = $this->datadogHost . self::$__eventUrl
              . '?api_key='          . $this->apiKey
              . '&application_key='  . $this->appKey;
 
+        return  $this->sendWithCurl($url, $vals);
+    }
+
+    /**
+     * Formats $vals array into event for submission to Datadog via UDP
+     * @param array $vals Optional values of the event. See
+     *   https://docs.datadoghq.com/api/?lang=bash#post-an-event for the valid keys
+     * @return null
+     */
+    private function eventUdp($vals)
+    {
+
+        // Format required values title and text
+        $title = isset($vals['title']) ? (string) $vals['title'] : '';
+        $text = isset($vals['text']) ? (string) $vals['text'] : '';
+
+        // Format fields into string that follows Datadog event submission via UDP standards
+        //   http://docs.datadoghq.com/guides/dogstatsd/#events
+        $fields = '';
+        $fields .= ($title);
+        $textField = ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
+        $fields .= $textField;
+        $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
+        $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
+        $fields .= (isset($vals['aggregation_key'])) ? '|k:' . ((string) $vals['aggregation_key']) : '';
+        $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
+        $fields .= (isset($vals['source_type_name'])) ? '|s:' . ((string) $vals['source_type_name']) : '';
+        $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
+        $fields .= (isset($vals['tags'])) ? $this->serialize_tags($vals['tags']) : '';
+
+        $title_length = strlen($title);
+        $text_length = strlen($textField)-1;
+
+        $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
+
+        return null;
+    }
+
+    /**
+     * Send the metrics over the API
+     * @param array $data Incoming Data
+     * @param string $type The type of the metric.
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @return void
+     **/
+    private function sendViaApi($data, $type, $tags)
+    {
+        $url = $this->datadogHost . self::$__metricsUrl
+            . '?api_key='          . $this->apiKey
+            . '&application_key='  . $this->appKey;
+        $seriesParams = $this->buildSeriesParams($data, $type, $tags);
+        $this->sendWithCurl($url, $seriesParams);
+    }
+
+    /**
+     * @param array $data
+     * @param string $type
+     * @param array $tags
+     * @return array
+     */
+    private function buildSeriesParams($data, $type, $tags)
+    {
+        $currentTime = time();
+
+        $series = [];
+        foreach ($data as $stat => $value) {
+            $series[] = [
+                'metric' => $stat,
+                'type' => $type,
+                'tags' => $tags,
+                'points' => [$currentTime, $value]
+            ];
+        }
+
+        return ['series' => $series];
+    }
+
+    /**
+     * @param string $url
+     * @param array $postFields
+     * @return bool
+     */
+    private function sendWithCurl($url, $postFields)
+    {
+        $success = true;
         $curl = curl_init($url);
 
         curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->curlVerifySslPeer);
@@ -424,7 +510,7 @@ class DogStatsd
         curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
         curl_setopt($curl, CURLOPT_POST, 1);
         curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($vals));
+        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($postFields));
 
         // Nab response and HTTP code
         $response_body = curl_exec($curl);
@@ -464,41 +550,34 @@ class DogStatsd
         }
 
         curl_close($curl);
+
         return $success;
     }
 
-    /**
-     * Formats $vals array into event for submission to Datadog via UDP
-     * @param array $vals Optional values of the event. See
-     *   https://docs.datadoghq.com/api/?lang=bash#post-an-event for the valid keys
-     * @return null
+
+    /*
+     *
+     * "{ \"series\" :
+         [{\"metric\":\"test.metric\",
+          \"points\":[[$currenttime, 20]],
+          \"type\":\"rate\",
+          \"interval\": 20,
+          \"host\":\"test.example.com\",
+          \"tags\":[\"environment:test\"]}
+        ]
+}"
+     *
+     * ARGUMENTS:
+
+    series [required]: Pass a JSON array where each item in the array contains the following arguments:
+
+        metric [required]: The name of the timeseries
+        type [optional, default=gauge]: Type of your metric either: gauge, rate, or count
+        interval [optional, default=None]: If the type of the metric is rate or count, define the corresponding interval.
+        points [required]: A JSON array of points. Each point is of the form: [[POSIX_timestamp, numeric_value], ...]
+         * Note: The timestamp should be in seconds, current. The numeric value format should be a float value.
+     * Current is defined as not more than 10 minutes in the future or more than 1 hour in the past.
+        host [optional]: The name of the host that produced the metric.
+        tags [optional, default=None]: A list of tags associated with the metric.
      */
-    private function eventUdp($vals)
-    {
-
-        // Format required values title and text
-        $title = isset($vals['title']) ? (string) $vals['title'] : '';
-        $text = isset($vals['text']) ? (string) $vals['text'] : '';
-
-        // Format fields into string that follows Datadog event submission via UDP standards
-        //   http://docs.datadoghq.com/guides/dogstatsd/#events
-        $fields = '';
-        $fields .= ($title);
-        $textField = ($text) ? '|' . str_replace("\n", "\\n", $text) : '|';
-        $fields .= $textField;
-        $fields .= (isset($vals['date_happened'])) ? '|d:' . ((string) $vals['date_happened']) : '';
-        $fields .= (isset($vals['hostname'])) ? '|h:' . ((string) $vals['hostname']) : '';
-        $fields .= (isset($vals['aggregation_key'])) ? '|k:' . ((string) $vals['aggregation_key']) : '';
-        $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
-        $fields .= (isset($vals['source_type_name'])) ? '|s:' . ((string) $vals['source_type_name']) : '';
-        $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
-        $fields .= (isset($vals['tags'])) ? $this->serialize_tags($vals['tags']) : '';
-
-        $title_length = strlen($title);
-        $text_length = strlen($textField)-1;
-
-        $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
-
-        return null;
-    }
 }
