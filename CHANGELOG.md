@@ -90,5 +90,11 @@ CHANGELOG
 [@jmparks-ebates]: https://github.com/jmparks-ebates
 [@Amaroq1]: https://github.com/Amaroq1
 [@onema]: https://github.com/onema
+[@localheinz]: https://github.com/localheinz
+[@pub007]: https://github.com/pub007
+[@Firehed]: https://github.com/Firehed
+[@CrshOverride]: https://github.com/CrshOverride
+[@zhukovra]: https://github.com/zhukovra
+[@krixon]: https://github.com/krixon
 [derek9gag]: https://github.com/derek9gag
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
