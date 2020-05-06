@@ -3,6 +3,12 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.0 / 2020-05-06
+
+* Add telemetry to the client. See [official documentation][dogstatsd_telemetry_doc] for more information.
+* Drop support for PHP `5.3`, `5.4` and `5.5`. Minimum supported version is now `5.6`.
+* `ext-sockets` is now part of the composer requirement. Thanks to [derek9gag][].
+
 # 1.4.1 / 2019-08-13
 
 * Fix declared private fields names, thanks to [@localheinz][].
@@ -84,3 +90,5 @@ CHANGELOG
 [@jmparks-ebates]: https://github.com/jmparks-ebates
 [@Amaroq1]: https://github.com/Amaroq1
 [@onema]: https://github.com/onema
+[derek9gag]: https://github.com/derek9gag
+[dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
