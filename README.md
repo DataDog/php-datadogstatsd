@@ -18,7 +18,7 @@ See [CHANGELOG.md](CHANGELOG.md) for changes.
 Add the following to your `composer.json`:
 
 ```
-"datadog/php-datadogstatsd": "1.4.*"
+"datadog/php-datadogstatsd": "1.5.*"
 ```
 The first version shipped in composer is *0.0.3*
 
