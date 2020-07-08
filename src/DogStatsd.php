@@ -53,6 +53,10 @@ class DogStatsd
      * @var array Tags to apply to all metrics
      */
     private $globalTags;
+    /**
+     * @var int Number of decimals to use when formatting numbers to strings
+     */
+    private $decimalPrecision;
 
     private static $__eventUrl = '/api/v1/events';
 
@@ -70,7 +74,7 @@ class DogStatsd
      *
      * @param array $config
      */
-    public function __construct(array $config = array())
+    public function __construct(array $config = array(), $decimal_precision = 5)
     {
         $this->host = isset($config['host']) ? $config['host'] : (getenv('DD_AGENT_HOST') ? getenv('DD_AGENT_HOST') : 'localhost');
         $this->port = isset($config['port']) ? $config['port'] : (getenv('DD_DOGSTATSD_PORT') ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
@@ -82,6 +86,8 @@ class DogStatsd
 
         $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
+
+        $this->decimalPrecision = $decimal_precision;
 
         $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : array();
         if (getenv('DD_ENTITY_ID')) {
@@ -563,6 +569,16 @@ class DogStatsd
     }
 
     protected function normalizeStat($stat) {
-      return format_number($stat, 999, '.', '');
+      // Float to string conversion changes by locale (comma instead of decimal e.x. 1.3 => 1,3 and sometimes commas for large integers e.x. 10,000)
+      // Very large numbers get messed up through number_format, to avoid this we break it up into the integer and decimal precision bits.
+      // To avoid different logic based on positive/negative numbers, take the abs and preserve the sign in the stringified output
+      $sign = ($stat < 0) ? '-' : '';
+      $stat = abs($stat);
+      $statInteger = floor($stat);
+      $statPrecision = $stat - $statInteger;
+      $formattedInt = number_format($statInteger, 0, '.', '');
+      // substr trims the preceeding 0 in prepresentation
+      $formattedPrecision = substr(number_format($statPrecision, $this->decimalPrecision, '.', ''), 1);
+      return "${sign}${formattedInt}${formattedPrecision}";
     }
 }
