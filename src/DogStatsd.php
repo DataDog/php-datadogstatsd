@@ -141,6 +141,7 @@ class DogStatsd
      */
     public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
     {
+        $time = $this->normalizeStat($time);
         $this->send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
@@ -169,6 +170,7 @@ class DogStatsd
      **/
     public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -183,6 +185,7 @@ class DogStatsd
      **/
     public function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -197,6 +200,7 @@ class DogStatsd
      **/
     public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|d"), $sampleRate, $tags);
     }
 
@@ -211,6 +215,7 @@ class DogStatsd
      **/
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -257,6 +262,7 @@ class DogStatsd
      **/
     public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
     {
+        $delta = $this->normalizeStat($delta);
         if (!is_array($stats)) {
             $stats = array($stats);
         }
@@ -554,5 +560,9 @@ class DogStatsd
         $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
 
         return null;
+    }
+
+    protected function normalizeStat($stat) {
+      return format_number($stat, 999, '.', '');
     }
 }
