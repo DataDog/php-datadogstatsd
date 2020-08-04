@@ -568,17 +568,13 @@ class DogStatsd
         return null;
     }
 
-    protected function normalizeStat($stat) {
-      // Float to string conversion changes by locale (comma instead of decimal e.x. 1.3 => 1,3 and sometimes commas for large integers e.x. 10,000)
-      // Very large numbers get messed up through number_format, to avoid this we break it up into the integer and decimal precision bits.
-      // To avoid different logic based on positive/negative numbers, take the abs and preserve the sign in the stringified output
-      $sign = ($stat < 0) ? '-' : '';
-      $stat = abs($stat);
-      $statInteger = floor($stat);
-      $statPrecision = $stat - $statInteger;
-      $formattedInt = number_format($statInteger, 0, '.', '');
-      // substr trims the preceeding 0 in prepresentation
-      $formattedPrecision = substr(number_format($statPrecision, $this->decimalPrecision, '.', ''), 1);
-      return "${sign}${formattedInt}${formattedPrecision}";
+    protected function normalizeStat($value) {
+      // Controlls the way things are converted to a string.
+      // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
+      // If one would rather control formatting themselves adn dont want to override the class, they can pass in a string
+      if is_string($value) {
+        return $value;
+      }
+      return number_format($value, $this->decimalPrecision, '.', '');
     }
 }
