@@ -73,6 +73,7 @@ class DogStatsd
      * api_key and app_key
      *
      * @param array $config
+     * @param int   $decimal_precision
      */
     public function __construct(array $config = array(), $decimal_precision = 5)
     {
@@ -568,6 +569,13 @@ class DogStatsd
         return null;
     }
 
+    /**
+     * Normalize the value witout locale consideration before queuing the metric for sending
+     *
+     * @param string $value The value to normalize
+     *
+     * @return string Formatted value
+     */
     protected function normalizeStat($value) {
       // Controlls the way things are converted to a string.
       // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
