@@ -580,7 +580,7 @@ class DogStatsd
       // Controlls the way things are converted to a string.
       // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
       // If one would rather control formatting themselves adn dont want to override the class, they can pass in a string
-      if (is_string($value)) {
+      if (!is_float($value)) {
         return $value;
       }
       return number_format($value, $this->decimalPrecision, '.', '');
