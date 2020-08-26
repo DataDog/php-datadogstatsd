@@ -70,12 +70,12 @@ class DogStatsd
      * datadog_host,
      * curl_ssl_verify_host,
      * curl_ssl_verify_peer,
-     * api_key and app_key
+     * api_key and app_key,
+     * decimal_precision
      *
      * @param array $config
-     * @param int   $decimal_precision
      */
-    public function __construct(array $config = array(), $decimal_precision = 5)
+    public function __construct(array $config = array())
     {
         $this->host = isset($config['host']) ? $config['host'] : (getenv('DD_AGENT_HOST') ? getenv('DD_AGENT_HOST') : 'localhost');
         $this->port = isset($config['port']) ? $config['port'] : (getenv('DD_DOGSTATSD_PORT') ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
@@ -88,7 +88,7 @@ class DogStatsd
         $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
 
-        $this->decimalPrecision = $decimal_precision;
+        $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
         $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : array();
         if (getenv('DD_ENTITY_ID')) {
@@ -579,10 +579,6 @@ class DogStatsd
     protected function normalizeStat($value) {
       // Controlls the way things are converted to a string.
       // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
-      // If one would rather control formatting themselves adn dont want to override the class, they can pass in a string
-      if (!is_float($value)) {
-        return $value;
-      }
       return number_format($value, $this->decimalPrecision, '.', '');
     }
 }
