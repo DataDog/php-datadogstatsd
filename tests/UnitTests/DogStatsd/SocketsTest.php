@@ -635,7 +635,7 @@ class SocketsTest extends SocketSpyTestCase
             'foo.metric',
         );
 
-        $expectedUdpMessage = 'foo.metric:-1|c';
+        $expectedUdpMessage = 'foo.metric:-1.00|c';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -1046,7 +1046,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value';
+        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:tag_value';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
@@ -1073,7 +1073,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d';
+        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
@@ -1082,7 +1082,7 @@ class SocketsTest extends SocketSpyTestCase
             "",
             array("tags" => "my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d")
         );
-        putenv("DD_ENTITY_ID");
+        putenv("DD_ENTITY_ID=''");
     }
 
     public function testGlobalTagsAreSupplementedWithLocalTags()
