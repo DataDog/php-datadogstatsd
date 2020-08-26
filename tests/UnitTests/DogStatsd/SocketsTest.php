@@ -1128,7 +1128,7 @@ class SocketsTest extends SocketSpyTestCase
         $dog->gauge('metric', 42);
 
         $this->assertSameWithTelemetry(
-            'metric:42|g',
+            'metric:42.00|g',
             $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]
         );
     }
@@ -1141,22 +1141,22 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry('test:21.00|ms', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]);
 
         $dog->gauge('test', 21);
-        $this->assertSameWithTelemetry('test:21|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 675, "packets_sent" => 1));
+        $this->assertSameWithTelemetry('test:21.00|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 678, "packets_sent" => 1));
 
         $dog->histogram('test', 21);
-        $this->assertSameWithTelemetry('test:21|h', $this->getSocketSpy()->argsFromSocketSendtoCalls[2][1], "", array("bytes_sent" => 676, "packets_sent" => 1));
+        $this->assertSameWithTelemetry('test:21.00|h', $this->getSocketSpy()->argsFromSocketSendtoCalls[2][1], "", array("bytes_sent" => 679, "packets_sent" => 1));
 
         $dog->distribution('test', 21);
-        $this->assertSameWithTelemetry('test:21|d', $this->getSocketSpy()->argsFromSocketSendtoCalls[3][1], "", array("bytes_sent" => 676, "packets_sent" => 1));
+        $this->assertSameWithTelemetry('test:21.00|d', $this->getSocketSpy()->argsFromSocketSendtoCalls[3][1], "", array("bytes_sent" => 679, "packets_sent" => 1));
 
         $dog->set('test', 21);
-        $this->assertSameWithTelemetry('test:21|s', $this->getSocketSpy()->argsFromSocketSendtoCalls[4][1], "", array("bytes_sent" => 676, "packets_sent" => 1));
+        $this->assertSameWithTelemetry('test:21.00|s', $this->getSocketSpy()->argsFromSocketSendtoCalls[4][1], "", array("bytes_sent" => 679, "packets_sent" => 1));
 
         $dog->increment('test');
-        $this->assertSameWithTelemetry('test:1|c', $this->getSocketSpy()->argsFromSocketSendtoCalls[5][1], "", array("bytes_sent" => 676, "packets_sent" => 1));
+        $this->assertSameWithTelemetry('test:1.00|c', $this->getSocketSpy()->argsFromSocketSendtoCalls[5][1], "", array("bytes_sent" => 679, "packets_sent" => 1));
 
         $dog->decrement('test');
-        $this->assertSameWithTelemetry('test:-1|c', $this->getSocketSpy()->argsFromSocketSendtoCalls[6][1], "", array("bytes_sent" => 675, "packets_sent" => 1));
+        $this->assertSameWithTelemetry('test:-1.00|c', $this->getSocketSpy()->argsFromSocketSendtoCalls[6][1], "", array("bytes_sent" => 678, "packets_sent" => 1));
 
         $dog->event('ev', array('text' => 'text'));
         $this->assertSameWithTelemetry('_e{2,4}:ev|text', $this->getSocketSpy()->argsFromSocketSendtoCalls[7][1], "", array("bytes_sent" => 676, "packets_sent" => 1, "metrics" => 0, "events" => 1));
@@ -1180,7 +1180,7 @@ class SocketsTest extends SocketSpyTestCase
         $this->getSocketSpy()->returnErrorOnSend = false;
 
         $dog->gauge('test', 22);
-        $this->assertSameWithTelemetry('test:22.00|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1], "", array("metrics" => 3, "bytes_dropped" => 1351, "packets_dropped" => 2));
+        $this->assertSameWithTelemetry('test:22.00|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1], "", array("metrics" => 3, "bytes_dropped" => 1357, "packets_dropped" => 2));
 
         # force flush to get the telemetry about the last message sent
         $dog->flush("");
