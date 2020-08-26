@@ -1057,34 +1057,6 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
-    public function testGlobalTagsWithEntityIdFromEnvVar()
-    {
-        putenv("DD_ENTITY_ID=04652bb7-19b7-11e9-9cc6-42010a9c016d");
-        $dog = new DogStatsd(array(
-            'global_tags' => array(
-                'my_tag' => 'tag_value',
-            ),
-            'disable_telemetry' => false
-        ));
-        $dog->timing('metric', 42, 1.0);
-        $spy = $this->getSocketSpy();
-        $this->assertSame(
-            1,
-            count($spy->argsFromSocketSendtoCalls),
-            'Should send 1 UDP message'
-        );
-        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d';
-        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
-
-        $this->assertSameWithTelemetry(
-            $expectedUdpMessage,
-            $argsPassedToSocketSendTo[1],
-            "",
-            array("tags" => "my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d")
-        );
-        putenv("DD_ENTITY_ID=''");
-    }
-
     public function testGlobalTagsAreSupplementedWithLocalTags()
     {
         $dog = new DogStatsd(array(
@@ -1213,6 +1185,34 @@ class SocketsTest extends SocketSpyTestCase
         # force flush to get the telemetry about the last message sent
         $dog->flush("");
         $this->assertSameWithTelemetry('', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 677, "packets_sent" => 1, "metrics" => 0));
+    }
+
+    public function testGlobalTagsWithEntityIdFromEnvVar()
+    {
+        putenv("DD_ENTITY_ID=04652bb7-19b7-11e9-9cc6-42010a9c016d");
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+            'disable_telemetry' => false
+        ));
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            "",
+            array("tags" => "my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d")
+        );
+        putenv("DD_ENTITY_ID");
     }
 
     /**
