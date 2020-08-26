@@ -1215,6 +1215,28 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry('', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 680, "packets_sent" => 1, "metrics" => 0));
     }
 
+    public function testDecimalPrecision()
+    {
+        $dog = new DogStatsd(array("disable_telemetry" => false, "decimal_precision" => 5));
+
+        $dog->timing('test', 21);
+        $this->assertSameWithTelemetry('test:21.00000|ms', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]);
+
+        $dog->gauge('test', 21.222225);
+        $this->assertSameWithTelemetry('test:21.22223|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 681, "packets_sent" => 1));
+    }
+
+    public function testFloatLocalization()
+    {
+        $defaultLocale = setlocale(LC_ALL, 0);
+        setlocale(LC_ALL, 'nl_NL');
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+
+        $dog->timing('test', 21.21);
+        $this->assertSameWithTelemetry('test:21.21|ms', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]);
+        setlocale(LC_ALL, $defaultLocale);
+    }
+
     /**
      * Get a timestamp created from a real date that is deterministic in nature
      *
