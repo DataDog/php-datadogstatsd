@@ -126,7 +126,7 @@ class SocketsTest extends SocketSpyTestCase
         $time = 43;
         $sampleRate = 1.0;
         $tags = array('horse' => 'cart');
-        $expectedUdpMessage = 'some.timing_metric:43|ms|#horse:cart';
+        $expectedUdpMessage = 'some.timing_metric:43.00|ms|#horse:cart';
 
         $dog = new DogStatsd(array('disable_telemetry' => false));
 
@@ -159,7 +159,7 @@ class SocketsTest extends SocketSpyTestCase
         $time = 26;
         $sampleRate = 1.0;
         $tags = array('tuba' => 'solo');
-        $expectedUdpMessage = 'some.microtiming_metric:26000|ms|#tuba:solo';
+        $expectedUdpMessage = 'some.microtiming_metric:26000.00|ms|#tuba:solo';
 
         $dog = new DogStatsd(array('disable_telemetry' => false));
 
@@ -192,7 +192,7 @@ class SocketsTest extends SocketSpyTestCase
         $value = 5;
         $sampleRate = 1.0;
         $tags = array('baseball' => 'cap');
-        $expectedUdpMessage = 'some.gauge_metric:5|g|#baseball:cap';
+        $expectedUdpMessage = 'some.gauge_metric:5.00|g|#baseball:cap';
 
         $dog = new DogStatsd(array('disable_telemetry' => false));
 
@@ -225,7 +225,7 @@ class SocketsTest extends SocketSpyTestCase
         $value = 109;
         $sampleRate = 1.0;
         $tags = array('happy' => 'days');
-        $expectedUdpMessage = 'some.histogram_metric:109|h|#happy:days';
+        $expectedUdpMessage = 'some.histogram_metric:109.00|h|#happy:days';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -258,7 +258,7 @@ class SocketsTest extends SocketSpyTestCase
         $value = 7;
         $sampleRate = 1.0;
         $tags = array('floppy' => 'hat');
-        $expectedUdpMessage = 'some.distribution_metric:7|d|#floppy:hat';
+        $expectedUdpMessage = 'some.distribution_metric:7.00|d|#floppy:hat';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -291,7 +291,7 @@ class SocketsTest extends SocketSpyTestCase
         $value = 22239;
         $sampleRate = 1.0;
         $tags = array('little' => 'bit');
-        $expectedUdpMessage = 'some.set_metric:22239|s|#little:bit';
+        $expectedUdpMessage = 'some.set_metric:22239.00|s|#little:bit';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -425,8 +425,8 @@ class SocketsTest extends SocketSpyTestCase
             'cowboy' => 'hat'
         );
 
-        $expectedUdpMessage1 = 'foo.metric:893|s|#cowboy:hat';
-        $expectedUdpMessage2 = 'bar.metric:4|s|#cowboy:hat';
+        $expectedUdpMessage1 = 'foo.metric:893.00|s|#cowboy:hat';
+        $expectedUdpMessage2 = 'bar.metric:4.00|s|#cowboy:hat';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -466,7 +466,7 @@ class SocketsTest extends SocketSpyTestCase
         $sampleRate = 1.0;
         $tag = 'string:tag';
 
-        $expectedUdpMessage = 'foo.metric:82|s|#string:tag';
+        $expectedUdpMessage = 'foo.metric:82.00|s|#string:tag';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -489,7 +489,7 @@ class SocketsTest extends SocketSpyTestCase
         $sampleRate = 1.0;
         $tag = null;
 
-        $expectedUdpMessage = 'foo.metric:19872|h';
+        $expectedUdpMessage = 'foo.metric:19872.00|h';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -606,7 +606,7 @@ class SocketsTest extends SocketSpyTestCase
             'foo.metric',
         );
 
-        $expectedUdpMessage = 'foo.metric:1|c';
+        $expectedUdpMessage = 'foo.metric:1.00|c';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -664,7 +664,7 @@ class SocketsTest extends SocketSpyTestCase
             'foo.metric',
         );
 
-        $expectedUdpMessage = 'foo.metric:-9|c';
+        $expectedUdpMessage = 'foo.metric:-9.00|c';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -693,7 +693,7 @@ class SocketsTest extends SocketSpyTestCase
             'foo.metric',
         );
 
-        $expectedUdpMessage = 'foo.metric:-47|c';
+        $expectedUdpMessage = 'foo.metric:-47.00|c';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -728,8 +728,8 @@ class SocketsTest extends SocketSpyTestCase
             'every' => 'day',
         );
 
-        $expectedUdpMessage1 = 'foo.metric:3|c|#every:day';
-        $expectedUdpMessage2 = 'bar.metric:3|c|#every:day';
+        $expectedUdpMessage1 = 'foo.metric:3.00|c|#every:day';
+        $expectedUdpMessage2 = 'bar.metric:3.00|c|#every:day';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -774,7 +774,7 @@ class SocketsTest extends SocketSpyTestCase
             'long' => 'walk',
         );
 
-        $expectedUdpMessage = 'foo.metric:-45|c|#long:walk';
+        $expectedUdpMessage = 'foo.metric:-45.00|c|#long:walk';
 
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
@@ -1046,7 +1046,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value';
+        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:tag_value';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
@@ -1100,7 +1100,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value,other_tag:other_value';
+        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:tag_value,other_tag:other_value';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
@@ -1128,7 +1128,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|ms|#my_tag:other_value';
+        $expectedUdpMessage = 'metric:42.00|ms|#my_tag:other_value';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
