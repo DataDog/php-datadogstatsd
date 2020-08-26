@@ -45,9 +45,9 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
         $batchedDog::$maxBufferLength = 2;
 
         $udpMessage = 'some fake UDP message';
-        $expectedUdpMessageOnceSent = $udpMessage . "1:21|g\n"
-            . $udpMessage . "2:21|g\n"
-            . $udpMessage . "3:21|g";
+        $expectedUdpMessageOnceSent = $udpMessage . "1:21.00|g\n"
+            . $udpMessage . "2:21.00|g\n"
+            . $udpMessage . "3:21.00|g";
 
         $batchedDog->gauge($udpMessage . '1', 21);
         $batchedDog->gauge($udpMessage . '2', 21);
