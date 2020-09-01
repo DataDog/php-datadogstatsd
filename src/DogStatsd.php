@@ -579,6 +579,12 @@ class DogStatsd
     protected function normalizeStat($value) {
       // Controlls the way things are converted to a string.
       // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
-      return number_format($value, $this->decimalPrecision, '.', '');
+      $string_representation = rtrim(number_format($value, $this->decimalPrecision, '.', ''), "0");
+      $value_len = strlen($string_representation);
+      $last_char = substr($value_len - 1, $value_len, $string_representation);
+      if ($last_char == '.') {
+        $string_representation = substr(0, $value_len - 1, $string_representation);
+      }
+      return $string_representation;
     }
 }
