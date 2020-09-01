@@ -1215,7 +1215,7 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry('', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 677, "packets_sent" => 1, "metrics" => 0));
     }
 
-    public function testDecimalPrecision()
+    public function testDecimalNormalization()
     {
         $dog = new DogStatsd(array("disable_telemetry" => false, "decimal_precision" => 5));
 
@@ -1224,6 +1224,9 @@ class SocketsTest extends SocketSpyTestCase
 
         $dog->gauge('test', 21.222225);
         $this->assertSameWithTelemetry('test:21.22223|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 675, "packets_sent" => 1));
+
+        $dog->gauge('test', 2000.00);
+        $this->assertSameWithTelemetry('test:2000|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[2][1], "", array("bytes_sent" => 682, "packets_sent" => 1));
     }
 
     public function testFloatLocalization()
@@ -1235,7 +1238,7 @@ class SocketsTest extends SocketSpyTestCase
         $dog->timing('test', 21.21000);
         $this->assertSameWithTelemetry('test:21.21|ms', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]);
         setlocale(LC_ALL, $defaultLocale);
-      }
+    }
 
 
     /**
