@@ -3,6 +3,10 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.1 / 2020-09-02
+
+* Fix numbers format on non US local, thanks to [@TheBooper][].
+
 # 1.5.0 / 2020-05-06
 
 * Add telemetry to the client. See [official documentation][dogstatsd_telemetry_doc] for more information.
@@ -97,4 +101,5 @@ CHANGELOG
 [@zhukovra]: https://github.com/zhukovra
 [@krixon]: https://github.com/krixon
 [derek9gag]: https://github.com/derek9gag
+[@TheBooper]: https://github.com/TheBooper
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
