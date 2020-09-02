@@ -53,6 +53,10 @@ class DogStatsd
      * @var array Tags to apply to all metrics
      */
     private $globalTags;
+    /**
+     * @var int Number of decimals to use when formatting numbers to strings
+     */
+    private $decimalPrecision;
 
     private static $__eventUrl = '/api/v1/events';
 
@@ -66,7 +70,8 @@ class DogStatsd
      * datadog_host,
      * curl_ssl_verify_host,
      * curl_ssl_verify_peer,
-     * api_key and app_key
+     * api_key and app_key,
+     * decimal_precision
      *
      * @param array $config
      */
@@ -82,6 +87,8 @@ class DogStatsd
 
         $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
         $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
+
+        $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
         $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : array();
         if (getenv('DD_ENTITY_ID')) {
@@ -141,6 +148,7 @@ class DogStatsd
      */
     public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
     {
+        $time = $this->normalizeStat($time);
         $this->send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
@@ -169,6 +177,7 @@ class DogStatsd
      **/
     public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -183,6 +192,7 @@ class DogStatsd
      **/
     public function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -197,6 +207,7 @@ class DogStatsd
      **/
     public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|d"), $sampleRate, $tags);
     }
 
@@ -211,6 +222,7 @@ class DogStatsd
      **/
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
+        $value = $this->normalizeStat($value);
         $this->send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -257,6 +269,7 @@ class DogStatsd
      **/
     public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
     {
+        $delta = $this->normalizeStat($delta);
         if (!is_array($stats)) {
             $stats = array($stats);
         }
@@ -555,4 +568,18 @@ class DogStatsd
 
         return null;
     }
+
+    /**
+     * Normalize the value witout locale consideration before queuing the metric for sending
+     *
+     * @param string $value The value to normalize
+     *
+     * @return string Formatted value
+     */
+    function normalizeStat($value) {
+      // Controlls the way things are converted to a string.
+      // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
+      return rtrim(trim(number_format($value, $this->decimalPrecision, '.', ''), "0"), ".");
+    }
+
 }
