@@ -219,6 +219,39 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
+    public function testGaugeZero()
+    {
+        $stat = 'some.gauge_metric';
+        $value = 0;
+        $sampleRate = 1.0;
+        $tags = array('baseball' => 'cap');
+        $expectedUdpMessage = 'some.gauge_metric:0|g|#baseball:cap';
+
+        $dog = new DogStatsd(array('disable_telemetry' => false));
+
+        $dog->gauge(
+            $stat,
+            $value,
+            $sampleRate,
+            $tags
+        );
+
+        $spy = $this->getSocketSpy();
+
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1]
+        );
+    }
+
     public function testHistogram()
     {
         $stat = 'some.histogram_metric';
