@@ -3,6 +3,10 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.2 / 2020-10-12
+
+* Fix 0 gauge not emitter, thanks to [@ZymoticB][].
+
 # 1.5.1 / 2020-09-02
 
 * Fix numbers format on non US local, thanks to [@TheBooper][].
@@ -102,4 +106,5 @@ CHANGELOG
 [@krixon]: https://github.com/krixon
 [derek9gag]: https://github.com/derek9gag
 [@TheBooper]: https://github.com/TheBooper
+[@ZymoticB]: https://github.com/ZymoticB
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
