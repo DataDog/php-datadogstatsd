@@ -8,10 +8,10 @@ namespace DataDog;
 
 class DogStatsd
 {
-    const OK        = 0;
-    const WARNING   = 1;
-    const CRITICAL  = 2;
-    const UNKNOWN   = 3;
+    public const OK        = 0;
+    public const WARNING   = 1;
+    public const CRITICAL  = 2;
+    public const UNKNOWN   = 3;
 
     /**
      * @var string
@@ -58,7 +58,7 @@ class DogStatsd
      */
     private $decimalPrecision;
 
-    private static $__eventUrl = '/api/v1/events';
+    private static $eventUrl = '/api/v1/events';
 
     // Used for the telemetry tags
     public static $version = '1.5.2';
@@ -77,8 +77,14 @@ class DogStatsd
      */
     public function __construct(array $config = array())
     {
-        $this->host = isset($config['host']) ? $config['host'] : (getenv('DD_AGENT_HOST') ? getenv('DD_AGENT_HOST') : 'localhost');
-        $this->port = isset($config['port']) ? $config['port'] : (getenv('DD_DOGSTATSD_PORT') ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
+        $this->host = isset($config['host'])
+            ? $config['host'] : (getenv('DD_AGENT_HOST')
+            ? getenv('DD_AGENT_HOST') : 'localhost');
+
+        $this->port = isset($config['port'])
+            ? $config['port'] : (getenv('DD_DOGSTATSD_PORT')
+            ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
+
         $this->socketPath = isset($config['socket_path']) ? $config['socket_path'] : null;
 
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
@@ -102,14 +108,18 @@ class DogStatsd
         # by default the telemetry is disable
         $this->disable_telemetry = isset($config["disable_telemetry"]) ? $config["disable_telemetry"] : true;
         $transport_type = !is_null($this->socketPath) ? "uds" : "udp";
-        $this->telemetry_tags = $this->serialize_tags(array("client" => "php", "client_version" => self::$version, "client_transport" => $transport_type));
-        $this->reset_telemetry();
+        $this->telemetry_tags = $this->serializeTags(array(
+            "client" => "php",
+            "client_version" => self::$version,
+            "client_transport" => $transport_type));
+
+        $this->resetTelemetry();
     }
 
     /**
      * Reset the telemetry value to zero
      */
-    private function reset_telemetry()
+    private function resetTelemetry()
     {
         $this->metrics_sent = 0;
         $this->events_sent = 0;
@@ -122,13 +132,13 @@ class DogStatsd
     /**
      * Reset the telemetry value to zero
      */
-    private function flush_telemetry()
+    private function flushTelemetry()
     {
-      if ($this->disable_telemetry == true) {
-        return "";
-      }
+        if ($this->disable_telemetry == true) {
+            return "";
+        }
 
-      return "\ndatadog.dogstatsd.client.metrics:{$this->metrics_sent}|c{$this->telemetry_tags}"
+        return "\ndatadog.dogstatsd.client.metrics:{$this->metrics_sent}|c{$this->telemetry_tags}"
              . "\ndatadog.dogstatsd.client.events:{$this->events_sent}|c{$this->telemetry_tags}"
              . "\ndatadog.dogstatsd.client.service_checks:{$this->service_checks_sent}|c{$this->telemetry_tags}"
              . "\ndatadog.dogstatsd.client.bytes_sent:{$this->bytes_sent}|c{$this->telemetry_tags}"
@@ -163,7 +173,7 @@ class DogStatsd
      **/
     public function microtiming($stat, $time, $sampleRate = 1.0, $tags = null)
     {
-        $this->timing($stat, $time*1000, $sampleRate, $tags);
+        $this->timing($stat, $time * 1000, $sampleRate, $tags);
     }
 
     /**
@@ -286,11 +296,11 @@ class DogStatsd
      * @param string|array $tags The tags to be serialize
      * @return string
      **/
-    private function serialize_tags($tags)
+    private function serializeTags($tags)
     {
         $all_tags = array_merge(
-            $this->normalize_tags($this->globalTags),
-            $this->normalize_tags($tags)
+            $this->normalizeTags($this->globalTags),
+            $this->normalizeTags($tags)
         );
 
         if (count($all_tags) === 0) {
@@ -313,7 +323,7 @@ class DogStatsd
      * @param mixed $tags The tags to normalize
      * @return array
      */
-    private function normalize_tags($tags)
+    private function normalizeTags($tags)
     {
         if ($tags === null) {
             return array();
@@ -370,9 +380,32 @@ class DogStatsd
         }
 
         foreach ($sampledData as $stat => $value) {
-            $value .= $this->serialize_tags($tags);
+            $value .= $this->serializeTags($tags);
             $this->report("$stat:$value");
         }
+    }
+
+    /**
+     * @deprecated service_check will be removed in future versions in favor of serviceCheck
+     *
+     * Send a custom service check status over UDP
+     * @param string $name service check name
+     * @param int $status service check status code (see OK, WARNING,...)
+     * @param array|string $tags Key Value array of Tag => Value, or single tag as string
+     * @param string $hostname hostname to associate with this service check status
+     * @param string $message message to associate with this service check status
+     * @param int $timestamp timestamp for the service check status (defaults to now)
+     * @return void
+     **/
+    public function service_check( // phpcs:ignore
+        $name,
+        $status,
+        $tags = null,
+        $hostname = null,
+        $message = null,
+        $timestamp = null
+    ) {
+        $this->serviceCheck($name, $status, $tags, $hostname, $message, $timestamp);
     }
 
     /**
@@ -385,7 +418,7 @@ class DogStatsd
      * @param int $timestamp timestamp for the service check status (defaults to now)
      * @return void
      **/
-    public function service_check(
+    public function serviceCheck(
         $name,
         $status,
         $tags = null,
@@ -401,16 +434,16 @@ class DogStatsd
         if ($hostname !== null) {
             $msg .= sprintf("|h:%s", $hostname);
         }
-        $msg .= $this->serialize_tags($tags);
+        $msg .= $this->serializeTags($tags);
         if ($message !== null) {
-            $msg .= sprintf('|m:%s', $this->escape_sc_message($message));
+            $msg .= sprintf('|m:%s', $this->escapeScMessage($message));
         }
 
         $this->service_checks_sent += 1;
         $this->report($msg);
     }
 
-    private function escape_sc_message($msg)
+    private function escapeScMessage($msg)
     {
         return str_replace("m:", "m\:", str_replace("\n", "\\n", $msg));
     }
@@ -422,10 +455,11 @@ class DogStatsd
 
     public function flush($message)
     {
-        $message .= $this->flush_telemetry();
+        $message .= $this->flushTelemetry();
 
         // Non - Blocking UDP I/O - Use IP Addresses!
-        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP) : socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP)
+            : socket_create(AF_UNIX, SOCK_DGRAM, 0);
         socket_set_nonblock($socket);
 
         if (!is_null($this->socketPath)) {
@@ -435,12 +469,12 @@ class DogStatsd
         }
 
         if ($res !== false) {
-          $this->reset_telemetry();
-          $this->bytes_sent += strlen($message);
-          $this->packets_sent += 1;
+            $this->resetTelemetry();
+            $this->bytes_sent += strlen($message);
+            $this->packets_sent += 1;
         } else {
-          $this->bytes_dropped += strlen($message);
-          $this->packets_dropped += 1;
+            $this->bytes_dropped += strlen($message);
+            $this->packets_dropped += 1;
         }
 
         socket_close($socket);
@@ -469,7 +503,7 @@ class DogStatsd
 
         // Convert tags string or array into array of tags: ie ['key:value']
         if (isset($vals['tags'])) {
-            $vals['tags'] = explode(",", substr($this->serialize_tags($vals['tags']), 2));
+            $vals['tags'] = explode(",", substr($this->serializeTags($vals['tags']), 2));
         }
 
         /**
@@ -478,7 +512,7 @@ class DogStatsd
         $success = true;
 
         // Get the url to POST to
-        $url = $this->datadogHost . self::$__eventUrl
+        $url = $this->datadogHost . self::$eventUrl
              . '?api_key='          . $this->apiKey
              . '&application_key='  . $this->appKey;
 
@@ -497,7 +531,6 @@ class DogStatsd
         $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
 
         try {
-
             // Check for cURL errors
             if ($curlErrorNum = curl_errno($curl)) {
                 throw new \Exception('Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl));
@@ -505,7 +538,8 @@ class DogStatsd
 
             // Check response code is 202
             if ($response_code !== 200 && $response_code !== 202) {
-                throw new \Exception('Datadog event API call HTTP response not OK - ' . $response_code . '; response body: ' . $response_body);
+                throw new \Exception('Datadog event API call HTTP response not OK - '
+                    . $response_code . '; response body: ' . $response_body);
             }
 
             // Check for empty response body
@@ -515,12 +549,14 @@ class DogStatsd
 
             // Decode JSON response
             if (!$decodedJson = json_decode($response_body, true)) {
-                throw new \Exception('Datadog event API call did not return a body that could be decoded via json_decode');
+                throw new \Exception('Datadog event API call did not return a body'
+                   . ' that could be decoded via json_decode');
             }
 
             // Check JSON decoded "status" is OK from the Datadog API
             if ($decodedJson['status'] !== 'ok') {
-                throw new \Exception('Datadog event API response  status not "ok"; response body: ' . $response_body);
+                throw new \Exception('Datadog event API response  status not "ok"; response body: '
+                    . $response_body);
             }
         } catch (\Exception $e) {
             $success = false;
@@ -558,10 +594,10 @@ class DogStatsd
         $fields .= (isset($vals['priority'])) ? '|p:' . ((string) $vals['priority']) : '';
         $fields .= (isset($vals['source_type_name'])) ? '|s:' . ((string) $vals['source_type_name']) : '';
         $fields .= (isset($vals['alert_type'])) ? '|t:' . ((string) $vals['alert_type']) : '';
-        $fields .= (isset($vals['tags'])) ? $this->serialize_tags($vals['tags']) : '';
+        $fields .= (isset($vals['tags'])) ? $this->serializeTags($vals['tags']) : '';
 
         $title_length = strlen($title);
-        $text_length = strlen($textField)-1;
+        $text_length = strlen($textField) - 1;
 
         $this->events_sent += 1;
         $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
@@ -583,5 +619,4 @@ class DogStatsd
 
         return rtrim(rtrim(number_format((float) $value, $this->decimalPrecision, '.', ''), "0"), ".");
     }
-
 }

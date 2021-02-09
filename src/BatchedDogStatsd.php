@@ -22,11 +22,10 @@ class BatchedDogStatsd extends DogStatsd
     public function __construct(array $config = array())
     {
       # by default the telemetry is enabled for BatchedDogStatsd
-      if (!isset($config["disable_telemetry"]))
-      {
-        $config["disable_telemetry"] = false;
-      }
-      parent::__construct($config);
+        if (!isset($config["disable_telemetry"])) {
+            $config["disable_telemetry"] = false;
+        }
+        parent::__construct($config);
     }
 
     /**
@@ -40,6 +39,15 @@ class BatchedDogStatsd extends DogStatsd
             $this->flushBuffer();
         }
     }
+
+    /**
+     * @deprecated flush_buffer will be removed in future versions in favor of flushBuffer
+     */
+    public function flush_buffer() // phpcs:ignore
+    {
+        $this->flushBuffer();
+    }
+
 
     public function flushBuffer()
     {
