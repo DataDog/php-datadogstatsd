@@ -38,6 +38,11 @@ class SocketSpy
     public $argsFromSocketCloseCalls = array();
 
     /**
+     * var boolean
+     */
+    public $returnErrorOnSend = false;
+
+    /**
      * @param int $domain
      * @param int $type
      * @param int $protocol
@@ -83,6 +88,10 @@ class SocketSpy
         $addr,
         $port
     ) {
+        if ($this->returnErrorOnSend === true) {
+          return false;
+        }
+
         $this->argsFromSocketSendtoCalls[] = array(
             $socket,
             $buf,
@@ -91,6 +100,7 @@ class SocketSpy
             $addr,
             $port
         );
+        return $len;
     }
 
     /**
