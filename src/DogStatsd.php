@@ -572,14 +572,16 @@ class DogStatsd
     /**
      * Normalize the value witout locale consideration before queuing the metric for sending
      *
-     * @param string $value The value to normalize
+     * @param float $value The value to normalize
      *
      * @return string Formatted value
      */
-    function normalizeStat($value) {
-      // Controlls the way things are converted to a string.
-      // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
-      return rtrim(rtrim(number_format($value, $this->decimalPrecision, '.', ''), "0"), ".");
+    private function normalizeStat($value)
+    {
+        // Controlls the way things are converted to a string.
+        // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
+
+        return rtrim(rtrim(number_format((float) $value, $this->decimalPrecision, '.', ''), "0"), ".");
     }
 
 }
