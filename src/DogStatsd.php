@@ -8,10 +8,13 @@ namespace DataDog;
 
 class DogStatsd
 {
-    public const OK        = 0;
-    public const WARNING   = 1;
-    public const CRITICAL  = 2;
-    public const UNKNOWN   = 3;
+    // phpcs:disable
+    const OK        = 0;
+    const WARNING   = 1;
+    const CRITICAL  = 2;
+    const UNKNOWN   = 3;
+    // phpcs:enable
+
 
     /**
      * @var string
