@@ -21,7 +21,7 @@ class BatchedDogStatsd extends DogStatsd
 
     public function __construct(array $config = array())
     {
-      # by default the telemetry is enabled for BatchedDogStatsd
+        // by default the telemetry is enabled for BatchedDogStatsd
         if (!isset($config["disable_telemetry"])) {
             $config["disable_telemetry"] = false;
         }
