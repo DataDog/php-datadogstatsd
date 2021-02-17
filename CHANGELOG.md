@@ -3,6 +3,11 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.2 / 2021-2-17
+
+* Fix Add PHPCS + style updates, thanks to [@timrourke][]
+* Fix `normalizeStat` `number_format`, thanks to [@umpirsky][] and [@ManInTheBox][]
+
 # 1.5.2 / 2020-10-12
 
 * Fix 0 gauge not emitter, thanks to [@ZymoticB][].
@@ -107,4 +112,7 @@ CHANGELOG
 [derek9gag]: https://github.com/derek9gag
 [@TheBooper]: https://github.com/TheBooper
 [@ZymoticB]: https://github.com/ZymoticB
+[@umpirsky]: https://github.com/umpirsky
+[@ManInTheBox]: https://github.com/ManInTheBox
+[@timrourke]: https://github.com/timrourke
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
