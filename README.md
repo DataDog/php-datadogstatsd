@@ -98,3 +98,15 @@ After the client is created, you can start sending Service Checks to Datadog. Se
 ```bash
 composer test
 ```
+
+### Lint
+
+```bash
+composer lint
+```
+
+### Fix lint
+
+```bash
+composer fix-lint
+```

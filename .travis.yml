@@ -21,3 +21,4 @@ script:
   # Execute PHPUnit tests
   - composer install --prefer-dist
   - vendor/bin/phpunit --coverage-text
+  - composer lint

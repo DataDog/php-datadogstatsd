@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<ruleset name="DataDogStatsd PHP">
+    <description>Sniffs for DataDogStatsd PHP</description>
+
+    <file>./src</file>
+
+    <arg name="colors" />
+
+    <rule ref="PSR12"/>
+
+    <rule ref="Generic.Commenting.Todo"/>
+    <rule ref="Generic.Commenting.Fixme"/>
+    <rule ref="Generic.Commenting.DocComment.MissingShort">
+        <severity>0</severity>
+    </rule>
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+</ruleset>
