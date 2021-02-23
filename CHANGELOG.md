@@ -3,7 +3,7 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
-# 1.5.2 / 2021-2-17
+# 1.5.3 / 2021-02-17
 
 * Fix Add PHPCS + style updates, thanks to [@timrourke][]
 * Fix `normalizeStat` `number_format`, thanks to [@umpirsky][] and [@ManInTheBox][]
