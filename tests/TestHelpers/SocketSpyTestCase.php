@@ -24,7 +24,7 @@ class SocketSpyTestCase extends TestCase
     /**
      * Set up a spy object to capture calls to global built in socket functions
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         global $socketSpy;
 

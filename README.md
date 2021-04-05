@@ -7,7 +7,7 @@
 
 This is an extremely simple PHP [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?tab=php) client.
 
-**Requires PHP >= 5.6.0.**
+**Requires PHP >= 7.3.0.**
 
 See [CHANGELOG.md](CHANGELOG.md) for changes.
 

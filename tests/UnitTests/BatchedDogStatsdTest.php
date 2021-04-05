@@ -8,7 +8,7 @@ use DataDog\TestHelpers\SocketSpyTestCase;
 
 class BatchedDogStatsdTest extends SocketSpyTestCase
 {
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
