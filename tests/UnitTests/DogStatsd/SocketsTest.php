@@ -9,7 +9,7 @@ use DataDog\TestHelpers\SocketSpyTestCase;
 
 class SocketsTest extends SocketSpyTestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 

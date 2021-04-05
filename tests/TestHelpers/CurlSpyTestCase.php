@@ -11,7 +11,7 @@ class CurlSpyTestCase extends TestCase
     /**
      * Set up a spy object to capture calls to built in curl functions
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         global $curlSpy;
 
