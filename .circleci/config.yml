@@ -20,19 +20,19 @@ version: 2 # use CircleCI 2.0
 
 jobs:
   test-7.2:
-    <<: *dockerbuild7
+    <<: *dockerbuild-7
     docker:
       - image: circleci/php:7.2-node-browsers
   test-7.1:
-    <<: *dockerbuild7
+    <<: *dockerbuild-7
     docker:
       - image: circleci/php:7.1-node-browsers
   test-7.0:
-    <<: *dockerbuild7
+    <<: *dockerbuild-7
     docker:
       - image: circleci/php:7.0-node-browsers
   test-5.6:
-    <<: *dockerbuild5
+    <<: *dockerbuild-5
     docker:
       - image: circleci/php:5.6-node-browsers
 
