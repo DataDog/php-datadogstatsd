@@ -1,0 +1,22 @@
+version: 2 # use CircleCI 2.0
+
+"-": &dockerbuild
+  steps:
+    - checkout
+    - run: find . -name '*.php' -exec php -l {} > /dev/null \; 2> /tmp/lint.err ; test ! -s /tmp/lint.err
+    - run: composer install --prefer-dist
+    - run: vendor/bin/phpunit --coverage-text
+    - run: composer lint
+
+jobs:
+  build-test:
+    <<: *dockerbuild
+    docker:
+      - image: circleci/php:7.1-node-browsers
+
+workflows:
+  version: 2
+  check_compile:
+    jobs:
+      - build-test
+    
