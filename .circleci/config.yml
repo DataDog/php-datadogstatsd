@@ -10,15 +10,30 @@ version: 2 # use CircleCI 2.0
     - run: composer lint
 
 jobs:
-  build-test:
+  build-7.2:
+    <<: *dockerbuild
+    docker:
+      - image: circleci/php:7.2-node-browsers
+  build-7.1:
     <<: *dockerbuild
     docker:
       - image: circleci/php:7.1-node-browsers
+  build-7.0:
+    <<: *dockerbuild
+    docker:
+      - image: circleci/php:7.0-node-browsers
+  build-5.6:
+    <<: *dockerbuild
+    docker:
+      - image: circleci/php:5.6-node-browsers
 
 workflows:
   version: 2
   check_compile:
     jobs:
-      - build-test
+      - build-7.2
+      - build-7.1
+      - build-7.0
+      - build-5.6
     
 
