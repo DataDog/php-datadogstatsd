@@ -8,11 +8,16 @@ version: 2 # use CircleCI 2.0
     - run: vendor/bin/phpunit --coverage-text
     - run: composer lint
 
+jobs:
+  build-test:
+    <<: *dockerbuild
+    docker:
+      - image: circleci/php:7.1-node-browsers
+
 workflows:
   version: 2
-  workflow:
+  check_compile:
     jobs:
-      build-test:
-        <<: *dockerbuild
-      docker:
-        - image: circleci/php:7.1-node-browsers
+      - build-test
+    
+
