@@ -3,6 +3,7 @@ version: 2 # use CircleCI 2.0
 "-": &dockerbuild
   steps:
     - checkout
+    - run: sudo docker-php-ext-install sockets
     - run: find . -name '*.php' -exec php -l {} > /dev/null \; 2> /tmp/lint.err ; test ! -s /tmp/lint.err
     - run: composer install --prefer-dist
     - run: vendor/bin/phpunit --coverage-text
