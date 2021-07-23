@@ -1,6 +1,6 @@
 version: 2 # use CircleCI 2.0
 
-"-": &dockerbuild
+"-": &dockerbuild-7
   steps:
     - checkout
     - run: sudo docker-php-ext-install sockets
@@ -9,21 +9,30 @@ version: 2 # use CircleCI 2.0
     - run: phpdbg -qrr  vendor/bin/phpunit --coverage-text
     - run: composer lint
 
+"-": &dockerbuild-5
+  steps:
+    - checkout
+    - run: sudo docker-php-ext-install sockets
+    - run: find . -name '*.php' -exec php -l {} > /dev/null \; 2> /tmp/lint.err ; test ! -s /tmp/lint.err
+    - run: composer install --prefer-dist
+    - run: vendor/bin/phpunit --coverage-text
+    - run: composer lint
+
 jobs:
   test-7.2:
-    <<: *dockerbuild
+    <<: *dockerbuild7
     docker:
       - image: circleci/php:7.2-node-browsers
   test-7.1:
-    <<: *dockerbuild
+    <<: *dockerbuild7
     docker:
       - image: circleci/php:7.1-node-browsers
   test-7.0:
-    <<: *dockerbuild
+    <<: *dockerbuild7
     docker:
       - image: circleci/php:7.0-node-browsers
   test-5.6:
-    <<: *dockerbuild
+    <<: *dockerbuild5
     docker:
       - image: circleci/php:5.6-node-browsers
 
