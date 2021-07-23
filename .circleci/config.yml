@@ -1,6 +1,6 @@
 version: 2 # use CircleCI 2.0
 
-"-": &dockerbuild-7
+x-dockerbuild-7: &dockerbuild-7
   steps:
     - checkout
     - run: sudo docker-php-ext-install sockets
@@ -9,7 +9,7 @@ version: 2 # use CircleCI 2.0
     - run: phpdbg -qrr  vendor/bin/phpunit --coverage-text
     - run: composer lint
 
-"-": &dockerbuild-5
+x-dockerbuild-5: &dockerbuild-5
   steps:
     - checkout
     - run: sudo docker-php-ext-install sockets
