@@ -13,6 +13,15 @@
         <directory suffix="Test.php">tests/UnitTests</directory>
     </testsuite>
 
+    <coverage>
+        <include>
+            <directory suffix=".php">src</directory>
+        </include>
+        <report>
+            <text outputFile="php://stdout"/>
+        </report>
+    </coverage>
+
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
