@@ -68,16 +68,16 @@ In order to use DogStatsD metrics, events, and Service Checks the Agent must be 
 
 ### Metrics
 
-After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php) to see how to submit all supported metric types to Datadog with working code examples:
+After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php) to see how to submit all supported metric types to Datadog with working code examples:
 
-* [Submit a COUNT metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#count).
-* [Submit a GAUGE metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#gauge).
-* [Submit a SET metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#set)
-* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#histogram)
-* [Submit a TIMER metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#timer)
-* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#distribution)
+* [Submit a COUNT metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#count).
+* [Submit a GAUGE metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#gauge).
+* [Submit a SET metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#set)
+* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#histogram)
+* [Submit a TIMER metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#timer)
+* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#distribution)
 
-Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#metric-submission-options) or [tagging your metrics with your custom tags](https://docs.datadoghq.com/developers/metrics/dogstatsd_metrics_submission/?tab=php#metric-tagging).
+Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#metric-submission-options) or [tagging your metrics with your custom tags](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#metric-tagging).
 
 ### Events
 
