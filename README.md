@@ -5,7 +5,7 @@
 [![Packagist Version](https://img.shields.io/packagist/v/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
 [![Total Downloads](https://img.shields.io/packagist/dt/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
 
-This is an extremely simple PHP [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?tab=php) client.
+This is an extremely simple PHP [DogStatsD](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=php) client.
 
 **Requires PHP >= 5.6.0.**
 
@@ -44,7 +44,7 @@ $statsd = new DogStatsd(
   );
 ```
 
-DogStatsd constructor, takes a configuration array. See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?tab=php#client-instantiation-parameters).
+DogStatsd constructor, takes a configuration array. See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=php#client-instantiation-parameters).
 
 ### Origin detection over UDP in Kubernetes
 
@@ -64,28 +64,28 @@ The agent uses this tag to infer packets' origin, and tag their metrics accordin
 
 ## Usage
 
-In order to use DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?tab=php).
+In order to use DogStatsD metrics, events, and Service Checks the Agent must be [running and available](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=php).
 
 ### Metrics
 
-After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php) to see how to submit all supported metric types to Datadog with working code examples:
+After the client is created, you can start sending custom metrics to Datadog. See the dedicated [Metric Submission: DogStatsD documentation](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php) to see how to submit all supported metric types to Datadog with working code examples:
 
-* [Submit a COUNT metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#count).
-* [Submit a GAUGE metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#gauge).
-* [Submit a SET metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#set)
-* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#histogram)
-* [Submit a TIMER metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#timer)
-* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#distribution)
+* [Submit a COUNT metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#count).
+* [Submit a GAUGE metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#gauge).
+* [Submit a SET metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#set)
+* [Submit a HISTOGRAM metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#histogram)
+* [Submit a TIMER metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#timer)
+* [Submit a DISTRIBUTION metric](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#distribution)
 
-Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#metric-submission-options) or [tagging your metrics with your custom tags](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?tab=php#metric-tagging).
+Some options are suppported when submitting metrics, like [applying a Sample Rate to your metrics](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#metric-submission-options) or [tagging your metrics with your custom tags](https://docs.datadoghq.com/metrics/dogstatsd_metrics_submission/?code-lang=php#metric-tagging).
 
 ### Events
 
-After the client is created, you can start sending events to your Datadog Event Stream. See the dedicated [Event Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/events/dogstatsd/?tab=php) to see how to submit an event to your Datadog Event Stream.
+After the client is created, you can start sending events to your Datadog Event Stream. See the dedicated [Event Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/events/dogstatsd/?code-lang=php) to see how to submit an event to your Datadog Event Stream.
 
 ### Service Checks
 
-After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?tab=php) to see how to submit a Service Check to Datadog.
+After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?code-lang=php) to see how to submit a Service Check to Datadog.
 
 ## Roadmap
 
