@@ -24,7 +24,7 @@ function curl_init($url = null)
 
     $curlSpy->curlInitWasCalledWithArg($url);
 
-    $resource = fopen('/dev/null', 'r');
+    $resource = tmpfile();
 
     $curlSpy->curlInitDidReturn($resource);
 
