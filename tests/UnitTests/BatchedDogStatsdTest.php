@@ -8,9 +8,9 @@ use DataDog\TestHelpers\SocketSpyTestCase;
 
 class BatchedDogStatsdTest extends SocketSpyTestCase
 {
-    protected function setUp()
+    protected function set_up()
     {
-        parent::setUp();
+        parent::set_up();
 
         // Flush the buffer to reset state for next test
         BatchedDogStatsd::$maxBufferLength = 50;
