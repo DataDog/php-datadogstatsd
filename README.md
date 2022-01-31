@@ -1,6 +1,6 @@
 # PHP DataDog StatsD Client
 
-[![Build Status](https://travis-ci.org/DataDog/php-datadogstatsd.svg?branch=master)](https://travis-ci.org/DataDog/php-datadogstatsd)
+[![CircleCI](https://circleci.com/gh/DataDog/php-datadogstatsd/tree/master.svg?style=svg)](https://circleci.com/gh/DataDog/php-datadogstatsd/tree/master)
 [![Author](https://img.shields.io/badge/author-@datadog-blue.svg?style=flat-square)](https://github.com/datadog)
 [![Packagist Version](https://img.shields.io/packagist/v/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
 [![Total Downloads](https://img.shields.io/packagist/dt/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
