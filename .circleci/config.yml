@@ -1,6 +1,6 @@
 version: 2 # use CircleCI 2.0
 
-x-dockerbuild-7: &dockerbuild-7
+x-dockerbuild-phpdbg: &dockerbuild-phpdbg
   steps:
     - checkout
     - run: sudo docker-php-ext-install sockets
@@ -19,16 +19,28 @@ x-dockerbuild-5: &dockerbuild-5
     - run: composer lint
 
 jobs:
+  test-8.0:
+    <<: *dockerbuild-phpdbg
+    docker:
+      - image: circleci/php:8.0-node-browsers
+  test-7.4:
+    <<: *dockerbuild-phpdbg
+    docker:
+      - image: circleci/php:7.4-node-browsers
+  test-7.3:
+    <<: *dockerbuild-phpdbg
+    docker:
+      - image: circleci/php:7.3-node-browsers
   test-7.2:
-    <<: *dockerbuild-7
+    <<: *dockerbuild-phpdbg
     docker:
       - image: circleci/php:7.2-node-browsers
   test-7.1:
-    <<: *dockerbuild-7
+    <<: *dockerbuild-phpdbg
     docker:
       - image: circleci/php:7.1-node-browsers
   test-7.0:
-    <<: *dockerbuild-7
+    <<: *dockerbuild-phpdbg
     docker:
       - image: circleci/php:7.0-node-browsers
   test-5.6:
@@ -40,6 +52,9 @@ workflows:
   version: 2
   check_compile:
     jobs:
+      - test-8.0
+      - test-7.4
+      - test-7.3
       - test-7.2
       - test-7.1
       - test-7.0

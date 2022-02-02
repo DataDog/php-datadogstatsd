@@ -9,9 +9,9 @@ use DataDog\TestHelpers\SocketSpyTestCase;
 
 class SocketsTest extends SocketSpyTestCase
 {
-    public function setUp()
+    public function set_up()
     {
-        parent::setUp();
+        parent::set_up();
 
         // Reset the stubs for mt_rand() and mt_getrandmax()
         global $mt_rand_stub_return_value;
