@@ -60,6 +60,10 @@ class DogStatsd
      * @var int Number of decimals to use when formatting numbers to strings
      */
     private $decimalPrecision;
+    /**
+     * @var string The prefix to apply to all metrics
+     */
+    private $metricPrefix;
 
     private static $eventUrl = '/api/v1/events';
 
@@ -74,7 +78,9 @@ class DogStatsd
      * curl_ssl_verify_host,
      * curl_ssl_verify_peer,
      * api_key and app_key,
-     * decimal_precision
+     * global_tags,
+     * decimal_precision,
+     * metric_prefix
      *
      * @param array $config
      */
@@ -103,6 +109,8 @@ class DogStatsd
         if (getenv('DD_ENTITY_ID')) {
             $this->globalTags['dd.internal.entity_id'] = getenv('DD_ENTITY_ID');
         }
+
+        $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
 
         if ($this->apiKey !== null) {
             $this->submitEventsOver = 'TCP';
@@ -387,7 +395,7 @@ class DogStatsd
 
         foreach ($sampledData as $stat => $value) {
             $value .= $this->serializeTags($tags);
-            $this->report("$stat:$value");
+            $this->report("{$this->metricPrefix}$stat:$value");
         }
     }
 

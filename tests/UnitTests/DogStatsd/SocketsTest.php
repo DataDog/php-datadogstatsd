@@ -1273,6 +1273,20 @@ class SocketsTest extends SocketSpyTestCase
         setlocale(LC_ALL, $defaultLocale);
     }
 
+    public function testMetricPrefix()
+    {
+      $dog = new DogStatsd(array("disable_telemetry" => false, "metric_prefix" => 'test_prefix'));
+
+      $dog->timing('test', 21.00);
+      $this->assertSameWithTelemetry('test_prefix.test:21|ms', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]);
+
+      $dog->gauge('test', 21.22);
+      $this->assertSameWithTelemetry('test_prefix.test:21.22|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 687, "packets_sent" => 1));
+
+      $dog->gauge('test', 2000.00);
+      $this->assertSameWithTelemetry('test_prefix.test:2000|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[2][1], "", array("bytes_sent" => 691, "packets_sent" => 1));
+    }
+
 
     /**
      * Get a timestamp created from a real date that is deterministic in nature
