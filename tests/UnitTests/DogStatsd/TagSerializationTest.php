@@ -47,6 +47,7 @@ class TagSerializationTest extends TestCase
                 ['foo' => 'bar', 'baz' => 42],
                 '|#foo:bar,baz:42'
             ],
+            // https://github.com/DataDog/php-datadogstatsd/issues/118
             'one string one true boolean' => [
                 ['foo' => 'bar', 'baz' => true],
                 '|#foo:bar,baz:true'
