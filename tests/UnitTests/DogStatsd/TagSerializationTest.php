@@ -46,6 +46,14 @@ class TagSerializationTest extends TestCase
             'one string one int' => [
                 ['foo' => 'bar', 'baz' => 42],
                 '|#foo:bar,baz:42'
+            ],
+            'one string one true boolean' => [
+                ['foo' => 'bar', 'baz' => true],
+                '|#foo:bar,baz:true'
+            ],
+            'one string one false boolean' => [
+                ['foo' => 'bar', 'baz' => false],
+                '|#foo:bar,baz:false'
             ]
         ];
     }
