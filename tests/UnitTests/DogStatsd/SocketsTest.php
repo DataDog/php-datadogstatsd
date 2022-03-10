@@ -318,14 +318,16 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
-    public function testSet()
+    /**
+     * @dataProvider setProvider
+     * @param $stat
+     * @param $value
+     * @param $sampleRate
+     * @param $tags
+     * @param $expectedUdpMessage
+     */
+    public function testSet($stat, $value, $sampleRate, $tags, $expectedUdpMessage)
     {
-        $stat = 'some.set_metric';
-        $value = 22239;
-        $sampleRate = 1.0;
-        $tags = array('little' => 'bit');
-        $expectedUdpMessage = 'some.set_metric:22239|s|#little:bit';
-
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
         $dog->set(
@@ -348,6 +350,33 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1]
+        );
+    }
+
+    public function setProvider()
+    {
+        return array(
+            'integer' => array(
+                'some.int_metric',
+                1,
+                1.0,
+                array('little' => 'bit'),
+                'some.int_metric:1|s|#little:bit'
+            ),
+            'float' => array(
+                'some.float_metric',
+                3.1415926535898,
+                1.0,
+                array('little' => 'bit'),
+                'some.float_metric:3.14|s|#little:bit'
+            ),
+            'string' => array(
+                'some.string_metric',
+                'uniqueval',
+                1.0,
+                array('little' => 'bit'),
+                'some.string_metric:uniqueval|s|#little:bit'
+            ),
         );
     }
 

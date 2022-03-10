@@ -238,14 +238,17 @@ class DogStatsd
      * Set
      *
      * @param  string       $stat       The metric
-     * @param  float        $value      The value
+     * @param  string|float $value      The value
      * @param  float        $sampleRate the rate (0-1) for sampling.
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
-        $value = $this->normalizeStat($value);
+        if (!is_string($value)) {
+            $value = $this->normalizeStat($value);
+        }
+
         $this->send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
