@@ -323,6 +323,8 @@ class DogStatsd
         foreach ($all_tags as $tag => $value) {
             if ($value === null) {
                 $tag_strings[] = $tag;
+            } elseif (is_bool($value)) {
+                $tag_strings[] = $tag . ':' . ($value === true ? 'true' : 'false');
             } else {
                 $tag_strings[] = $tag . ':' . $value;
             }
