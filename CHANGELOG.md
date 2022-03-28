@@ -3,6 +3,13 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.4 / 2022-03-28
+
+* Fix regression preventing string values in `set()`. thanks to [@colinodell][]
+* Fix boolean tag values, thanks to [@roippi][]
+* Adding suppport for a metric prefix, thanks to [@scott-shields-github][]
+* Add CircleCI status badge, thanks to [@peter279k][]
+
 # 1.5.3 / 2021-02-17
 
 * Fix Add PHPCS + style updates, thanks to [@timrourke][]
