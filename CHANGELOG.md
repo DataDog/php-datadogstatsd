@@ -122,4 +122,8 @@ CHANGELOG
 [@umpirsky]: https://github.com/umpirsky
 [@ManInTheBox]: https://github.com/ManInTheBox
 [@timrourke]: https://github.com/timrourke
+[@peter279k]: https://github.com/peter279k
+[@scott-shields-github]: https://github.com/scott-shields-github
+[@roippi]: https://github.com/roippi
+[@colinodell]: https://github.com/colinodell
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
