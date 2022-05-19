@@ -3,7 +3,7 @@
 namespace DataDog\TestHelpers;
 
 use DataDog\DogStatsd;
-use PHPUnit\Framework\TestCase;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 /**
  * Making this variable global to this file is necessary for interacting with
@@ -24,13 +24,13 @@ class SocketSpyTestCase extends TestCase
     /**
      * Set up a spy object to capture calls to global built in socket functions
      */
-    protected function setUp()
+    protected function set_up()
     {
         global $socketSpy;
 
         $socketSpy = new SocketSpy();
 
-        parent::setUp();
+        parent::set_up();
     }
 
     /**

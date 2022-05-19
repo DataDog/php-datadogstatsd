@@ -29,7 +29,7 @@ function socket_create($domain, $type, $protocol)
 
     // A PHP resource of unimportance, useful primarily to assert that our stubs
     // of the global socket functions return or take a deterministic value.
-    $resource = fopen('/dev/null', 'r');
+    $resource = tmpfile();
 
     $socketSpy->socketCreateDidReturn($resource);
 
