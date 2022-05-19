@@ -19,13 +19,13 @@ class BatchedDogStatsd extends DogStatsd
     public static $maxBufferLength = 50;
 
 
-    public function __construct(array $config = array(), $transportFactory = null)
+    public function __construct(array $config = array())
     {
         // by default the telemetry is enabled for BatchedDogStatsd
         if (!isset($config["disable_telemetry"])) {
             $config["disable_telemetry"] = false;
         }
-        parent::__construct($config, $transportFactory);
+        parent::__construct($config);
     }
 
     /**

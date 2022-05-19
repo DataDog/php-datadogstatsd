@@ -1,6 +1,6 @@
 # PHP DataDog StatsD Client
 
-[![Build Status](https://travis-ci.org/DataDog/php-datadogstatsd.svg?branch=master)](https://travis-ci.org/DataDog/php-datadogstatsd)
+[![CircleCI](https://circleci.com/gh/DataDog/php-datadogstatsd/tree/master.svg?style=svg)](https://circleci.com/gh/DataDog/php-datadogstatsd/tree/master)
 [![Author](https://img.shields.io/badge/author-@datadog-blue.svg?style=flat-square)](https://github.com/datadog)
 [![Packagist Version](https://img.shields.io/packagist/v/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
 [![Total Downloads](https://img.shields.io/packagist/dt/datadog/php-datadogstatsd.svg?style=flat-square)](https://packagist.org/packages/datadog/php-datadogstatsd)
@@ -45,64 +45,6 @@ $statsd = new DogStatsd(
 ```
 
 DogStatsd constructor, takes a configuration array. See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=php#client-instantiation-parameters).
-
-#### Migrating from legacy configuration
-
-In some setups, the use of environment variables can cause surprises, such as warnings, test-failures, etc.
-
-There is a new argument `transport_factory`, which takes an argument that _implements_ `DataDog\TransportFactory` interface. This has one method `create`, which can return, one or more classes implementing `DataDog\TransportMechanism`. This can be particularly useful if you experience warnings, errors or other output from the PHP built-in's this library uses for communicating stats.
-
-##### Defining custom implementation of transport factory
-
-```php
-<?php
-
-namespace YourOrg\Metrics;
-
-/**
- * This class works around the decisions the constructor of DogStatsd class
- * Which has default convenience functionality, which can make your code
- * more difficult to reason about.
- */
-final class CustomTransportFactory implements DataDog\TransportFactory
-{
-    private $host;
-    private $port;
-
-    public function __construct($host, $port)
-    {
-        if (empty($host) || empty($port)) {
-            throw new \ArgumentException("Must specify host and port");
-        }
-    }
-
-    public function create()
-    {
-        return new Ipv4UdpTransport(
-            $this->host,
-            $this->port
-        );
-    }
-}
-```
-
-##### Instantiating datadog with your new class
-```php
-<?php
-
-require __DIR__ . '/vendor/autoload.php';
-
-use DataDog\DogStatsd;
-use YourOrg\Metrics\CustomTransportFactory;
-
-$statsd = new DogStatsd(
-    array('transport_factory' =>, new CustomTransportFactory())
-);
-```
-
-#### Why this structure?
-
-The reason a factory is used to create an instance, is that DogStatsD opens sockets on the machine running this code. If sockets are left open and unclosed, then the second time a socket is to be created, more problems arise.
 
 ### Origin detection over UDP in Kubernetes
 

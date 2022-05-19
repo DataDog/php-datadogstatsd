@@ -60,16 +60,15 @@ class DogStatsd
      * @var int Number of decimals to use when formatting numbers to strings
      */
     private $decimalPrecision;
-
     /**
-     * @var TransportFactory
+     * @var string The prefix to apply to all metrics
      */
-    private $transportFactory;
+    private $metricPrefix;
 
     private static $eventUrl = '/api/v1/events';
 
     // Used for the telemetry tags
-    public static $version = '1.5.3';
+    public static $version = '1.5.4';
 
     /**
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
@@ -79,12 +78,13 @@ class DogStatsd
      * curl_ssl_verify_host,
      * curl_ssl_verify_peer,
      * api_key and app_key,
-     * decimal_precision
-     * transport_factory
+     * global_tags,
+     * decimal_precision,
+     * metric_prefix
      *
      * @param array $config
      */
-    public function __construct(array $config = array(), $transportFactory = null)
+    public function __construct(array $config = array())
     {
         $this->host = isset($config['host'])
             ? $config['host'] : (getenv('DD_AGENT_HOST')
@@ -95,12 +95,6 @@ class DogStatsd
             ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
 
         $this->socketPath = isset($config['socket_path']) ? $config['socket_path'] : null;
-
-        $this->transportFactory = (
-            isset($config['transport_factory']) ?
-            $transportFactory :
-            new BridgingTransportFactory($this->socketPath, $this->host, $this->port)
-        );
 
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
         $this->curlVerifySslHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
@@ -115,6 +109,8 @@ class DogStatsd
         if (getenv('DD_ENTITY_ID')) {
             $this->globalTags['dd.internal.entity_id'] = getenv('DD_ENTITY_ID');
         }
+
+        $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
 
         if ($this->apiKey !== null) {
             $this->submitEventsOver = 'TCP';
@@ -242,14 +238,17 @@ class DogStatsd
      * Set
      *
      * @param  string       $stat       The metric
-     * @param  float        $value      The value
+     * @param  string|float $value      The value
      * @param  float        $sampleRate the rate (0-1) for sampling.
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
-        $value = $this->normalizeStat($value);
+        if (!is_string($value)) {
+            $value = $this->normalizeStat($value);
+        }
+
         $this->send(array($stat => "$value|s"), $sampleRate, $tags);
     }
 
@@ -327,6 +326,8 @@ class DogStatsd
         foreach ($all_tags as $tag => $value) {
             if ($value === null) {
                 $tag_strings[] = $tag;
+            } elseif (is_bool($value)) {
+                $tag_strings[] = $tag . ':' . ($value === true ? 'true' : 'false');
             } else {
                 $tag_strings[] = $tag . ':' . $value;
             }
@@ -399,7 +400,7 @@ class DogStatsd
 
         foreach ($sampledData as $stat => $value) {
             $value .= $this->serializeTags($tags);
-            $this->report("$stat:$value");
+            $this->report("{$this->metricPrefix}$stat:$value");
         }
     }
 
@@ -477,7 +478,15 @@ class DogStatsd
         $message .= $this->flushTelemetry();
 
         // Non - Blocking UDP I/O - Use IP Addresses!
-        $res = $this->transportFactory->create()->sendMessage($message);
+        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP)
+            : socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        socket_set_nonblock($socket);
+
+        if (!is_null($this->socketPath)) {
+            $res = socket_sendto($socket, $message, strlen($message), 0, $this->socketPath);
+        } else {
+            $res = socket_sendto($socket, $message, strlen($message), 0, $this->host, $this->port);
+        }
 
         if ($res !== false) {
             $this->resetTelemetry();
@@ -487,6 +496,8 @@ class DogStatsd
             $this->bytes_dropped += strlen($message);
             $this->packets_dropped += 1;
         }
+
+        socket_close($socket);
     }
 
     /**
