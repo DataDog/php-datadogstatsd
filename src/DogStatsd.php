@@ -171,7 +171,7 @@ class DogStatsd
      */
     public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
     {
-        $time = $this->normalizeStat($time);
+        $time = $this->normalizeValue($time);
         $this->send(array($stat => "$time|ms"), $sampleRate, $tags);
     }
 
@@ -200,7 +200,7 @@ class DogStatsd
      **/
     public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
     {
-        $value = $this->normalizeStat($value);
+        $value = $this->normalizeValue($value);
         $this->send(array($stat => "$value|g"), $sampleRate, $tags);
     }
 
@@ -215,7 +215,7 @@ class DogStatsd
      **/
     public function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
     {
-        $value = $this->normalizeStat($value);
+        $value = $this->normalizeValue($value);
         $this->send(array($stat => "$value|h"), $sampleRate, $tags);
     }
 
@@ -230,7 +230,7 @@ class DogStatsd
      **/
     public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
     {
-        $value = $this->normalizeStat($value);
+        $value = $this->normalizeValue($value);
         $this->send(array($stat => "$value|d"), $sampleRate, $tags);
     }
 
@@ -246,7 +246,7 @@ class DogStatsd
     public function set($stat, $value, $sampleRate = 1.0, $tags = null)
     {
         if (!is_string($value)) {
-            $value = $this->normalizeStat($value);
+            $value = $this->normalizeValue($value);
         }
 
         $this->send(array($stat => "$value|s"), $sampleRate, $tags);
@@ -295,7 +295,7 @@ class DogStatsd
      **/
     public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
     {
-        $delta = $this->normalizeStat($delta);
+        $delta = $this->normalizeValue($delta);
         if (!is_array($stats)) {
             $stats = array($stats);
         }
@@ -380,7 +380,8 @@ class DogStatsd
      * @return void
      **/
     public function send($data, $sampleRate = 1.0, $tags = null)
-    {
+    { 
+        $sampleRate = $this->normalizeValue($sampleRate);
         $this->metrics_sent += count($data);
         // sampling
         $sampledData = array();
@@ -640,7 +641,7 @@ class DogStatsd
      *
      * @return string Formatted value
      */
-    private function normalizeStat($value)
+    private function normalizeValue($value)
     {
         // Controlls the way things are converted to a string.
         // Otherwise localization settings impact float to string conversion (e.x 1.3 -> 1,3 and 10000 => 10,000)
