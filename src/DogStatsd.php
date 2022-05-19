@@ -380,7 +380,7 @@ class DogStatsd
      * @return void
      **/
     public function send($data, $sampleRate = 1.0, $tags = null)
-    { 
+    {
         $sampleRate = $this->normalizeValue($sampleRate);
         $this->metrics_sent += count($data);
         // sampling
