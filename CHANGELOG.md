@@ -3,6 +3,11 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.5 / 2022-05-20
+
+* Fix test support for multiple PHP versions. thanks to [@Lewiscowles1986][]
+* Normalize sample rate
+
 # 1.5.4 / 2022-03-28
 
 * Fix regression preventing string values in `set()`. thanks to [@colinodell][]
@@ -126,4 +131,5 @@ CHANGELOG
 [@scott-shields-github]: https://github.com/scott-shields-github
 [@roippi]: https://github.com/roippi
 [@colinodell]: https://github.com/colinodell
+[@Lewiscowles1986]: https://github.com/Lewiscowles1986
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
