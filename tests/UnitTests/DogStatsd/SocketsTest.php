@@ -1302,6 +1302,23 @@ class SocketsTest extends SocketSpyTestCase
         setlocale(LC_ALL, $defaultLocale);
     }
 
+    public function testSampleRateFloatLocalization()
+    {
+        $defaultLocale = setlocale(LC_ALL, 0);
+        setlocale(LC_ALL, 'de_DE');
+        $dog = new DogStatsd(array("disable_telemetry" => true));
+
+        while (!array_key_exists(0, $this->getSocketSpy()->argsFromSocketSendtoCalls)) {
+            $dog->timing('test', 21.21000, 0.3);
+        }
+
+        $this->assertSame(
+            'test:21.21|ms|@0.3',
+            $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1]
+        );
+        setlocale(LC_ALL, $defaultLocale);
+    }
+
     public function testMetricPrefix()
     {
       $dog = new DogStatsd(array("disable_telemetry" => false, "metric_prefix" => 'test_prefix'));
