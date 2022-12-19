@@ -22,7 +22,7 @@ jobs:
   test-8.2:
     <<: *dockerbuild-phpdbg
     docker:
-      - image: circleci/php:8.2-browsers
+      - image: cimg/php:8.2-browsers
   test-8.0:
     <<: *dockerbuild-phpdbg
     docker:
