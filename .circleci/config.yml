@@ -19,6 +19,10 @@ x-dockerbuild-5: &dockerbuild-5
     - run: composer lint
 
 jobs:
+  test-8.2:
+    <<: *dockerbuild-phpdbg
+    docker:
+      - image: circleci/php:8.2-node-browsers
   test-8.0:
     <<: *dockerbuild-phpdbg
     docker:
@@ -52,6 +56,7 @@ workflows:
   version: 2
   check_compile:
     jobs:
+      - test-8.2
       - test-8.0
       - test-7.4
       - test-7.3

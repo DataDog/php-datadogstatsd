@@ -65,6 +65,18 @@ class DogStatsd
      */
     private $metricPrefix;
 
+    // Telemetry
+    private $disable_telemetry;
+    private $telemetry_tags;
+    private $metrics_sent;
+    private $events_sent;
+    private $service_checks_sent;
+    private $bytes_sent;
+    private $bytes_dropped;
+    private $packets_sent;
+    private $packets_dropped;
+   
+
     private static $eventUrl = '/api/v1/events';
 
     // Used for the telemetry tags
@@ -510,7 +522,7 @@ class DogStatsd
      * @param  array  $vals  Optional values of the event. See
      *                       https://docs.datadoghq.com/api/?lang=bash#post-an-event
      *                       for the valid keys
-     * @return null
+     * @return bool
      **/
     public function event($title, $vals = array())
     {
@@ -602,7 +614,7 @@ class DogStatsd
      *
      * @param  array $vals Optional values of the event. See
      *                     https://docs.datadoghq.com/api/?lang=bash#post-an-event for the valid keys
-     * @return null
+     * @return bool
      */
     private function eventUdp($vals)
     {
@@ -631,7 +643,7 @@ class DogStatsd
         $this->events_sent += 1;
         $this->report('_e{' . $title_length . ',' . $text_length . '}:' . $fields);
 
-        return null;
+        return true;
     }
 
     /**
