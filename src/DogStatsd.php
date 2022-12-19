@@ -75,7 +75,7 @@ class DogStatsd
     private $bytes_dropped;
     private $packets_sent;
     private $packets_dropped;
-   
+
 
     private static $eventUrl = '/api/v1/events';
 
