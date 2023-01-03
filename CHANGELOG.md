@@ -3,6 +3,10 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.5.6 / 2023-01-3
+
+* Fix warnings to support PHP 8.2
+
 # 1.5.5 / 2022-05-20
 
 * Fix test support for multiple PHP versions. thanks to [@Lewiscowles1986][]
