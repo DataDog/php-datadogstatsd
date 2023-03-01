@@ -496,9 +496,9 @@ class DogStatsd
         socket_set_nonblock($socket);
 
         if (!is_null($this->socketPath)) {
-            $res = socket_sendto($socket, $message, strlen($message), 0, $this->socketPath);
+            $res = socket_write($socket, $message, strlen($message), 0, $this->socketPath);
         } else {
-            $res = socket_sendto($socket, $message, strlen($message), 0, $this->host, $this->port);
+            $res = socket_write($socket, $message, strlen($message), 0, $this->host, $this->port);
         }
 
         if ($res !== false) {
