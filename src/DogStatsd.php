@@ -33,26 +33,6 @@ class DogStatsd
      */
     private $datadogHost;
     /**
-     * @var string
-     */
-    private $apiKey;
-    /**
-     * @var string
-     */
-    private $appKey;
-    /**
-     * @var string Config for submitting events via 'TCP' vs 'UDP'; default 'UDP'
-     */
-    private $submitEventsOver = 'UDP';
-    /**
-     * @var int Config pass-through for CURLOPT_SSL_VERIFYHOST; defaults 2
-     */
-    private $curlVerifySslHost;
-    /**
-     * @var int Config pass-through for CURLOPT_SSL_VERIFYPEER; default 1
-     */
-    private $curlVerifySslPeer;
-    /**
      * @var array Tags to apply to all metrics
      */
     private $globalTags;
@@ -87,9 +67,6 @@ class DogStatsd
      * host,
      * port,
      * datadog_host,
-     * curl_ssl_verify_host,
-     * curl_ssl_verify_peer,
-     * api_key and app_key,
      * global_tags,
      * decimal_precision,
      * metric_prefix
@@ -109,11 +86,6 @@ class DogStatsd
         $this->socketPath = isset($config['socket_path']) ? $config['socket_path'] : null;
 
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
-        $this->curlVerifySslHost = isset($config['curl_ssl_verify_host']) ? $config['curl_ssl_verify_host'] : 2;
-        $this->curlVerifySslPeer = isset($config['curl_ssl_verify_peer']) ? $config['curl_ssl_verify_peer'] : 1;
-
-        $this->apiKey = isset($config['api_key']) ? $config['api_key'] : null;
-        $this->appKey = isset($config['app_key']) ? $config['app_key'] : null;
 
         $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
@@ -123,10 +95,6 @@ class DogStatsd
         }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
-
-        if ($this->apiKey !== null) {
-            $this->submitEventsOver = 'TCP';
-        }
 
         // by default the telemetry is disable
         $this->disable_telemetry = isset($config["disable_telemetry"]) ? $config["disable_telemetry"] : true;
@@ -513,114 +481,16 @@ class DogStatsd
         socket_close($socket);
     }
 
-    /**
-     * Send an event to the Datadog HTTP api. Potentially slow, so avoid
-     * making many call in a row if you don't want to stall your app.
-     * Requires PHP >= 5.3.0
-     *
-     * @param  string $title Title of the event
-     * @param  array  $vals  Optional values of the event. See
-     *                       https://docs.datadoghq.com/api/?lang=bash#post-an-event
-     *                       for the valid keys
-     * @return bool
-     **/
-    public function event($title, $vals = array())
-    {
-
-        // Assemble the request
-        $vals['title'] = $title;
-
-        // If sending events via UDP
-        if ($this->submitEventsOver === 'UDP') { // FIX
-            return $this->eventUdp($vals);
-        }
-
-        // Convert tags string or array into array of tags: ie ['key:value']
-        if (isset($vals['tags'])) {
-            $vals['tags'] = explode(",", substr($this->serializeTags($vals['tags']), 2));
-        }
-
-        /**
-         * @var boolean Flag for returning success
-         */
-        $success = true;
-
-        // Get the url to POST to
-        $url = $this->datadogHost . self::$eventUrl
-             . '?api_key='          . $this->apiKey
-             . '&application_key='  . $this->appKey;
-
-        $curl = curl_init($url);
-
-        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, $this->curlVerifySslPeer);
-        curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, $this->curlVerifySslHost);
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($curl, CURLOPT_HTTPHEADER, array('Content-Type: application/json'));
-        curl_setopt($curl, CURLOPT_POST, 1);
-        curl_setopt($curl, CURLOPT_HEADER, 0);
-        curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($vals));
-
-        // Nab response and HTTP code
-        $response_body = curl_exec($curl);
-        $response_code = (int) curl_getinfo($curl, CURLINFO_HTTP_CODE);
-
-        try {
-            // Check for cURL errors
-            if ($curlErrorNum = curl_errno($curl)) {
-                throw new \Exception('Datadog event API call cURL issue #' . $curlErrorNum . ' - ' . curl_error($curl));
-            }
-
-            // Check response code is 202
-            if ($response_code !== 200 && $response_code !== 202) {
-                throw new \Exception(
-                    'Datadog event API call HTTP response not OK - '
-                    . $response_code . '; response body: ' . $response_body
-                );
-            }
-
-            // Check for empty response body
-            if (!$response_body) {
-                throw new \Exception('Datadog event API call did not return a body');
-            }
-
-            // Decode JSON response
-            if (!$decodedJson = json_decode($response_body, true)) {
-                throw new \Exception(
-                    'Datadog event API call did not return a body'
-                    . ' that could be decoded via json_decode'
-                );
-            }
-
-            // Check JSON decoded "status" is OK from the Datadog API
-            if ($decodedJson['status'] !== 'ok') {
-                throw new \Exception(
-                    'Datadog event API response  status not "ok"; response body: '
-                    . $response_body
-                );
-            }
-        } catch (\Exception $e) {
-            $success = false;
-
-            // Use error_log for API submission errors to avoid warnings/etc.
-            error_log($e->getMessage());
-        }
-
-        curl_close($curl);
-        return $success;
-    }
-
-    /**
+     /**
      * Formats $vals array into event for submission to Datadog via UDP
      *
      * @param  array $vals Optional values of the event. See
      *                     https://docs.datadoghq.com/api/?lang=bash#post-an-event for the valid keys
      * @return bool
      */
-    private function eventUdp($vals)
+    public function event($title, $vals = array())
     {
-
         // Format required values title and text
-        $title = isset($vals['title']) ? (string) $vals['title'] : '';
         $text = isset($vals['text']) ? (string) $vals['text'] : '';
 
         // Format fields into string that follows Datadog event submission via UDP standards
