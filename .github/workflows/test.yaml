@@ -33,7 +33,7 @@ jobs:
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress
 
-    - name: Setup PHP with PECL extension
+    - name: Setup PHP
       uses: shivammathur/setup-php@v2
       with:
         php-version: '8.2'
@@ -41,7 +41,5 @@ jobs:
 
     - name: Run Tests
       run: |
-        find . -name '*.php' -exec php -l {} 1>/dev/null \; 2>/tmp/lint.err ; test ! -s /tmp/lint.err
-        composer install --prefer-dist
-        phpdbg -qrr  vendor/bin/phpunit --coverage-text
         composer lint
+        composer test
