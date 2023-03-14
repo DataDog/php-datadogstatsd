@@ -89,7 +89,6 @@ After the client is created, you can start sending Service Checks to Datadog. Se
 
 ## Roadmap
 
-* Add a configurable timeout for event submission via TCP
 * Write unit tests
 * Document service check functionality
 
