@@ -1333,6 +1333,37 @@ class SocketsTest extends SocketSpyTestCase
       $this->assertSameWithTelemetry('test_prefix.test:2000|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[2][1], "", array("bytes_sent" => 691, "packets_sent" => 1));
     }
 
+    public function testDDTags()
+    {
+        putenv("DD_VERSION=1.2.3");
+        putenv("DD_ENV=prod");
+        putenv("DD_SERVICE=myService");
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+            'disable_telemetry' => false
+        ));
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value,env:prod,service:myService,version:1.2.3';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            "",
+            array("tags" => "my_tag:tag_value,env:prod,service:myService,version:1.2.3")
+        );
+        putenv("DD_VERSION");
+        putenv("DD_ENV");
+        putenv("DD_SERVICE");
+    }
 
     /**
      * Get a timestamp created from a real date that is deterministic in nature
