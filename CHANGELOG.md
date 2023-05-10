@@ -3,6 +3,11 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.6.0 / 2023-05-10
+
+* Add support for [Unified service tagging](https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes)
+* Remove `lib-curl` dependency and support for events API (using `APP_KEY`). Submitting events now requires a connection to a Datadog Agent.
+
 # 1.5.6 / 2023-01-3
 
 * Fix warnings to support PHP 8.2
