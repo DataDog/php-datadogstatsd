@@ -93,6 +93,15 @@ class DogStatsd
         if (getenv('DD_ENTITY_ID')) {
             $this->globalTags['dd.internal.entity_id'] = getenv('DD_ENTITY_ID');
         }
+        if (getenv('DD_ENV')) {
+            $this->globalTags['env'] = getenv('DD_ENV');
+        }
+        if (getenv('DD_SERVICE')) {
+            $this->globalTags['service'] = getenv('DD_SERVICE');
+        }
+        if (getenv('DD_VERSION')) {
+            $this->globalTags['version'] = getenv('DD_VERSION');
+        }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
 
