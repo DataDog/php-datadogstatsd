@@ -468,8 +468,13 @@ class DogStatsd
         $message .= $this->flushTelemetry();
 
         // Non - Blocking UDP I/O - Use IP Addresses!
-        $socket = is_null($this->socketPath) ? socket_create(AF_INET, SOCK_DGRAM, SOL_UDP)
-            : socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        if (!is_null($this->socketPath)) {
+            $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+        } elseif (filter_var($this->host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+            $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+        } else {
+            $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+        }
         socket_set_nonblock($socket);
 
         if (!is_null($this->socketPath)) {
