@@ -4,4 +4,5 @@
 
 
 # Documentation
+*                     @DataDog/agent-metrics-logs
 *.md                  @DataDog/baklava
