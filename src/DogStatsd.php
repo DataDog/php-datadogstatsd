@@ -66,6 +66,7 @@ class DogStatsd
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:
      * host,
      * port,
+     * socket_path,
      * datadog_host,
      * global_tags,
      * decimal_precision,
@@ -75,15 +76,35 @@ class DogStatsd
      */
     public function __construct(array $config = array())
     {
+        $urlHost = null;
+        $urlPort = null;
+        $urlSocketPath = null;
+
+        if ($url = getenv("DD_DOGSTATSD_URL")) {
+            if (substr($url, 0, 6) === 'udp://') {
+                $parts = parse_url($url);
+                $urlHost = $parts['host'];
+                $urlPort = $parts['port'];
+            }
+
+            if (substr($url, 0, 7) === 'unix://') {
+                $urlSocketPath = substr($url, 7);
+            }
+        }
+
         $this->host = isset($config['host'])
             ? $config['host'] : (getenv('DD_AGENT_HOST')
-            ? getenv('DD_AGENT_HOST') : 'localhost');
+            ? getenv('DD_AGENT_HOST') : ($urlHost
+            ? $urlHost : 'localhost'));
 
         $this->port = isset($config['port'])
             ? $config['port'] : (getenv('DD_DOGSTATSD_PORT')
-            ? (int)getenv('DD_DOGSTATSD_PORT') : 8125);
+            ? (int)getenv('DD_DOGSTATSD_PORT') : ($urlPort
+            ? $urlPort : 8125));
 
-        $this->socketPath = isset($config['socket_path']) ? $config['socket_path'] : null;
+        $this->socketPath = isset($config['socket_path'])
+            ? $config['socket_path'] : ($urlSocketPath
+            ? $urlSocketPath : null);
 
         $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
 

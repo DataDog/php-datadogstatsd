@@ -105,6 +105,23 @@ class SocketsTest extends SocketSpyTestCase
         putenv("DD_DOGSTATSD_PORT");
     }
 
+    public function testHostAndPortFromUrl()
+    {
+        putenv("DD_DOGSTATSD_URL=udp://oh.my.address:1234");
+        $dog = new DogStatsd();
+        $this->assertSame(
+            'oh.my.address',
+            self::getPrivate($dog, 'host'),
+            'Should retrieve host from url'
+        );
+        $this->assertSame(
+            1234,
+            self::getPrivate($dog, 'port'),
+            'Should retrieve port from url'
+        );
+        putenv("DD_DOGSTATSD_URL");
+    }
+
     public function testDefaultHostAndPort()
     {
         $dog = new DogStatsd();
@@ -118,6 +135,37 @@ class SocketsTest extends SocketSpyTestCase
             self::getPrivate($dog, 'port'),
             'Should retrieve default port'
         );
+        $this->assertSame(
+            null,
+            self::getPrivate($dog, 'socketPath'),
+            'Should retrieve default port'
+        );
+    }
+
+    public function testSocketPathFromEnvVar()
+    {
+        putenv("DD_DOGSTATSD_URL=unix:///var/run/datadog/dsd.socket");
+        $dog = new DogStatsd();
+        $this->assertSame(
+            '/var/run/datadog/dsd.socket',
+            self::getPrivate($dog, 'socketPath'),
+            'Should retrieve socket_path from env var'
+        );
+        putenv("DD_DOGSTATSD_URL");
+    }
+
+    public function testSocketPathFromArgs()
+    {
+        putenv("DD_DOGSTATSD_URL='unix:///var/run/datadog/ignored.socket'");
+        $dog = new DogStatsd([
+            'socket_path' => '/var/run/datadog/dsd.socket',
+        ]);
+        $this->assertSame(
+            '/var/run/datadog/dsd.socket',
+            self::getPrivate($dog, 'socketPath'),
+            'Should retrieve socket_path from args not env var'
+        );
+        putenv("DD_DOGSTATSD_URL");
     }
 
     public function testTiming()
