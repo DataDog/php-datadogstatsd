@@ -3,6 +3,11 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.6.1 / 2024-02-23
+
+* Add support for `DD_DOGSTATSD_URL` environment variable (#148) [@fernandocarletti][]
+* Apply check for IPv6 addresses (#146) [@NickStallman][]
+
 # 1.6.0 / 2023-05-10
 
 * Add support for [Unified service tagging](https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes)
@@ -141,4 +146,6 @@ CHANGELOG
 [@roippi]: https://github.com/roippi
 [@colinodell]: https://github.com/colinodell
 [@Lewiscowles1986]: https://github.com/Lewiscowles1986
+[@fernandocarletti]: https://github.com/fernandocarletti
+[@NickStallman]: https://github.com/NickStallman
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
