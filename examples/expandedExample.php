@@ -11,6 +11,8 @@ $scriptStartTime = time();
 
 echo "Script starting.\n";
 
+echo "foo bar"
+
 // Send metrics and events for 5 minutes.
 while (time() < $scriptStartTime + ($runFor * 60)) {
     $startTime1 = microtime(true);
