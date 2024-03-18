@@ -106,7 +106,9 @@ class DogStatsd
             ? $config['socket_path'] : ($urlSocketPath
             ? $urlSocketPath : null);
 
-        $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
+        $this->datadogHost = isset($config['datadog_host'])
+            ? $config['datadog_host'] : (getenv('DD_SITE')
+            ? getenv('DD_SITE') : 'https://app.datadoghq.com');
 
         $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
