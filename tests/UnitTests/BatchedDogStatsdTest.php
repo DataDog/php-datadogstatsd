@@ -74,4 +74,26 @@ class BatchedDogStatsdTest extends SocketSpyTestCase
             array("metrics" => 3)
         );
     }
+
+    public function testGetBufferLength() {
+        $batchedDog = new BatchedDogStatsd();
+
+        $this->assertEquals(0, BatchedDogStatsd::getBufferLength());
+
+        $batchedDog->gauge("some-value", 1);
+
+        $this->assertEquals(1, BatchedDogStatsd::getBufferLength());
+    }
+
+    public function testGetBufferLengthAfterExceedingMaxBufferLength()
+    {
+        BatchedDogStatsd::$maxBufferLength = 2;
+
+        $batchedDog = new BatchedDogStatsd();
+
+        $batchedDog->increment(["first-value", "another-value", "yet-another-value"]);
+        $batchedDog->gauge("some-value", 1);
+
+        $this->assertEquals(1, BatchedDogStatsd::getBufferLength());
+    }
 }

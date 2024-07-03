@@ -55,4 +55,12 @@ class BatchedDogStatsd extends DogStatsd
         static::$buffer = array();
         static::$bufferLength = 0;
     }
+
+    /**
+     * @return int
+     */
+    public static function getBufferLength()
+    {
+        return self::$bufferLength;
+    }
 }
