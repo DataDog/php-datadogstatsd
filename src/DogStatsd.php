@@ -60,7 +60,7 @@ class DogStatsd
     private static $eventUrl = '/api/v1/events';
 
     // Used for the telemetry tags
-    public static $version = '1.6.1';
+    public static $version = '1.6.2';
 
     /**
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:

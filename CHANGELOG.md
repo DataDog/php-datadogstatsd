@@ -3,6 +3,11 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+
+# 1.6.2 / 2024-07-16
+
+* Add getter for `BatchedDogStatsd::$bufferLength` (#151) [@cosmastech][]
+
 # 1.6.1 / 2024-02-23
 
 * Add support for `DD_DOGSTATSD_URL` environment variable (#148) [@fernandocarletti][]
@@ -148,4 +153,5 @@ CHANGELOG
 [@Lewiscowles1986]: https://github.com/Lewiscowles1986
 [@fernandocarletti]: https://github.com/fernandocarletti
 [@NickStallman]: https://github.com/NickStallman
+[@cosmastech]: https://github.com/cosmastech
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
