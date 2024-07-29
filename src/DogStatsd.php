@@ -70,9 +70,19 @@ class DogStatsd
      * datadog_host,
      * global_tags,
      * decimal_precision,
-     * metric_prefix
+     * metric_prefix,
+     * disable_telemetry
      *
-     * @param array $config
+     * @param array{
+     *     host: string,
+     *     port: int,
+     *     socket_path: string,
+     *     datadog_host: string,
+     *     global_tags: string[],
+     *     decimal_precision: int,
+     *     metric_prefix: string,
+     *     disable_telemetry: bool
+     * } $config
      */
     public function __construct(array $config = array())
     {
