@@ -4,5 +4,5 @@
 
 
 # Documentation
-*                     @DataDog/agent-metrics-logs
+*                     @DataDog/agent-metric-pipelines
 *.md                  @DataDog/documentation
