@@ -133,6 +133,10 @@ class DogStatsd
         if (getenv('DD_VERSION')) {
             $this->globalTags['version'] = getenv('DD_VERSION');
         }
+        // DD_EXTERNAL_ENV can be supplied by the Admission controller for origin detection.
+        if (getenv('DD_EXTERNAL_ENV')) {
+            $this->globalTags['e'] = getenv('DD_EXTERNAL_ENV');
+        }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
 
