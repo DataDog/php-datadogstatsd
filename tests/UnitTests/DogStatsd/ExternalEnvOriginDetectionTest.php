@@ -16,12 +16,12 @@ class ExternalEnvOriginDetectionTest extends TestCase
       return $reflectionMethod->invoke($object, $params);
     }
 
-    protected function setUp(): void {
+    protected function setUp() {
         $this->oldVar = getenv("DD_EXTERNAL_ENV");
         putenv("DD_EXTERNAL_ENV=cn-SomeKindOfContainerName");
     }
 
-    protected function tearDown(): void {
+    protected function tearDown() {
         if ($this->oldVar) {
             putenv("DD_EXTERNAL_ENV=" . $this->oldVar);
         } else {

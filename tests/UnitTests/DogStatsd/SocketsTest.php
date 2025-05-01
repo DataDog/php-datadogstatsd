@@ -9,6 +9,14 @@ use DataDog\TestHelpers\SocketSpyTestCase;
 
 class SocketsTest extends SocketSpyTestCase
 {
+    private $oldAgentHost;
+    private $oldDogstatsdPort;
+    private $oldDogstatsdUrl;
+    private $oldEntityId;
+    private $oldVersion;
+    private $oldEnv;
+    private $oldService;
+
     public function set_up()
     {
         parent::set_up();
@@ -18,6 +26,59 @@ class SocketsTest extends SocketSpyTestCase
         global $mt_getrandmax_stub_return_value;
         $mt_rand_stub_return_value = null;
         $mt_getrandmax_stub_return_value = null;
+
+        $this->oldAgentHost = getenv("DD_AGENT_HOST");
+        $this->oldDogstatsdPort = getenv("DD_DOGSTATSD_PORT");
+        $this->oldDogstatsdUrl = getenv("DD_DOGSTATSD_URL");
+        $this->oldEntityId = getenv("DD_ENTITY_ID");
+        $this->oldVersion = getenv("DD_VERSION");
+        $this->oldEnv = getenv("DD_ENV");
+        $this->oldService = getenv("DD_SERVICE");
+
+        putenv("DD_EXTERNAL_ENV");
+    }
+
+    protected function tearDown() {
+        if ($this->oldAgentHost) {
+            putenv("DD_AGENT_HOST=" . $this->oldAgentHost);
+        } else {
+            putenv("DD_AGENT_HOST");
+        }
+
+        if ($this->oldDogstatsdPort) {
+            putenv("DD_DOGSTATSD_PORT=" . $this->oldDogstatsdPort);
+        } else {
+            putenv("DD_DOGSTATSD_PORT");
+        }
+        if ($this->oldDogstatsdUrl) {
+            putenv("DD_DOGSTATSD_URL=" . $this->oldDogstatsdUrl);
+        } else {
+            putenv("DD_DOGSTATSD_URL");
+        }
+
+        if ($this->oldEntityId) {
+            putenv("DD_ENTITY_ID=" . $this->oldEntityId);
+        } else {
+            putenv("DD_ENTITY_ID");
+        }
+
+        if ($this->oldVersion) {
+            putenv("DD_VERSION=" . $this->oldVersion);
+        } else {
+            putenv("DD_VERSION");
+        }
+
+        if ($this->oldEnv) {
+            putenv("DD_ENV=" . $this->oldEnv);
+        } else {
+            putenv("DD_ENV");
+        }
+
+        if ($this->oldService) {
+            putenv("DD_SERVICE=" . $this->oldService);
+        } else {
+            putenv("DD_SERVICE");
+        }
     }
 
     static function getPrivate($object, $property) {
@@ -79,8 +140,6 @@ class SocketsTest extends SocketSpyTestCase
             self::getPrivate($dog, 'port'),
             'Should retrieve port from env var'
         );
-        putenv("DD_AGENT_HOST");
-        putenv("DD_DOGSTATSD_PORT");
     }
 
     public function testHostAndPortFromArgs()
@@ -101,8 +160,6 @@ class SocketsTest extends SocketSpyTestCase
             self::getPrivate($dog, 'port'),
             'Should retrieve port from args not env var'
         );
-        putenv("DD_AGENT_HOST");
-        putenv("DD_DOGSTATSD_PORT");
     }
 
     public function testHostAndPortFromUrl()
@@ -119,7 +176,6 @@ class SocketsTest extends SocketSpyTestCase
             self::getPrivate($dog, 'port'),
             'Should retrieve port from url'
         );
-        putenv("DD_DOGSTATSD_URL");
     }
 
     public function testDefaultHostAndPort()
@@ -151,7 +207,6 @@ class SocketsTest extends SocketSpyTestCase
             self::getPrivate($dog, 'socketPath'),
             'Should retrieve socket_path from env var'
         );
-        putenv("DD_DOGSTATSD_URL");
     }
 
     public function testSocketPathFromArgs()
@@ -165,7 +220,6 @@ class SocketsTest extends SocketSpyTestCase
             self::getPrivate($dog, 'socketPath'),
             'Should retrieve socket_path from args not env var'
         );
-        putenv("DD_DOGSTATSD_URL");
     }
 
     public function testTiming()
@@ -1192,7 +1246,6 @@ class SocketsTest extends SocketSpyTestCase
             "",
             array("tags" => "my_tag:tag_value,dd.internal.entity_id:04652bb7-19b7-11e9-9cc6-42010a9c016d")
         );
-        putenv("DD_ENTITY_ID");
     }
 
     public function testGlobalTagsAreSupplementedWithLocalTags()
@@ -1408,9 +1461,6 @@ class SocketsTest extends SocketSpyTestCase
             "",
             array("tags" => "my_tag:tag_value,env:prod,service:myService,version:1.2.3")
         );
-        putenv("DD_VERSION");
-        putenv("DD_ENV");
-        putenv("DD_SERVICE");
     }
 
     /**
