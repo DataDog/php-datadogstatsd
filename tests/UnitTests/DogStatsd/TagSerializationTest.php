@@ -2,8 +2,8 @@
 
 namespace DataDog\UnitTests\DogStatsd;
 
-use PHPUnit\Framework\TestCase;
 use DataDog\DogStatsd;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class TagSerializationTest extends TestCase
 {

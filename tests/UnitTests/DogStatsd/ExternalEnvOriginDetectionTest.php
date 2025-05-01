@@ -1,10 +1,9 @@
 <?php
 
-
 namespace DataDog\UnitTests\DogStatsd;
 
-use PHPUnit\Framework\TestCase;
 use DataDog\DogStatsd;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class ExternalEnvOriginDetectionTest extends TestCase
 {
