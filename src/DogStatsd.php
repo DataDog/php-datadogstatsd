@@ -37,6 +37,10 @@ class DogStatsd
      */
     private $globalTags;
     /**
+     * @var string External data to apply to all metrics
+     */
+    private $externalData;
+    /**
      * @var int Number of decimals to use when formatting numbers to strings
      */
     private $decimalPrecision;
@@ -135,7 +139,7 @@ class DogStatsd
         }
         // DD_EXTERNAL_ENV can be supplied by the Admission controller for origin detection.
         if (getenv('DD_EXTERNAL_ENV')) {
-            $this->globalTags['e'] = getenv('DD_EXTERNAL_ENV');
+            $this->externalData = getenv('DD_EXTERNAL_ENV');
         }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
@@ -425,6 +429,9 @@ class DogStatsd
 
         foreach ($sampledData as $stat => $value) {
             $value .= $this->serializeTags($tags);
+            if ($this->externalData) {
+                $value .= "|e:{$this->externalData}";
+            }
             $this->report("{$this->metricPrefix}$stat:$value");
         }
     }

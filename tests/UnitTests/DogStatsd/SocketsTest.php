@@ -15,6 +15,7 @@ class SocketsTest extends SocketSpyTestCase
     private $oldEntityId;
     private $oldVersion;
     private $oldEnv;
+    private $oldExternalEnv;
     private $oldService;
 
     public function set_up()
@@ -33,6 +34,7 @@ class SocketsTest extends SocketSpyTestCase
         $this->oldEntityId = getenv("DD_ENTITY_ID");
         $this->oldVersion = getenv("DD_VERSION");
         $this->oldEnv = getenv("DD_ENV");
+        $this->oldExternalEnv = getenv("DD_EXTERNAL_ENV");
         $this->oldService = getenv("DD_SERVICE");
 
         putenv("DD_EXTERNAL_ENV");
@@ -72,6 +74,12 @@ class SocketsTest extends SocketSpyTestCase
             putenv("DD_ENV=" . $this->oldEnv);
         } else {
             putenv("DD_ENV");
+        }
+
+        if ($this->oldExternalEnv) {
+            putenv("DD_EXTERNAL_ENV=" . $this->oldExternalEnv);
+        } else {
+            putenv("DD_EXTERNAL_ENV");
         }
 
         if ($this->oldService) {
@@ -1434,6 +1442,48 @@ class SocketsTest extends SocketSpyTestCase
 
       $dog->gauge('test', 2000.00);
       $this->assertSameWithTelemetry('test_prefix.test:2000|g', $this->getSocketSpy()->argsFromSocketSendtoCalls[2][1], "", array("bytes_sent" => 691, "packets_sent" => 1));
+    }
+
+    public function testExternalEnv()
+    {
+        putenv("DD_EXTERNAL_ENV=cn-SomeKindOfContainerName");
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog->gauge('metric', 42);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|e:cn-SomeKindOfContainerName';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testExternalEnvWithTags()
+    {
+        putenv("DD_EXTERNAL_ENV=cn-SomeKindOfContainerName");
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:cn-SomeKindOfContainerName';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
     }
 
     public function testDDTags()
