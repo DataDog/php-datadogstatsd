@@ -23,7 +23,7 @@ class TagSerializationTest extends TestCase
         putenv("DD_EXTERNAL_ENV");
     }
 
-    protected function tearDown() {
+    protected function tear_down() {
         if ($this->oldVar) {
             putenv("DD_EXTERNAL_ENV=" . $this->old);
         }
