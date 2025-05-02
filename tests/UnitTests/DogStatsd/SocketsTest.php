@@ -38,7 +38,7 @@ class SocketsTest extends SocketSpyTestCase
         putenv("DD_EXTERNAL_ENV");
     }
 
-    protected function tearDown() {
+    protected function tear_down() {
         if ($this->oldAgentHost) {
             putenv("DD_AGENT_HOST=" . $this->oldAgentHost);
         } else {
@@ -79,6 +79,8 @@ class SocketsTest extends SocketSpyTestCase
         } else {
             putenv("DD_SERVICE");
         }
+
+        parent::tear_down();
     }
 
     static function getPrivate($object, $property) {

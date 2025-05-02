@@ -16,7 +16,9 @@ class TagSerializationTest extends TestCase
     }
 
     // Ensure DD_EXTERNAL_ENV is not set when we run these tests.
-    protected function setUp() {
+    protected function set_up() {
+        parent::set_up();
+
         $this->oldVar = getenv("DD_EXTERNAL_ENV");
         putenv("DD_EXTERNAL_ENV");
     }
@@ -25,6 +27,8 @@ class TagSerializationTest extends TestCase
         if ($this->oldVar) {
             putenv("DD_EXTERNAL_ENV=" . $this->old);
         }
+
+        parent::tear_down();
     }
 
   /**
