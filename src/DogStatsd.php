@@ -139,7 +139,7 @@ class DogStatsd
         }
         // DD_EXTERNAL_ENV can be supplied by the Admission controller for origin detection.
         if (getenv('DD_EXTERNAL_ENV')) {
-            $this->externalData = getenv('DD_EXTERNAL_ENV');
+            $this->externalData = $this->sanitize(getenv('DD_EXTERNAL_ENV'));
         }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
@@ -155,6 +155,25 @@ class DogStatsd
         );
 
         $this->resetTelemetry();
+    }
+
+    /**
+     * Sanitize the DD_EXTERNAL_ENV input to ensure it doesn't contain invalid characters
+     * that may break the protocol.
+     * Removing any non-printable characters and `|`.
+     */
+    private function sanitize($input) {
+      $output = '';
+
+      for ($i = 0, $len = strlen($input); $i < $len; $i++) {
+          $char = $input[$i];
+
+          if (ctype_print($char) && $char !== '|') {
+              $output .= $char;
+          }
+      }
+
+      return $output;
     }
 
     /**

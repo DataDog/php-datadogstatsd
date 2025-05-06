@@ -1465,9 +1465,10 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
-    public function testExternalEnvWithTags()
+    public function testExternalEnvInvalidCharacters()
     {
-        putenv("DD_EXTERNAL_ENV=cn-SomeKindOfContainerName");
+        // Environment var contains a new line and a | character..
+        putenv("DD_EXTERNAL_ENV=it-false,\ncn-nginx-webserver,|pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
         $dog = new DogStatsd(array("disable_telemetry" => false));
         $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
         $spy = $this->getSocketSpy();
@@ -1476,7 +1477,28 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:cn-SomeKindOfContainerName';
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testExternalEnvWithTags()
+    {
+        putenv("DD_EXTERNAL_ENV=it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
