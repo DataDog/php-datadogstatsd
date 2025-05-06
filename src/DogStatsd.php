@@ -162,18 +162,19 @@ class DogStatsd
      * that may break the protocol.
      * Removing any non-printable characters and `|`.
      */
-    private function sanitize($input) {
-      $output = '';
+    private function sanitize($input)
+    {
+        $output = '';
 
-      for ($i = 0, $len = strlen($input); $i < $len; $i++) {
-          $char = $input[$i];
+        for ($i = 0, $len = strlen($input); $i < $len; $i++) {
+            $char = $input[$i];
 
-          if (ctype_print($char) && $char !== '|') {
-              $output .= $char;
-          }
-      }
+            if (ctype_print($char) && $char !== '|') {
+                $output .= $char;
+            }
+        }
 
-      return $output;
+        return $output;
     }
 
     /**
