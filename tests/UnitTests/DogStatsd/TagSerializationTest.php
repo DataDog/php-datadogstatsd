@@ -2,15 +2,33 @@
 
 namespace DataDog\UnitTests\DogStatsd;
 
-use PHPUnit\Framework\TestCase;
 use DataDog\DogStatsd;
+use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class TagSerializationTest extends TestCase
 {
+    private $oldVar;
+
     private function callPrivate($object, $method, $params) {
       $reflectionMethod = new \ReflectionMethod(get_class($object), $method);
       $reflectionMethod->setAccessible(true);
       return $reflectionMethod->invoke($object, $params);
+    }
+
+    // Ensure DD_EXTERNAL_ENV is not set when we run these tests.
+    protected function set_up() {
+        parent::set_up();
+
+        $this->oldVar = getenv("DD_EXTERNAL_ENV");
+        putenv("DD_EXTERNAL_ENV");
+    }
+
+    protected function tear_down() {
+        if ($this->oldVar) {
+            putenv("DD_EXTERNAL_ENV=" . $this->old);
+        }
+
+        parent::tear_down();
     }
 
   /**
