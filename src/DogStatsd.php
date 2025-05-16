@@ -2,6 +2,8 @@
 
 namespace DataDog;
 
+require 'OriginDetection.php';
+
 /**
  * Datadog implementation of StatsD
  **/
@@ -14,7 +16,6 @@ class DogStatsd
     const CRITICAL  = 2;
     const UNKNOWN   = 3;
     // phpcs:enable
-
 
     /**
      * @var string
@@ -48,6 +49,8 @@ class DogStatsd
      * @var string The prefix to apply to all metrics
      */
     private $metricPrefix;
+
+    private $containerID;
 
     // Telemetry
     private $disable_telemetry;
@@ -155,7 +158,30 @@ class DogStatsd
         );
 
         $this->resetTelemetry();
+
+        $originDetectionEnabled = $this->isOriginDetectionEnabled($config);
+        if ($originDetectionEnabled) {
+            $originDetection = new OriginDetection();
+            $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
+            $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled); 
+        }
     }
+
+    function isOriginDetectionEnabled($config): bool {
+        if ((isset($config["origin_detection"]) && !$config["origin_detection"]) || isset($config["container_id"])) {
+            return false;
+        }
+
+        if (getenv("DD_ORIGIN_DETECTION_ENABLED")) {
+            $envVarValue = getenv("DD_ORIGIN_DETECTION_ENABLED");
+            return $envVarValue != "false";
+        }
+
+        // default to true
+		return true;
+    }
+
+
 
     /**
      * Sanitize the DD_EXTERNAL_ENV input to ensure it doesn't contain invalid characters
@@ -451,6 +477,9 @@ class DogStatsd
             $value .= $this->serializeTags($tags);
             if ($this->externalData) {
                 $value .= "|e:{$this->externalData}";
+            }
+            if ($this->containerID) {
+                $value .= "|c:{$this->containerID}";
             }
             $this->report("{$this->metricPrefix}$stat:$value");
         }
