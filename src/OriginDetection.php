@@ -5,13 +5,13 @@ namespace DataDog;
 class OriginDetection
 {
     // CGROUPV1BASECONTROLLER is the controller used to identify the container-id for cgroup v1
-    const CGROUPV1BASECONTROLLER = "memory";
+    private const CGROUPV1BASECONTROLLER = "memory";
 
     // From
     // https://github.com/torvalds/linux/blob/5859a2b1991101d6b978f3feb5325dad39421f29/include/linux/proc_ns.h#L41-L49
     // Currently, host namespace inode number are hardcoded, which can be used to detect
     // if we're running in host namespace or not (does not work when running in DinD)
-    const HOSTCGROUPNAMESPACEINODE = 0xEFFFFFFB;
+    private const HOSTCGROUPNAMESPACEINODE = 0xEFFFFFFB;
 
     private function getFilepaths()
     {
@@ -66,7 +66,9 @@ class OriginDetection
                 continue;
             }
 
-            $segments = array(rtrim($cgroupMountPath, '/'), trim($controller, '/'), ltrim($cgroupControllersPaths[$controller], '/'));
+            $segments = array(rtrim($cgroupMountPath, '/'),
+                              trim($controller, '/'),
+                              ltrim($cgroupControllersPaths[$controller], '/'));
             $path = implode("/", array_filter($segments, function ($segment) {
                 return $segment !== null && $segment !== '';
             }));

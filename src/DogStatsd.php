@@ -2,7 +2,7 @@
 
 namespace DataDog;
 
-require 'OriginDetection.php';
+use DataDog\OriginDetection;
 
 /**
  * Datadog implementation of StatsD
