@@ -163,11 +163,12 @@ class DogStatsd
         if ($originDetectionEnabled) {
             $originDetection = new OriginDetection();
             $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
-            $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled); 
+            $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
         }
     }
 
-    function isOriginDetectionEnabled($config): bool {
+    private function isOriginDetectionEnabled($config): bool
+    {
         if ((isset($config["origin_detection"]) && !$config["origin_detection"]) || isset($config["container_id"])) {
             return false;
         }
@@ -178,10 +179,8 @@ class DogStatsd
         }
 
         // default to true
-		return true;
+        return true;
     }
-
-
 
     /**
      * Sanitize the DD_EXTERNAL_ENV input to ensure it doesn't contain invalid characters
