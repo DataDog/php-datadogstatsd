@@ -13,7 +13,7 @@ class OriginDetection
     // if we're running in host namespace or not (does not work when running in DinD)
     private const HOSTCGROUPNAMESPACEINODE = 0xEFFFFFFB;
 
-    private function getFilepaths()
+    public function getFilepaths()
     {
         return array(
             // cgroupPath is the path to the cgroup file where we can find the container id if one exists.
@@ -28,7 +28,7 @@ class OriginDetection
         );
     }
 
-    private function isHostCgroupNamespace(): bool
+    public function isHostCgroupNamespace(): bool
     {
         $stat = @stat("/proc/self/ns/cgroup");
         if (!$stat) {
@@ -39,7 +39,7 @@ class OriginDetection
     }
 
     // parseCgroupNodePath parses /proc/self/cgroup and returns a map of controller to its associated cgroup node path.
-    private function parseCgroupNodePath($lines): array
+    public function parseCgroupNodePath($lines): array
     {
         $res = [];
 
@@ -57,7 +57,7 @@ class OriginDetection
         return $res;
     }
 
-    private function getCgroupInode(string $cgroupMountPath, string $procSelfCgroupPath): string
+    public function getCgroupInode(string $cgroupMountPath, string $procSelfCgroupPath): string
     {
         $cgroupControllersPaths = $this->parseCgroupNodePath(file_get_contents($procSelfCgroupPath));
 
@@ -120,7 +120,7 @@ class OriginDetection
     }
 
     // readContainerID attempts to return the container ID from the provided file path or empty on failure.
-    private function readContainerID(string $fpath): string
+    public function readContainerID(string $fpath): string
     {
         $handle = @fopen($fpath, 'r');
         if (!$handle) {
@@ -160,7 +160,7 @@ class OriginDetection
         return "";
     }
 
-    private function readMountInfo(string $path): string
+    public function readMountInfo(string $path): string
     {
         $handle = @fopen($path, 'r');
         if (!$handle) {
