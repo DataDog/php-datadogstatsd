@@ -4,7 +4,6 @@ namespace DataDog;
 
 class OriginDetection
 {
-
     // phpcs:disable
     // CGROUPV1BASECONTROLLER is the controller used to identify the container-id for cgroup v1
     const CGROUPV1BASECONTROLLER = "memory";
