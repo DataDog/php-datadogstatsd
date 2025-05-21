@@ -49,7 +49,9 @@ class DogStatsd
      * @var string The prefix to apply to all metrics
      */
     private $metricPrefix;
-
+    /**
+     * @var string The container ID field, used for origin detection
+     */
     private $containerID;
 
     // Telemetry
@@ -62,9 +64,6 @@ class DogStatsd
     private $bytes_dropped;
     private $packets_sent;
     private $packets_dropped;
-
-
-    private static $eventUrl = '/api/v1/events';
 
     // Used for the telemetry tags
     public static $version = '1.6.2';
@@ -169,7 +168,7 @@ class DogStatsd
 
     private function isOriginDetectionEnabled($config)
     {
-        if ((isset($config["origin_detection"]) && !$config["origin_detection"]) || isset($config["container_id"])) {
+        if ((isset($config["origin_detection"]) && !$config["origin_detection"])) {
             return false;
         }
 
