@@ -4,14 +4,17 @@ namespace DataDog;
 
 class OriginDetection
 {
+
+    // phpcs:disable
     // CGROUPV1BASECONTROLLER is the controller used to identify the container-id for cgroup v1
-    private const CGROUPV1BASECONTROLLER = "memory";
+    const CGROUPV1BASECONTROLLER = "memory";
 
     // From
     // https://github.com/torvalds/linux/blob/5859a2b1991101d6b978f3feb5325dad39421f29/include/linux/proc_ns.h#L41-L49
     // Currently, host namespace inode number are hardcoded, which can be used to detect
     // if we're running in host namespace or not (does not work when running in DinD)
-    private const HOSTCGROUPNAMESPACEINODE = 0xEFFFFFFB;
+    const HOSTCGROUPNAMESPACEINODE = 0xEFFFFFFB;
+    // phpcs:enable
 
     public function getFilepaths()
     {
@@ -28,18 +31,18 @@ class OriginDetection
         );
     }
 
-    public function isHostCgroupNamespace(): bool
+    public function isHostCgroupNamespace()
     {
         $stat = @stat("/proc/self/ns/cgroup");
         if (!$stat) {
             return false;
         }
-        $inode = $stat['ino'] ?? null;
+        $inode = isset($stat['ino']) ? $stat['ino'] : null;
         return $inode === self::HOSTCGROUPNAMESPACEINODE;
     }
 
     // parseCgroupNodePath parses /proc/self/cgroup and returns a map of controller to its associated cgroup node path.
-    public function parseCgroupNodePath($lines): array
+    public function parseCgroupNodePath($lines)
     {
         $res = [];
 
@@ -57,7 +60,7 @@ class OriginDetection
         return $res;
     }
 
-    public function getCgroupInode(string $cgroupMountPath, string $procSelfCgroupPath): string
+    public function getCgroupInode($cgroupMountPath, $procSelfCgroupPath)
     {
         $cgroupControllersPaths = $this->parseCgroupNodePath(file_get_contents($procSelfCgroupPath));
 
@@ -84,7 +87,7 @@ class OriginDetection
     // inodeForPath returns the inode number for the file at the given path.
     // The number is prefixed by 'in-' so the agent can identify this as an
     // inode and not a container id.
-    private function inodeForPath(string $path): string
+    private function inodeForPath($path)
     {
         $stat = @stat($path);
         if (!$stat || !isset($stat['ino'])) {
@@ -95,7 +98,7 @@ class OriginDetection
     }
 
     // parseContainerID finds the first container ID reading from $handle and returns it.
-    private function parseContainerID($handle): string
+    private function parseContainerID($handle)
     {
         $expLine = '/^\d+:[^:]*:(.+)$/';
         $uuidSource = "[0-9a-f]{8}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{4}[-_][0-9a-f]{12}";
@@ -120,7 +123,7 @@ class OriginDetection
     }
 
     // readContainerID attempts to return the container ID from the provided file path or empty on failure.
-    public function readContainerID(string $fpath): string
+    public function readContainerID($fpath)
     {
         $handle = @fopen($fpath, 'r');
         if (!$handle) {
@@ -136,7 +139,7 @@ class OriginDetection
 
     // Parsing /proc/self/mountinfo is not always reliable in Kubernetes+containerd (at least)
     // We're still trying to use it as it may help in some cgroupv2 configurations (Docker, ECS, raw containerd)
-    private function parseMountInfo($handle): string
+    private function parseMountInfo($handle)
     {
         $containerRegexpStr = '([0-9a-f]{64})|([0-9a-f]{32}-\\d+)|([0-9a-f]{8}(-[0-9a-f]{4}){4}$)';
         $cIDMountInfoRegexp = '#.*/([^\s/]+)/(' . $containerRegexpStr . ')/[\S]*hostname#';
@@ -160,7 +163,7 @@ class OriginDetection
         return "";
     }
 
-    public function readMountInfo(string $path): string
+    public function readMountInfo($path)
     {
         $handle = @fopen($path, 'r');
         if (!$handle) {
@@ -180,7 +183,7 @@ class OriginDetection
     // 3. Read the container Id from /proc/self/mountinfo. Sometimes, depending on container runtimes or
     //    mount settings this can contain a container id.
     // 4. Read the inode from /proc/self/cgroup.
-    public function getContainerID(string $userProvidedId, bool $cgroupFallback): string
+    public function getContainerID($userProvidedId, $cgroupFallback)
     {
         if ($userProvidedId != "") {
             return $userProvidedId;

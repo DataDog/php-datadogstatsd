@@ -167,7 +167,7 @@ class DogStatsd
         }
     }
 
-    private function isOriginDetectionEnabled($config): bool
+    private function isOriginDetectionEnabled($config)
     {
         if ((isset($config["origin_detection"]) && !$config["origin_detection"]) || isset($config["container_id"])) {
             return false;

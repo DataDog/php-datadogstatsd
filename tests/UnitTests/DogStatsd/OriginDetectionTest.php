@@ -3,8 +3,7 @@
 namespace DataDog\UnitTests\DogStatsd;
 
 use DataDog\OriginDetection;
-use org\bovigo\vfs\vfsStream, org\bovigo\vfs\vfsStreamDirectory;
-use org\bovigo\vfs\vfsStreamFile;
+use org\bovigo\vfs\vfsStream;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
 
 class OriginDetectionTest extends TestCase
@@ -17,7 +16,7 @@ class OriginDetectionTest extends TestCase
             ->at($root);
         
         $originDetection = $this->getMockBuilder(OriginDetection::class) 
-            ->onlyMethods(['getFilePaths'])
+            ->setMethods(['getFilePaths'])
             ->getMock();
 
         $originDetection->method('getFilePaths')->willReturn(array(
@@ -100,7 +99,7 @@ class OriginDetectionTest extends TestCase
             ->at($root);
         
         $originDetection = $this->getMockBuilder(OriginDetection::class) 
-            ->onlyMethods(['getFilePaths'])
+            ->setMethods(['getFilePaths'])
             ->getMock();
 
         $originDetection->method('getFilePaths')->willReturn(array(
@@ -326,7 +325,7 @@ EOT;
             ->at($root);
 
         $originDetection = $this->getMockBuilder(OriginDetection::class) 
-            ->onlyMethods(['getFilePaths'])
+            ->setMethods(['getFilePaths'])
             ->getMock();
 
         $originDetection->method('getFilePaths')->willReturn(array(
@@ -376,6 +375,7 @@ EOT;
         }
     }
 
+
     public function testGetCgroupInode() {
         $tests = [
             [
@@ -388,36 +388,30 @@ EOT;
             [
                 'description' => 'matching entry in /proc/self/cgroup and /proc/mounts - cgroup/hybrid only',
                 'cgroupNodeDir' => 'system.slice/docker-abcdef0123456789abcdef0123456789.scope',
-                'procSelfCgroupContent' => <<<EOT
-    3:memory:/system.slice/docker-abcdef0123456789abcdef0123456789.scope
-    2:net_cls,net_prio:c
-    1:name=systemd:b
-    0::a
-    EOT,
+                'procSelfCgroupContent' => '3:memory:/system.slice/docker-abcdef0123456789abcdef0123456789.scope
+2:net_cls,net_prio:c
+1:name=systemd:b
+0::a',
                 'expectedResult' => 'in-0',
                 'controller' => 'memory'
             ],
             [
                 'description' => 'non memory or empty controller',
                 'cgroupNodeDir' => 'system.slice/docker-abcdef0123456789abcdef0123456789.scope',
-                'procSelfCgroupContent' => <<<EOT
-    3:cpu:/system.slice/docker-abcdef0123456789abcdef0123456789.scope
-    2:net_cls,net_prio:c
-    1:name=systemd:b
-    0::a
-    EOT,
+                'procSelfCgroupContent' => '3:cpu:/system.slice/docker-abcdef0123456789abcdef0123456789.scope
+2:net_cls,net_prio:c
+1:name=systemd:b
+0::a',
                 'expectedResult' => '',
                 'controller' => 'cpu',
             ],
             [
                 'description' => 'path does not exist',
                 'cgroupNodeDir' => 'dummy.scope',
-                'procSelfCgroupContent' => <<<EOT
-    3:memory:/system.slice/docker-abcdef0123456789abcdef0123456789.scope
-    2:net_cls,net_prio:c
-    1:name=systemd:b
-    0::a
-    EOT,
+                'procSelfCgroupContent' => '3:memory:/system.slice/docker-abcdef0123456789abcdef0123456789.scope
+2:net_cls,net_prio:c
+1:name=systemd:b
+0::a',
                 'expectedResult' => '',
                 'controller' => null,
             ],
@@ -432,8 +426,9 @@ EOT;
 
         foreach ($tests as $test) {
             $sys = vfsStream::setup('');
-
-			$groupControllerPath = vfsStream::newFile(implode("/", array_filter(array("sys/fs/cgroup", $test['controller'], $test['cgroupNodeDir']))))
+            $zork = $test['controller'];
+            $segments = array("sys/fs/cgroup", $zork, $test["cgroupNodeDir"]);
+			$groupControllerPath = vfsStream::newFile(implode("/", array_filter($segments)))
                 ->withContent("")
                 ->at($sys);
 
@@ -442,7 +437,7 @@ EOT;
                 ->at($sys);
 
             $originDetection = $this->getMockBuilder(OriginDetection::class) 
-                ->onlyMethods(['getFilePaths'])
+                ->setMethods(['getFilePaths'])
                 ->getMock();
 
             $originDetection->method('getFilePaths')->willReturn(array(
@@ -456,7 +451,6 @@ EOT;
             $this->assertSame($test['expectedResult'], $result, $test['description']);
         }
     }
-
 
     public function testReadCIDOrInode() {
         $tests = [
@@ -499,21 +493,23 @@ EOT;
 
         foreach ($tests as $test) {
             $originDetection = $this->getMockBuilder(OriginDetection::class) 
-                ->onlyMethods(['getFilePaths', 'isHostCgroupNamespace'])
+                ->setMethods(['getFilePaths', 'isHostCgroupNamespace'])
                 ->getMock();
 
             $sys = vfsStream::setup('');
 
-			$groupControllerPath = vfsStream::newFile(implode("/", array_filter(array("sys/fs/cgroup", $test['cgroupNodeDir'] ?? null))))
+            $segments = array("sys/fs/cgroup", isset($test['cgroupNodeDir']) ? $test['cgroupNodeDir'] : null);
+
+			vfsStream::newFile(implode("/", array_filter($segments)))
                 ->withContent("")
                 ->at($sys);
 
-            $procSelfCgroup = vfsStream::newFile("proc/self/cgroup")
-                ->withContent($test['procSelfCgroupContent'] ?? "")
+            vfsStream::newFile("proc/self/cgroup")
+                ->withContent(isset($test['procSelfCgroupContent']) ? $test['procSelfCgroupContent'] : "")
                 ->at($sys);
 
-            $mountInfo = vfsStream::newFile("proc/self/mountinfo")
-                ->withContent($test['mountInfoContent'] ?? "")
+            vfsStream::newFile("proc/self/mountinfo")
+                ->withContent(isset($test['mountInfoContent']) ? $test['mountInfoContent'] : "")
                 ->at($sys);
 
             $originDetection->method('getFilePaths')->willReturn(array(
@@ -523,7 +519,7 @@ EOT;
             ));
 
             $originDetection->method('isHostCgroupNamespace')
-                ->willReturn($test['isHostCgroupNs'] ?? false);
+                ->willReturn(isset($test['isHostCgroupNs']) ? $test['isHostCgroupNs'] : false);
 
 			$containerID = $originDetection->getContainerID("", true);
             $this->assertSame($test['expectedResult'], $containerID, $test['description']);
