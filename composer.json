@@ -47,7 +47,8 @@
     },
     "require-dev": {
         "yoast/phpunit-polyfills": "^1.0.1",
-        "squizlabs/php_codesniffer": "^3.3"
+        "squizlabs/php_codesniffer": "^3.3",
+	"mikey179/vfsstream": "^1.6"
     },
     "scripts": {
         "fix-lint": "phpcbf",
