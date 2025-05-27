@@ -158,12 +158,26 @@ class DogStatsd
 
         $this->resetTelemetry();
 
+        $originDetection = new OriginDetection();
         $originDetectionEnabled = $this->isOriginDetectionEnabled($config);
-        if ($originDetectionEnabled) {
-            $originDetection = new OriginDetection();
-            $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
-            $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
+        $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
+        $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
+    }
+
+    /**
+     * For boolean environment variables if the value is 0, f or false (case insensitive) the
+     * value is treated as false.
+     * All other values are true.
+     **/
+    private function isTrue($value) {
+        switch (strtolower($value)) {
+        case '0':
+        case 'f':
+        case 'false':
+            return false;
         }
+
+        return true;
     }
 
     private function isOriginDetectionEnabled($config)
@@ -174,7 +188,7 @@ class DogStatsd
 
         if (getenv("DD_ORIGIN_DETECTION_ENABLED")) {
             $envVarValue = getenv("DD_ORIGIN_DETECTION_ENABLED");
-            return $envVarValue != "false";
+            return $this->isTrue($envVarValue);
         }
 
         // default to true
