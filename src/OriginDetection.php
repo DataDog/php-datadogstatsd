@@ -32,7 +32,7 @@ class OriginDetection
 
     public function isHostCgroupNamespace()
     {
-        $stat = @stat("/proc/self/ns/cgroup");
+        $stat = stat("/proc/self/ns/cgroup");
         if (!$stat) {
             return false;
         }
@@ -88,7 +88,7 @@ class OriginDetection
     // inode and not a container id.
     private function inodeForPath($path)
     {
-        $stat = @stat($path);
+        $stat = stat($path);
         if (!$stat || !isset($stat['ino'])) {
             return '';
         }
@@ -124,7 +124,7 @@ class OriginDetection
     // readContainerID attempts to return the container ID from the provided file path or empty on failure.
     public function readContainerID($fpath)
     {
-        $handle = @fopen($fpath, 'r');
+        $handle = fopen($fpath, 'r');
         if (!$handle) {
             return "";
         }
@@ -164,7 +164,7 @@ class OriginDetection
 
     public function readMountInfo($path)
     {
-        $handle = @fopen($path, 'r');
+        $handle = fopen($path, 'r');
         if (!$handle) {
             return "";
         }
