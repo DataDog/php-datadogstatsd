@@ -169,12 +169,13 @@ class DogStatsd
      * value is treated as false.
      * All other values are true.
      **/
-    private function isTrue($value) {
+    private function isTrue($value)
+    {
         switch (strtolower($value)) {
-        case '0':
-        case 'f':
-        case 'false':
-            return false;
+            case '0':
+            case 'f':
+            case 'false':
+                return false;
         }
 
         return true;
