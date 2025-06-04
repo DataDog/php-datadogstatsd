@@ -130,7 +130,7 @@ class DogStatsd
             ? getenv('DD_CARDINALITY') : ((getenv('DATADOG_CARDINALITY'))
             ? getenv('DATADOG_CARDINALITY') : null));
 
-    $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
+        $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
 
         $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
@@ -489,8 +489,10 @@ class DogStatsd
         if (in_array($cardinality, ["none", "low", "orchestrator", "high"])) {
             return $cardinality;
         } else {
-            trigger_error("Cardinality must be one of the following: 'none', 'low', 'orchestrator' or 'high'.",
-                          E_USER_WARNING);
+            trigger_error(
+                "Cardinality must be one of the following: 'none', 'low', 'orchestrator' or 'high'.",
+                E_USER_WARNING
+            );
             return null;
         }
     }
