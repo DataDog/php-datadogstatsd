@@ -17,6 +17,7 @@ class SocketsTest extends SocketSpyTestCase
     private $oldEnv;
     private $oldExternalEnv;
     private $oldService;
+    private $oldCardinality;
     private $oldOriginDetectionEnabled;
 
     public function set_up()
@@ -37,6 +38,7 @@ class SocketsTest extends SocketSpyTestCase
         $this->oldEnv = getenv("DD_ENV");
         $this->oldExternalEnv = getenv("DD_EXTERNAL_ENV");
         $this->oldService = getenv("DD_SERVICE");
+        $this->oldCardinality = getenv("DD_CARDINALITY");
         $this->oldOriginDetectionEnabled = getenv("DD_ORIGIN_DETECTION_ENABLED");
 
         putenv("DD_EXTERNAL_ENV");
@@ -88,6 +90,12 @@ class SocketsTest extends SocketSpyTestCase
             putenv("DD_SERVICE=" . $this->oldService);
         } else {
             putenv("DD_SERVICE");
+        }
+
+        if ($this->oldCardinality) {
+            putenv("DD_CARDINALITY=" . $this->oldCardinality);
+        } else {
+            putenv("DD_CARDINALITY");
         }
 
         if ($this->oldOriginDetectionEnabled) {
@@ -1591,6 +1599,105 @@ class SocketsTest extends SocketSpyTestCase
             "",
             array("tags" => "my_tag:tag_value,env:prod,service:myService,version:1.2.3")
         );
+    }
+
+    public function testCardinality()
+    {
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog->gauge('metric', 42, 1.0, null, "high");
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|card:high';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testGlobalCardinality()
+    {
+        $dog = new DogStatsd(array(
+            "disable_telemetry" => false,
+            "cardinality" => "orchestrator"
+        ));
+        $dog->gauge('metric', 42);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|card:orchestrator';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testEnvVarCardinality()
+    {
+        putenv("DD_CARDINALITY=HIGH");
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog->gauge('metric', 42);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+
+        );
+        $expectedUdpMessage = 'metric:42|g|card:high';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testInvalidCardinalityIgnored()
+    {
+        $error = "";
+        set_error_handler(function ($errno, $errstr) use (&$error) {
+            if ($errno === E_USER_WARNING) {
+                $error = $errstr;
+                return true;
+            }
+            return false;
+        });
+
+        // Invalid cardinality will raise a warning.
+        putenv("DD_CARDINALITY=sausage");
+        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog->gauge('metric', 42);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+
+        );
+        $expectedUdpMessage = 'metric:42|g';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+
+        restore_error_handler();
     }
 
     /**
