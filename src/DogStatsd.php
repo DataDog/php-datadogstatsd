@@ -48,6 +48,11 @@ class DogStatsd
      * @var string The prefix to apply to all metrics
      */
     private $metricPrefix;
+    /**
+     * @var string The tag cardinality.
+     * Possible values are "none", "low", "orchestrator" and "high"
+     */
+    private $cardinality;
 
     // Telemetry
     private $disable_telemetry;
@@ -120,7 +125,12 @@ class DogStatsd
             ? $config['socket_path'] : ($urlSocketPath
             ? $urlSocketPath : null);
 
-        $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
+        $this->cardinality = isset($config['cardinality'])
+            ? $config['cardinality'] : ((getenv('DD_CARDINALITY'))
+            ? getenv('DD_CARDINALITY') : ((getenv('DATADOG_CARDINALITY'))
+            ? getenv('DATADOG_CARDINALITY') : null));
+
+    $this->datadogHost = isset($config['datadog_host']) ? $config['datadog_host'] : 'https://app.datadoghq.com';
 
         $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
@@ -217,10 +227,10 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      */
-    public function timing($stat, $time, $sampleRate = 1.0, $tags = null)
+    public function timing($stat, $time, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         $time = $this->normalizeValue($time);
-        $this->send(array($stat => "$time|ms"), $sampleRate, $tags);
+        $this->send(array($stat => "$time|ms"), $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -232,9 +242,9 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function microtiming($stat, $time, $sampleRate = 1.0, $tags = null)
+    public function microtiming($stat, $time, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
-        $this->timing($stat, $time * 1000, $sampleRate, $tags);
+        $this->timing($stat, $time * 1000, $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -246,10 +256,10 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function gauge($stat, $value, $sampleRate = 1.0, $tags = null)
+    public function gauge($stat, $value, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         $value = $this->normalizeValue($value);
-        $this->send(array($stat => "$value|g"), $sampleRate, $tags);
+        $this->send(array($stat => "$value|g"), $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -261,10 +271,10 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function histogram($stat, $value, $sampleRate = 1.0, $tags = null)
+    public function histogram($stat, $value, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         $value = $this->normalizeValue($value);
-        $this->send(array($stat => "$value|h"), $sampleRate, $tags);
+        $this->send(array($stat => "$value|h"), $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -276,10 +286,10 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function distribution($stat, $value, $sampleRate = 1.0, $tags = null)
+    public function distribution($stat, $value, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         $value = $this->normalizeValue($value);
-        $this->send(array($stat => "$value|d"), $sampleRate, $tags);
+        $this->send(array($stat => "$value|d"), $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -291,13 +301,13 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function set($stat, $value, $sampleRate = 1.0, $tags = null)
+    public function set($stat, $value, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         if (!is_string($value)) {
             $value = $this->normalizeValue($value);
         }
 
-        $this->send(array($stat => "$value|s"), $sampleRate, $tags);
+        $this->send(array($stat => "$value|s"), $sampleRate, $tags, $cardinality);
     }
 
 
@@ -310,9 +320,9 @@ class DogStatsd
      * @param  int          $value      the amount to increment by (default 1)
      * @return void
      **/
-    public function increment($stats, $sampleRate = 1.0, $tags = null, $value = 1)
+    public function increment($stats, $sampleRate = 1.0, $tags = null, $value = 1, $cardinality = null)
     {
-        $this->updateStats($stats, $value, $sampleRate, $tags);
+        $this->updateStats($stats, $value, $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -324,12 +334,12 @@ class DogStatsd
      * @param  int          $value      the amount to decrement by (default -1)
      * @return void
      **/
-    public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1)
+    public function decrement($stats, $sampleRate = 1.0, $tags = null, $value = -1, $cardinality = null)
     {
         if ($value > 0) {
             $value = -$value;
         }
-        $this->updateStats($stats, $value, $sampleRate, $tags);
+        $this->updateStats($stats, $value, $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -341,7 +351,7 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null)
+    public function updateStats($stats, $delta = 1, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         $delta = $this->normalizeValue($delta);
         if (!is_array($stats)) {
@@ -351,7 +361,7 @@ class DogStatsd
         foreach ($stats as $stat) {
             $data[$stat] = "$delta|c";
         }
-        $this->send($data, $sampleRate, $tags);
+        $this->send($data, $sampleRate, $tags, $cardinality);
     }
 
     /**
@@ -427,7 +437,7 @@ class DogStatsd
      * @param  array|string $tags       Key Value array of Tag => Value, or single tag as string
      * @return void
      **/
-    public function send($data, $sampleRate = 1.0, $tags = null)
+    public function send($data, $sampleRate = 1.0, $tags = null, $cardinality = null)
     {
         $sampleRate = $this->normalizeValue($sampleRate);
         $this->metrics_sent += count($data);
@@ -447,12 +457,41 @@ class DogStatsd
             return;
         }
 
+        $cardinalityToUse = $this->validateCardinality($cardinality ?: $this->cardinality);
+
         foreach ($sampledData as $stat => $value) {
             $value .= $this->serializeTags($tags);
             if ($this->externalData) {
                 $value .= "|e:{$this->externalData}";
             }
+            if ($cardinalityToUse) {
+                $value .= "|card:{$cardinalityToUse}";
+            }
             $this->report("{$this->metricPrefix}$stat:$value");
+        }
+    }
+
+    /**
+     * validateCardinality ensures the given cardinality is valid
+     * either null, "none", "low", "orchestrator" or "high".
+     * Return the lower case cardinality if it is valid,
+     * null if it is not.
+     *
+     * @param string $cardinality the cardinality
+     */
+    private function validateCardinality($cardinality)
+    {
+        if ($cardinality == null) {
+            return null;
+        }
+
+        $cardinality = strtolower($cardinality);
+        if (in_array($cardinality, ["none", "low", "orchestrator", "high"])) {
+            return $cardinality;
+        } else {
+            trigger_error("Cardinality must be one of the following: 'none', 'low', 'orchestrator' or 'high'.",
+                          E_USER_WARNING);
+            return null;
         }
     }
 
