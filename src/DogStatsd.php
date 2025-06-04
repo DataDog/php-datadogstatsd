@@ -472,10 +472,11 @@ class DogStatsd
     }
 
     /**
-     * validateCardinality ensures the given cardinality is valid
-     * either null, "none", "low", "orchestrator" or "high".
-     * Return the lower case cardinality if it is valid,
-     * null if it is not.
+     * validateCardinality ensures the given cardinality is valid either null,
+     * "none", "low", "orchestrator" or "high".
+     * Return the lower case cardinality if it is valid.
+     * If it is not valid, raises a warning and if the warning is handled
+     * returns null if it is not valid.
      *
      * @param string $cardinality the cardinality
      */
