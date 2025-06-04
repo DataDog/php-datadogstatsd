@@ -2,6 +2,8 @@
 
 namespace DataDog;
 
+use DataDog\OriginDetection;
+
 /**
  * Datadog implementation of StatsD
  **/
@@ -14,7 +16,6 @@ class DogStatsd
     const CRITICAL  = 2;
     const UNKNOWN   = 3;
     // phpcs:enable
-
 
     /**
      * @var string
@@ -53,6 +54,10 @@ class DogStatsd
      * Possible values are "none", "low", "orchestrator" and "high"
      */
     private $cardinality;
+    /**
+     * @var string The container ID field, used for origin detection
+     */
+    private $containerID;
 
     // Telemetry
     private $disable_telemetry;
@@ -64,9 +69,6 @@ class DogStatsd
     private $bytes_dropped;
     private $packets_sent;
     private $packets_dropped;
-
-
-    private static $eventUrl = '/api/v1/events';
 
     // Used for the telemetry tags
     public static $version = '1.6.2';
@@ -165,6 +167,43 @@ class DogStatsd
         );
 
         $this->resetTelemetry();
+
+        $originDetection = new OriginDetection();
+        $originDetectionEnabled = $this->isOriginDetectionEnabled($config);
+        $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
+        $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
+    }
+
+    /**
+     * For boolean environment variables if the value is 0, f or false (case insensitive) the
+     * value is treated as false.
+     * All other values are true.
+     **/
+    private function isTrue($value)
+    {
+        switch (strtolower($value)) {
+            case '0':
+            case 'f':
+            case 'false':
+                return false;
+        }
+
+        return true;
+    }
+
+    private function isOriginDetectionEnabled($config)
+    {
+        if ((isset($config["origin_detection"]) && !$config["origin_detection"])) {
+            return false;
+        }
+
+        if (getenv("DD_ORIGIN_DETECTION_ENABLED")) {
+            $envVarValue = getenv("DD_ORIGIN_DETECTION_ENABLED");
+            return $this->isTrue($envVarValue);
+        }
+
+        // default to true
+        return true;
     }
 
     /**
@@ -466,6 +505,9 @@ class DogStatsd
             }
             if ($cardinalityToUse) {
                 $value .= "|card:{$cardinalityToUse}";
+            }
+            if ($this->containerID) {
+                $value .= "|c:{$this->containerID}";
             }
             $this->report("{$this->metricPrefix}$stat:$value");
         }
