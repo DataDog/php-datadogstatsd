@@ -1,6 +1,76 @@
 CHANGELOG
 =========
 
+[//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
+
+
+# 1.6.2 / 2024-07-16
+
+* Add getter for `BatchedDogStatsd::$bufferLength` (#151) [@cosmastech][]
+
+# 1.6.1 / 2024-02-23
+
+* Add support for `DD_DOGSTATSD_URL` environment variable (#148) [@fernandocarletti][]
+* Apply check for IPv6 addresses (#146) [@NickStallman][]
+
+# 1.6.0 / 2023-05-10
+
+* Add support for [Unified service tagging](https://docs.datadoghq.com/getting_started/tagging/unified_service_tagging/?tab=kubernetes)
+* Remove `lib-curl` dependency and support for events API (using `APP_KEY`). Submitting events now requires a connection to a Datadog Agent.
+
+# 1.5.6 / 2023-01-3
+
+* Fix warnings to support PHP 8.2
+
+# 1.5.5 / 2022-05-20
+
+* Fix test support for multiple PHP versions. thanks to [@Lewiscowles1986][]
+* Normalize sample rate
+
+# 1.5.4 / 2022-03-28
+
+* Fix regression preventing string values in `set()`. thanks to [@colinodell][]
+* Fix boolean tag values, thanks to [@roippi][]
+* Adding suppport for a metric prefix, thanks to [@scott-shields-github][]
+* Add CircleCI status badge, thanks to [@peter279k][]
+
+# 1.5.3 / 2021-02-17
+
+* Fix Add PHPCS + style updates, thanks to [@timrourke][]
+* Fix `normalizeStat` `number_format`, thanks to [@umpirsky][] and [@ManInTheBox][]
+
+# 1.5.2 / 2020-10-12
+
+* Fix 0 gauge not emitter, thanks to [@ZymoticB][].
+
+# 1.5.1 / 2020-09-02
+
+* Fix numbers format on non US local, thanks to [@TheBooper][].
+
+# 1.5.0 / 2020-05-06
+
+* Add telemetry to the client. See [official documentation][dogstatsd_telemetry_doc] for more information.
+* Drop support for PHP `5.3`, `5.4` and `5.5`. Minimum supported version is now `5.6`.
+* `ext-sockets` is now part of the composer requirement. Thanks to [derek9gag][].
+
+# 1.4.1 / 2019-08-13
+
+* Fix declared private fields names, thanks to [@localheinz][].
+* Fix events over UDP being truncated when newlines were escaped, thanks to [@pub007][].
+
+# 1.4.0 / 2019-03-18
+
+* Add the `DD_AGENT_HOST` and `DD_DOGSTATSD_PORT` environment variables support for client configuration
+* Get the `dd.internal.entity_id` tag from the `DD_ENTITY_ID` environment variable
+
+# 1.3.0 / 2018-09-27
+
+* Add support for global tags, thanks to [@Firehed][]
+
+# 1.2.0 / 2018-09-27
+
+* Add support for UDS socket (agent >= 6.0), thanks to [@CrshOverride][]
+
 # 1.1.0 / 2018-09-05
 
 * Add support for new "distribution" metric type
@@ -64,3 +134,24 @@ CHANGELOG
 [@jmparks-ebates]: https://github.com/jmparks-ebates
 [@Amaroq1]: https://github.com/Amaroq1
 [@onema]: https://github.com/onema
+[@localheinz]: https://github.com/localheinz
+[@pub007]: https://github.com/pub007
+[@Firehed]: https://github.com/Firehed
+[@CrshOverride]: https://github.com/CrshOverride
+[@zhukovra]: https://github.com/zhukovra
+[@krixon]: https://github.com/krixon
+[derek9gag]: https://github.com/derek9gag
+[@TheBooper]: https://github.com/TheBooper
+[@ZymoticB]: https://github.com/ZymoticB
+[@umpirsky]: https://github.com/umpirsky
+[@ManInTheBox]: https://github.com/ManInTheBox
+[@timrourke]: https://github.com/timrourke
+[@peter279k]: https://github.com/peter279k
+[@scott-shields-github]: https://github.com/scott-shields-github
+[@roippi]: https://github.com/roippi
+[@colinodell]: https://github.com/colinodell
+[@Lewiscowles1986]: https://github.com/Lewiscowles1986
+[@fernandocarletti]: https://github.com/fernandocarletti
+[@NickStallman]: https://github.com/NickStallman
+[@cosmastech]: https://github.com/cosmastech
+[dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry

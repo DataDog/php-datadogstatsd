@@ -29,7 +29,7 @@ function socket_create($domain, $type, $protocol)
 
     // A PHP resource of unimportance, useful primarily to assert that our stubs
     // of the global socket functions return or take a deterministic value.
-    $resource = fopen('/dev/null', 'r');
+    $resource = tmpfile();
 
     $socketSpy->socketCreateDidReturn($resource);
 
@@ -58,11 +58,11 @@ function socket_set_nonblock($socket)
  * @param string $addr
  * @param int $port
  */
-function socket_sendto($socket, $buf, $len, $flags, $addr, $port)
+function socket_sendto($socket, $buf, $len, $flags, $addr, $port=null)
 {
     global $socketSpy;
 
-    $socketSpy->socketSendtoWasCalledWithArgs($socket, $buf, $len, $flags, $addr, $port);
+    return $socketSpy->socketSendtoWasCalledWithArgs($socket, $buf, $len, $flags, $addr, $port);
 }
 
 /**
