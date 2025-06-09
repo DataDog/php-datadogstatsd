@@ -77,6 +77,10 @@ class TagSerializationTest extends TestCase
             'grab bag' => [
                 ['foo' => 'bar', 'baz' => false, 'nullValue' => null, 'blam' => 1, 'blah' => 0],
                 '|#foo:bar,baz:false,nullValue,blam:1,blah:0'
+            ],
+            'string element' => [
+                ['foo:bar'],
+                '|#foo:bar'
             ]
         ];
     }
