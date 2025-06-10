@@ -26,7 +26,7 @@ Or manually clone this repository and set it up with `require './src/DogStatsd.p
 
 Once installed, turn on the socket extension to PHP which must be enabled at compile time by giving the `--enable-sockets` option to **configure**.
 
-### Configuration
+## Configuration
 
 To instantiate a DogStatsd object using `composer`:
 
@@ -45,22 +45,6 @@ $statsd = new DogStatsd(
 ```
 
 DogStatsd constructor, takes a configuration array. See the full list of available [DogStatsD Client instantiation parameters](https://docs.datadoghq.com/developers/dogstatsd/?code-lang=php#client-instantiation-parameters).
-
-### Origin detection over UDP in Kubernetes
-
-Origin detection is a method to detect which pod DogStatsD packets are coming from in order to add the pod's tags to the tag list.
-
-To enable origin detection over UDP, add the following lines to your application manifest
-```yaml
-env:
-  - name: DD_ENTITY_ID
-    valueFrom:
-      fieldRef:
-        fieldPath: metadata.uid
-```
-
-The DogStatsD client attaches an internal tag, `entity_id`. The value of this tag is the content of the `DD_ENTITY_ID` environment variable, which is the pod’s UID.
-The agent uses this tag to infer packets' origin, and tag their metrics accordingly.
 
 ## Usage
 
@@ -87,10 +71,51 @@ After the client is created, you can start sending events to your Datadog Event 
 
 After the client is created, you can start sending Service Checks to Datadog. See the dedicated [Service Check Submission: DogStatsD documentation](https://docs.datadoghq.com/developers/service_checks/dogstatsd_service_checks_submission/?code-lang=php) to see how to submit a Service Check to Datadog.
 
-## Roadmap
+### Origin detection in Kubernetes
 
-* Write unit tests
-* Document service check functionality
+Origin detection is a method to detect which pod DogStatsD packets are coming from in order to add the pod's tags to the tag list.
+
+#### Tag cardinality
+
+The tags that can be added to metrics can be found [here][tags]. The cardinality can be specified globally by setting the `DD_CARDINALITY`
+environment or by passing a `'cardinality'` field to the constructor. Cardinality can also be specified per metric by passing the value
+in the `$cardinality` parameter. Valid values for this parameter are `"none"`, `"low"`, `"orchestrator"` or `"high"`. If an invalid 
+value is passed, an `E_USER_WARNING` error is raised. If this error is handled with `set_error_handler` the metric is sent without a 
+cardinality field.
+
+Origin detection is achieved in a number of ways:
+
+#### CGroups
+
+On Linux the container ID can be extracted from `procfs` entries related to `cgroups`. The client reads from `/proc/self/cgroup` or `/proc/self/mountinfo` to attempt to parse the container id. 
+
+In cgroup v2, the container ID can be inferred by resolving the cgroup path from `/proc/self/cgroup`, combining it with the cgroup mount point from `/proc/self/mountinfo]`. The resulting directory's inode is sent to the agent. Provided the agent is on the same node as the client, this can be used to identify the pod's UID.
+
+#### Over UDP 
+
+To enable origin detection over UDP, add the following lines to your application manifest
+```yaml
+env:
+  - name: DD_ENTITY_ID
+    valueFrom:
+      fieldRef:
+        fieldPath: metadata.uid
+```
+
+The DogStatsD client attaches an internal tag, `entity_id`. The value of this tag is the content of the `DD_ENTITY_ID` environment variable, which is the pod's UID.
+The agent uses this tag to infer packets' origin, and tag their metrics accordingly.
+
+#### DD_EXTERNAL_ENV
+
+If the pod is annotated with the label:
+
+```
+admission.datadoghq.com/enabled: "true"
+```
+
+The [admissions controller] injects an environment variable `DD_EXTERNAL_ENV`. 
+The value of this is sent in a field with the metric which can be used by the 
+agent to determine the metrics origin.
 
 ## Tests
 
@@ -109,3 +134,6 @@ composer lint
 ```bash
 composer fix-lint
 ```
+
+[admissions controller]: https://docs.datadoghq.com/containers/cluster_agent/admission_controller/?tab=datadogoperator
+[tags]: https://docs.datadoghq.com/containers/kubernetes/tag/?tab=datadogoperator
