@@ -73,7 +73,7 @@ After the client is created, you can start sending Service Checks to Datadog. Se
 
 ### Origin detection in Kubernetes
 
-Origin detection is a method to detect which pod DogStatsD packets are coming from in order to add the pod's tags to the tag list.
+Origin detection is a method to detect the pod that DogStatsD packets are coming from and add the pod's tags to the tag list.
 
 #### Tag cardinality
 
