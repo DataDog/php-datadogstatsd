@@ -3,6 +3,10 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.6.3 / 2025-06-13
+
+* Enable Origin Detection, via CGroups, `DD_EXTERNAL_ENV` or inode. (#155, #156, #157)
+* Interpret tags passed as strings correctly. (#79) [@vlakarados][]
 
 # 1.6.2 / 2024-07-16
 
@@ -154,4 +158,5 @@ CHANGELOG
 [@fernandocarletti]: https://github.com/fernandocarletti
 [@NickStallman]: https://github.com/NickStallman
 [@cosmastech]: https://github.com/cosmastech
+[@vlakarados]: https://github.com/vlakarados
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
