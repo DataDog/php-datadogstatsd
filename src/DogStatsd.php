@@ -93,7 +93,7 @@ class DogStatsd
      *     socket_path?: string,
      *     cardinality?: "none"|"low"|"orchestrator"|"high",
      *     datadog_host?: string,
-     *     global_tags?: string[],
+     *     global_tags?: string|string[]|array<string,string>|array<string,null>,
      *     decimal_precision?: int,
      *     metric_prefix?: string,
      *     disable_telemetry?: bool,
