@@ -78,21 +78,27 @@ class DogStatsd
      * host,
      * port,
      * socket_path,
+     * cardinality,
      * datadog_host,
      * global_tags,
      * decimal_precision,
      * metric_prefix,
-     * disable_telemetry
+     * disable_telemetry,
+     * container_id,
+     * origin_detecion
      *
      * @param array{
-     *     host: string,
-     *     port: int,
-     *     socket_path: string,
-     *     datadog_host: string,
-     *     global_tags: string[],
-     *     decimal_precision: int,
-     *     metric_prefix: string,
-     *     disable_telemetry: bool
+     *     host?: string,
+     *     port?: int,
+     *     socket_path?: string,
+     *     cardinality?: "none"|"low"|"orchestrator"|"high",
+     *     datadog_host?: string,
+     *     global_tags?: string|string[]|array<string,string>|array<string,null>,
+     *     decimal_precision?: int,
+     *     metric_prefix?: string,
+     *     disable_telemetry?: bool,
+     *     container_id?: string,
+     *     origin_detection?: bool
      * } $config
      */
     public function __construct(array $config = array())
