@@ -115,6 +115,7 @@ class OriginDetection
         $expContainerID = '/(' . $uuidSource . '|' . $containerSource . '|' . $taskSource . ')(?:.scope)?$/';
 
         while (($line = fgets($handle)) !== false) {
+            $line = rtrim($line);
             if (preg_match($expLine, $line, $matches)) {
                 if (count($matches) != 2) {
                     continue;

@@ -70,6 +70,12 @@ class OriginDetectionTest extends TestCase
             [
                 'input' => "1:name=systemd:/docker/34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376.scope",
                 'expected' => "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376"
+            ],
+            [
+                'input' => "1:name=systemd:/nope
+2:pids:/docker/34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376
+3:cpu:/invalid",
+                'expected' => "34dc0b5e626f2c5c4c5170e34b10e7654ce36f0fcd532739f4445baabea03376"
             ]
         ];
 
