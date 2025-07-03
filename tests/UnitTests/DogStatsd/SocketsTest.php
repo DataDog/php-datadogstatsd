@@ -107,6 +107,20 @@ class SocketsTest extends SocketSpyTestCase
         parent::tear_down();
     }
 
+
+    /**
+     * Origin detection via cgroups only works on Linux. On Linux this could
+     * interfere with the tests and the container ID is non deterministic,
+     * so for Linux we disable origin detection. Other OSes shouldn't pick
+     * up the container Id, so we keep origin detection enabled to ensure it
+     * doesn't raise unwanted errors.
+     */
+    function disableOriginDetectionLinux() {
+        if (strtoupper(substr(PHP_OS, 0, 5)) == 'LINUX') {
+            putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        }
+    }
+
     static function getPrivate($object, $property) {
         $reflector = new ReflectionProperty(get_class($object), $property);
         $reflector->setAccessible(true);
@@ -316,12 +330,6 @@ class SocketsTest extends SocketSpyTestCase
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1]
         );
-    }
-
-    function disableOriginDetectionLinux() {
-        if (strtoupper(substr(PHP_OS, 0, 3)) == 'LIN') {
-            putenv("DD_ORIGIN_DETECTION_ENABLED=false");
-        }
     }
 
     public function testGauge()
