@@ -319,7 +319,7 @@ class SocketsTest extends SocketSpyTestCase
     }
 
     function disableOriginDetectionNonWindows() {
-        if (strtoupper(substr(PHP_OS, 0, 3)) == 'WIN') {
+        if (strtoupper(substr(PHP_OS, 0, 3)) !== 'WIN') {
             putenv("DD_ORIGIN_DETECTION_ENABLED=false");
         }
     }
