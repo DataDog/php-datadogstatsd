@@ -107,6 +107,20 @@ class SocketsTest extends SocketSpyTestCase
         parent::tear_down();
     }
 
+
+    /**
+     * Origin detection via cgroups only works on Linux. On Linux this could
+     * interfere with the tests and the container ID is non deterministic,
+     * so for Linux we disable origin detection. Other OSes shouldn't pick
+     * up the container Id, so we keep origin detection enabled to ensure it
+     * doesn't raise unwanted errors.
+     */
+    function disableOriginDetectionLinux() {
+        if (strtoupper(substr(PHP_OS, 0, 5)) == 'LINUX') {
+            putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        }
+    }
+
     static function getPrivate($object, $property) {
         $reflector = new ReflectionProperty(get_class($object), $property);
         $reflector->setAccessible(true);
@@ -155,7 +169,8 @@ class SocketsTest extends SocketSpyTestCase
     {
         putenv("DD_AGENT_HOST=myenvvarhost");
         putenv("DD_DOGSTATSD_PORT=1234");
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd();
         $this->assertSame(
             'myenvvarhost',
@@ -173,7 +188,7 @@ class SocketsTest extends SocketSpyTestCase
     {
         putenv("DD_AGENT_HOST=myenvvarhost");
         putenv("DD_DOGSTATSD_PORT=1234");
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
         $dog = new DogStatsd(array(
             'host' => 'myhost',
             'port' => 4321
@@ -193,7 +208,7 @@ class SocketsTest extends SocketSpyTestCase
     public function testHostAndPortFromUrl()
     {
         putenv("DD_DOGSTATSD_URL=udp://oh.my.address:1234");
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
         $dog = new DogStatsd();
         $this->assertSame(
             'oh.my.address',
@@ -319,7 +334,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testGauge()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+        
         $stat = 'some.gauge_metric';
         $value = 5;
         $sampleRate = 1.0;
@@ -353,7 +369,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testGaugeZero()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $stat = 'some.gauge_metric';
         $value = 0;
         $sampleRate = 1.0;
@@ -387,7 +404,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testHistogram()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $stat = 'some.histogram_metric';
         $value = 109;
         $sampleRate = 1.0;
@@ -421,7 +439,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testDistribution()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $stat = 'some.distribution_metric';
         $value = 7;
         $sampleRate = 1.0;
@@ -463,7 +482,8 @@ class SocketsTest extends SocketSpyTestCase
      */
     public function testSet($stat, $value, $sampleRate, $tags, $expectedUdpMessage)
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
         $dog->set(
@@ -535,7 +555,8 @@ class SocketsTest extends SocketSpyTestCase
         $timestamp,
         $expectedUdpMessage
     ) {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
         $dog->service_check(
@@ -561,7 +582,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function serviceCheckProvider()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $name = 'neat-service';
         $status = DogStatsd::CRITICAL;
         $tags = array('red' => 'balloon', 'green' => 'ham');
@@ -620,7 +642,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSend()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $sampleRate = 1.0;
         $tags = array(
             'cowboy' => 'hat'
@@ -661,7 +684,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSendSerializesTagAsString()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $data = array(
             'foo.metric' => '82|s',
         );
@@ -685,7 +709,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSendSerializesMessageWithoutTags()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $data = array(
             'foo.metric' => '19872|h',
         );
@@ -709,7 +734,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSendReturnsEarlyWhenPassedEmptyData()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
         $dog->send(array());
@@ -725,7 +751,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSendSendsWhenRandCalculationLessThanSampleRate()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         global $mt_rand_stub_return_value;
         global $mt_getrandmax_stub_return_value;
 
@@ -753,7 +780,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSendSendsWhenRandCalculationEqualToSampleRate()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         global $mt_rand_stub_return_value;
         global $mt_getrandmax_stub_return_value;
 
@@ -781,7 +809,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSendDoesNotSendWhenRandCalculationGreaterThanSampleRate()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         global $mt_rand_stub_return_value;
         global $mt_getrandmax_stub_return_value;
 
@@ -809,7 +838,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testIncrement()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $stats = array(
             'foo.metric',
         );
@@ -839,7 +869,7 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testDecrement()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
 
         $stats = array(
             'foo.metric',
@@ -870,7 +900,7 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testDecrementWithValueGreaterThanOne()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
 
         $stats = array(
             'foo.metric',
@@ -901,7 +931,7 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testDecrementWithValueLessThanOne()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
 
         $stats = array(
             'foo.metric',
@@ -932,7 +962,7 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testUpdateStats()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
 
         $stats = array(
             'foo.metric',
@@ -983,7 +1013,7 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testUpdateStatsWithStringMetric()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
 
         $stats = 'foo.metric';
         $delta = -45;
@@ -1040,7 +1070,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testFlushUdp()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $expectedUdpMessage = 'foo';
 
         $dog = new DogStatsd(array("disable_telemetry" => true));
@@ -1109,7 +1140,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testFlushUds()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $expectedUdsMessage = 'foo';
         $expectedUdsSocketPath = '/path/to/some.socket';
 
@@ -1179,7 +1211,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testEventUdp()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $eventTitle = 'Some event title';
         $eventVals = array(
             'text'             => "Some event text\nthat spans 2 lines",
@@ -1226,7 +1259,8 @@ class SocketsTest extends SocketSpyTestCase
      */
     public function testEventUdpWithEmptyValues()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $eventTitle = '';
 
         $expectedUdpMessage = "_e{0,0}:|";
@@ -1255,7 +1289,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testGlobalTags()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array(
             'global_tags' => array(
                 'my_tag' => 'tag_value',
@@ -1282,7 +1317,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testGlobalTagsWithEntityIdFromEnvVar()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         putenv("DD_ENTITY_ID=04652bb7-19b7-11e9-9cc6-42010a9c016d");
         $dog = new DogStatsd(array(
             'global_tags' => array(
@@ -1310,7 +1346,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testGlobalTagsAreSupplementedWithLocalTags()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array(
             'global_tags' => array(
                 'my_tag' => 'tag_value',
@@ -1338,7 +1375,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testGlobalTagsAreReplacedWithConflictingLocalTags()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array(
             'global_tags' => array(
                 'my_tag' => 'tag_value',
@@ -1366,7 +1404,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testTelemetryDefault()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd();
         $dog->gauge('metric', 42);
 
@@ -1378,7 +1417,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testTelemetryEnable()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
         $dog->gauge('metric', 42);
 
@@ -1390,7 +1430,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testTelemetryAllDataType()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
 
         $dog->timing('test', 21);
@@ -1427,7 +1468,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testTelemetryNetworkError()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
         $this->getSocketSpy()->returnErrorOnSend = true;
 
@@ -1446,7 +1488,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testDecimalNormalization()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false, "decimal_precision" => 5));
 
         $dog->timing('test', 21.00000);
@@ -1461,7 +1504,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testFloatLocalization()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $defaultLocale = setlocale(LC_ALL, 0);
         setlocale(LC_ALL, 'nl_NL');
         $dog = new DogStatsd(array("disable_telemetry" => false));
@@ -1473,7 +1517,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testSampleRateFloatLocalization()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $defaultLocale = setlocale(LC_ALL, 0);
         setlocale(LC_ALL, 'de_DE');
         $dog = new DogStatsd(array("disable_telemetry" => true));
@@ -1491,7 +1536,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testMetricPrefix()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false, "metric_prefix" => 'test_prefix'));
 
         $dog->timing('test', 21.00);
@@ -1507,7 +1553,8 @@ class SocketsTest extends SocketSpyTestCase
     public function testExternalEnv()
     {
         putenv("DD_EXTERNAL_ENV=cn-SomeKindOfContainerName");
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
         $dog->gauge('metric', 42);
         $spy = $this->getSocketSpy();
@@ -1530,7 +1577,8 @@ class SocketsTest extends SocketSpyTestCase
     {
         // Environment var contains a new line and a | character..
         putenv("DD_EXTERNAL_ENV=it-false,\ncn-nginx-webserver,|pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         $dog = new DogStatsd(array("disable_telemetry" => false));
         $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
         $spy = $this->getSocketSpy();
@@ -1551,7 +1599,8 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testExternalEnvWithTags()
     {
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
+
         putenv("DD_EXTERNAL_ENV=it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
         $dog = new DogStatsd(array("disable_telemetry" => false));
         $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
@@ -1576,7 +1625,7 @@ class SocketsTest extends SocketSpyTestCase
         putenv("DD_VERSION=1.2.3");
         putenv("DD_ENV=prod");
         putenv("DD_SERVICE=myService");
-        putenv("DD_ORIGIN_DETECTION_ENABLED=false");
+        $this->disableOriginDetectionLinux();
         $dog = new DogStatsd(array(
             'global_tags' => array(
                 'my_tag' => 'tag_value',
