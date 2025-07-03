@@ -63,11 +63,14 @@ class OriginDetection
 
     public function getCgroupInode($cgroupMountPath, $procSelfCgroupPath)
     {
-        if (!is_readable($procSelfCgroupPath)) {
+        // phpcs:disable
+        $content = @file_get_contents($procSelfCgroupPath);
+        // phpcs:enable
+        if ($content == false) {
             return '';
         }
 
-        $cgroupControllersPaths = $this->parseCgroupNodePath(file_get_contents($procSelfCgroupPath));
+        $cgroupControllersPaths = $this->parseCgroupNodePath($content);
 
         foreach ([self::CGROUPV1BASECONTROLLER , ''] as $controller) {
             if (!isset($cgroupControllersPaths[$controller])) {
