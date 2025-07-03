@@ -87,7 +87,7 @@ class OriginDetectionTest extends TestCase
                 ->at($root);
 
             $id = $originDetection->readContainerID(vfsStream::url('proc/self/cgroup'));
-            $this->assertSame($case['expected'], $id);
+            $this->assertSame($case['expected'], $id, $case['input']);
         }
 	}
 
