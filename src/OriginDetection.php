@@ -63,7 +63,14 @@ class OriginDetection
 
     public function getCgroupInode($cgroupMountPath, $procSelfCgroupPath)
     {
-        $cgroupControllersPaths = $this->parseCgroupNodePath(file_get_contents($procSelfCgroupPath));
+        // phpcs:disable
+        $content = @file_get_contents($procSelfCgroupPath);
+        // phpcs:enable
+        if ($content == false) {
+            return '';
+        }
+
+        $cgroupControllersPaths = $this->parseCgroupNodePath($content);
 
         foreach ([self::CGROUPV1BASECONTROLLER , ''] as $controller) {
             if (!isset($cgroupControllersPaths[$controller])) {
@@ -111,6 +118,7 @@ class OriginDetection
         $expContainerID = '/(' . $uuidSource . '|' . $containerSource . '|' . $taskSource . ')(?:.scope)?$/';
 
         while (($line = fgets($handle)) !== false) {
+            $line = rtrim($line);
             if (preg_match($expLine, $line, $matches)) {
                 if (count($matches) != 2) {
                     continue;
