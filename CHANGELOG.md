@@ -3,6 +3,14 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.6.4
+
+* Revert 1.6.3 changes
+
+# 1.6.3 / 2025-06-13
+
+* Enable Origin Detection, via CGroups, `DD_EXTERNAL_ENV` or inode. (#155, #156, #157)
+* Interpret tags passed as strings correctly. (#79) [@vlakarados][]
 
 # 1.6.2 / 2024-07-16
 
