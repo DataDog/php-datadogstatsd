@@ -3,6 +3,10 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.7.0 / 2025-07-11
+* Fix the array shape for configuration (#159) [@lcobucci][]
+* Fix Windows errors caused by 1.6.3 (#162)
+
 # 1.6.3 / 2025-06-13
 
 * Enable Origin Detection, via CGroups, `DD_EXTERNAL_ENV` or inode. (#155, #156, #157)
@@ -130,6 +134,11 @@ CHANGELOG
 [#27]: https://github.com/DataDog/php-datadogstatsd/issues/27
 [#28]: https://github.com/DataDog/php-datadogstatsd/issues/28
 [#41]: https://github.com/DataDog/php-datadogstatsd/pull/41
+[#79]: https://github.com/DataDog/php-datadogstatsd/pull/79
+[#155]: https://github.com/DataDog/php-datadogstatsd/pull/155
+[#156]: https://github.com/DataDog/php-datadogstatsd/pull/156
+[#157]: https://github.com/DataDog/php-datadogstatsd/pull/157
+[#163]: https://github.com/DataDog/php-datadogstatsd/pull/162
 [@bigthyme]: https://github.com/bigthyme
 [@obradovic]: https://github.com/obradovic
 [@shadowhand]: https://github.com/shadowhand
@@ -159,4 +168,5 @@ CHANGELOG
 [@NickStallman]: https://github.com/NickStallman
 [@cosmastech]: https://github.com/cosmastech
 [@vlakarados]: https://github.com/vlakarados
+[@lcobucci]: https://github.com/lcobucci
 [dogstatsd_telemetry_doc]: https://docs.datadoghq.com/developers/dogstatsd/high_throughput/?tab=php#client-side-telemetry
