@@ -1553,9 +1553,10 @@ class SocketsTest extends SocketSpyTestCase
     public function testExternalEnv()
     {
         putenv("DD_EXTERNAL_ENV=cn-SomeKindOfContainerName");
-        $this->disableOriginDetectionLinux();
 
-        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog = new DogStatsd(array("disable_telemetry" => false,
+                                   "origin_detection" => true,
+                                   "container_id" => "container"));
         $dog->gauge('metric', 42);
         $spy = $this->getSocketSpy();
         $this->assertSame(
@@ -1563,7 +1564,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|g|e:cn-SomeKindOfContainerName';
+        $expectedUdpMessage = 'metric:42|g|e:cn-SomeKindOfContainerName|c:container';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
@@ -1577,9 +1578,10 @@ class SocketsTest extends SocketSpyTestCase
     {
         // Environment var contains a new line and a | character..
         putenv("DD_EXTERNAL_ENV=it-false,\ncn-nginx-webserver,|pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
-        $this->disableOriginDetectionLinux();
 
-        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog = new DogStatsd(array("disable_telemetry" => false,
+                                   "origin_detection" => true,
+                                   "container_id" => "container"));
         $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
         $spy = $this->getSocketSpy();
         $this->assertSame(
@@ -1587,7 +1589,7 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759';
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759|c:container';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(
@@ -1599,10 +1601,10 @@ class SocketsTest extends SocketSpyTestCase
 
     public function testExternalEnvWithTags()
     {
-        $this->disableOriginDetectionLinux();
-
         putenv("DD_EXTERNAL_ENV=it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
-        $dog = new DogStatsd(array("disable_telemetry" => false));
+        $dog = new DogStatsd(array("disable_telemetry" => false,
+                                   "origin_detection" => true,
+                                   "container_id" => "container"));
         $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
         $spy = $this->getSocketSpy();
         $this->assertSame(
@@ -1610,7 +1612,52 @@ class SocketsTest extends SocketSpyTestCase
             count($spy->argsFromSocketSendtoCalls),
             'Should send 1 UDP message'
         );
-        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759';
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|e:it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759|c:container';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testExternalEnvDisabledOriginDetection()
+    {
+        putenv("DD_EXTERNAL_ENV=it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
+        $dog = new DogStatsd(array("disable_telemetry" => false,
+                                   "origin_detection" => false));
+        $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            ""
+        );
+    }
+
+    public function testExternalEnvDisabledOriginDetectionContainerID()
+    {
+        putenv("DD_EXTERNAL_ENV=it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759");
+        $dog = new DogStatsd(array("disable_telemetry" => false,
+                                   "origin_detection" => false,
+                                   "container_id" => "container"));
+        $dog->gauge('metric', 42, 1.0, array('my_tag' => 'other_value'));
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|g|#my_tag:other_value|c:container';
         $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
 
         $this->assertSameWithTelemetry(

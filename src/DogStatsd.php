@@ -155,14 +155,10 @@ class DogStatsd
         if (getenv('DD_VERSION')) {
             $this->globalTags['version'] = getenv('DD_VERSION');
         }
-        // DD_EXTERNAL_ENV can be supplied by the Admission controller for origin detection.
-        if (getenv('DD_EXTERNAL_ENV')) {
-            $this->externalData = $this->sanitize(getenv('DD_EXTERNAL_ENV'));
-        }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';
 
-        // by default the telemetry is disable
+        // by default the telemetry is disabled
         $this->disable_telemetry = isset($config["disable_telemetry"]) ? $config["disable_telemetry"] : true;
         $transport_type = !is_null($this->socketPath) ? "uds" : "udp";
         $this->telemetry_tags = $this->serializeTags(
@@ -176,6 +172,12 @@ class DogStatsd
 
         $originDetection = new OriginDetection();
         $originDetectionEnabled = $this->isOriginDetectionEnabled($config);
+
+        // DD_EXTERNAL_ENV can be supplied by the Admission controller for origin detection.
+        if ($originDetectionEnabled && getEnv('DD_EXTERNAL_ENV')) {
+            $this->externalData = $this->sanitize(getenv('DD_EXTERNAL_ENV'));
+        }
+
         $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
         $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
     }
@@ -199,8 +201,8 @@ class DogStatsd
 
     private function isOriginDetectionEnabled($config)
     {
-        if ((isset($config["origin_detection"]) && !$config["origin_detection"])) {
-            return false;
+        if (isset($config["origin_detection"])) {
+            return $config["origin_detection"];
         }
 
         if (getenv("DD_ORIGIN_DETECTION_ENABLED")) {
