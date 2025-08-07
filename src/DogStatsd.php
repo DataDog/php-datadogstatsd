@@ -284,6 +284,7 @@ class DogStatsd
 
         $additionalFields = $this->getFields(null);
 
+        // phpcs:disable
         return "\ndatadog.dogstatsd.client.metrics:{$this->metrics_sent}|c{$this->telemetry_tags}{$additionalFields}"
              . "\ndatadog.dogstatsd.client.events:{$this->events_sent}|c{$this->telemetry_tags}{$additionalFields}"
              . "\ndatadog.dogstatsd.client.service_checks:{$this->service_checks_sent}|c{$this->telemetry_tags}{$additionalFields}"
@@ -291,6 +292,7 @@ class DogStatsd
              . "\ndatadog.dogstatsd.client.bytes_dropped:{$this->bytes_dropped}|c{$this->telemetry_tags}{$additionalFields}"
              . "\ndatadog.dogstatsd.client.packets_sent:{$this->packets_sent}|c{$this->telemetry_tags}{$additionalFields}"
              . "\ndatadog.dogstatsd.client.packets_dropped:{$this->packets_dropped}|c{$this->telemetry_tags}{$additionalFields}";
+        // phpcs:enable
     }
 
     /**
