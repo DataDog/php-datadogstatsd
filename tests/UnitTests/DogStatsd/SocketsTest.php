@@ -141,6 +141,9 @@ class SocketsTest extends SocketSpyTestCase
         $packets_sent = $this->get_default($params["packets_sent"], 0);
         $packets_dropped = $this->get_default($params["packets_dropped"], 0);
         $transport_type = $this->get_default($params["transport"], "udp");
+        $external_env = $this->get_default($params["external_env"], null);
+        $container_id = $this->get_default($params["container_id"], null);
+        $cardinality = $this->get_default($params["cardinality"], null);
 
         $version = DogStatsd::$version;
         $tags = "client:php,client_version:{$version},client_transport:{$transport_type}";
@@ -150,13 +153,24 @@ class SocketsTest extends SocketSpyTestCase
           $tags = $extra_tags.",".$tags;
         }
 
-        $telemetry = "\ndatadog.dogstatsd.client.metrics:{$metrics_sent}|c|#{$tags}"
-             . "\ndatadog.dogstatsd.client.events:{$events_sent}|c|#{$tags}"
-             . "\ndatadog.dogstatsd.client.service_checks:{$service_checks_sent}|c|#{$tags}"
-             . "\ndatadog.dogstatsd.client.bytes_sent:{$bytes_sent}|c|#{$tags}"
-             . "\ndatadog.dogstatsd.client.bytes_dropped:{$bytes_dropped}|c|#{$tags}"
-             . "\ndatadog.dogstatsd.client.packets_sent:{$packets_sent}|c|#{$tags}"
-             . "\ndatadog.dogstatsd.client.packets_dropped:{$packets_dropped}|c|#{$tags}";
+        $additionalFields = "";
+        if ($external_env) {
+            $additionalFields .= "|e:{$external_env}";
+        }
+        if ($cardinality) {
+            $additionalFields .= "|card:{$cardinality}";
+        }
+        if ($container_id) {
+            $additionalFields .= "|c:{$container_id}";
+        }
+
+        $telemetry = "\ndatadog.dogstatsd.client.metrics:{$metrics_sent}|c|#{$tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.events:{$events_sent}|c|#{$tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.service_checks:{$service_checks_sent}|c|#{$tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.bytes_sent:{$bytes_sent}|c|#{$tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.bytes_dropped:{$bytes_dropped}|c|#{$tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.packets_sent:{$packets_sent}|c|#{$tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.packets_dropped:{$packets_dropped}|c|#{$tags}{$additionalFields}";
 
         $this->assertSame(
           $expected.$telemetry,
@@ -1570,7 +1584,11 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1],
-            ""
+            "",
+            array(
+                "external_env" => "cn-SomeKindOfContainerName",
+                "container_id" => "container"
+            )
         );
     }
 
@@ -1595,7 +1613,11 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1],
-            ""
+            "",
+            array(
+                "external_env" => "it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759",
+                "container_id" => "container"
+            )
         );
     }
 
@@ -1618,7 +1640,11 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1],
-            ""
+            "",
+            array(
+                "external_env" => "it-false,cn-nginx-webserver,pu-75a2b6d5-3949-4afb-ad0d-92ff0674e759",
+                "container_id" => "container"
+            )
         );
     }
 
@@ -1663,7 +1689,10 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1],
-            ""
+            "",
+            array(
+                "container_id" => "container"
+            )
         );
     }
 
@@ -1736,7 +1765,10 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1],
-            ""
+            "",
+            array(
+                "cardinality" => "orchestrator"
+            )
         );
     }
 
@@ -1758,7 +1790,10 @@ class SocketsTest extends SocketSpyTestCase
         $this->assertSameWithTelemetry(
             $expectedUdpMessage,
             $argsPassedToSocketSendTo[1],
-            ""
+            "",
+            array(
+                "cardinality" => "high"
+            )
         );
     }
 

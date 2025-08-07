@@ -247,6 +247,32 @@ class DogStatsd
         $this->packets_sent = 0;
         $this->packets_dropped = 0;
     }
+
+    /**
+     * Gets the origin detection fields to be appended to each metric.
+     *
+     * @param string|null $cardinality override cardinality to set.
+     * @returns string
+     */
+    private function getFields($cardinality)
+    {
+        $cardinalityToUse = $this->validateCardinality($cardinality ?: $this->cardinality);
+
+        $additionalFields = "";
+        if ($this->externalData) {
+            $additionalFields .= "|e:{$this->externalData}";
+        }
+        if ($cardinalityToUse) {
+            $additionalFields .= "|card:{$cardinalityToUse}";
+        }
+        if ($this->containerID) {
+            $additionalFields .= "|c:{$this->containerID}";
+        }
+
+        return $additionalFields;
+    }
+
+
     /**
      * Reset the telemetry value to zero
      */
@@ -256,13 +282,15 @@ class DogStatsd
             return "";
         }
 
-        return "\ndatadog.dogstatsd.client.metrics:{$this->metrics_sent}|c{$this->telemetry_tags}"
-             . "\ndatadog.dogstatsd.client.events:{$this->events_sent}|c{$this->telemetry_tags}"
-             . "\ndatadog.dogstatsd.client.service_checks:{$this->service_checks_sent}|c{$this->telemetry_tags}"
-             . "\ndatadog.dogstatsd.client.bytes_sent:{$this->bytes_sent}|c{$this->telemetry_tags}"
-             . "\ndatadog.dogstatsd.client.bytes_dropped:{$this->bytes_dropped}|c{$this->telemetry_tags}"
-             . "\ndatadog.dogstatsd.client.packets_sent:{$this->packets_sent}|c{$this->telemetry_tags}"
-             . "\ndatadog.dogstatsd.client.packets_dropped:{$this->packets_dropped}|c{$this->telemetry_tags}";
+        $additionalFields = $this->getFields(null);
+
+        return "\ndatadog.dogstatsd.client.metrics:{$this->metrics_sent}|c{$this->telemetry_tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.events:{$this->events_sent}|c{$this->telemetry_tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.service_checks:{$this->service_checks_sent}|c{$this->telemetry_tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.bytes_sent:{$this->bytes_sent}|c{$this->telemetry_tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.bytes_dropped:{$this->bytes_dropped}|c{$this->telemetry_tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.packets_sent:{$this->packets_sent}|c{$this->telemetry_tags}{$additionalFields}"
+             . "\ndatadog.dogstatsd.client.packets_dropped:{$this->packets_dropped}|c{$this->telemetry_tags}{$additionalFields}";
     }
 
     /**
@@ -506,18 +534,12 @@ class DogStatsd
             return;
         }
 
-        $cardinalityToUse = $this->validateCardinality($cardinality ?: $this->cardinality);
+        $fields = $this->getFields($cardinality);
 
         foreach ($sampledData as $stat => $value) {
             $value .= $this->serializeTags($tags);
-            if ($this->externalData) {
-                $value .= "|e:{$this->externalData}";
-            }
-            if ($cardinalityToUse) {
-                $value .= "|card:{$cardinalityToUse}";
-            }
-            if ($this->containerID) {
-                $value .= "|c:{$this->containerID}";
+            if ($fields) {
+                $value .= $fields;
             }
             $this->report("{$this->metricPrefix}$stat:$value");
         }
