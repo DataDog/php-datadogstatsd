@@ -43,6 +43,11 @@ class SocketSpy
     public $returnErrorOnSend = false;
 
     /**
+     * @var null|callable
+     */
+    public $errorThrownOnSend = null;
+
+    /**
      * @param int $domain
      * @param int $type
      * @param int $protocol
@@ -88,6 +93,10 @@ class SocketSpy
         $addr,
         $port
     ) {
+        if ($this->errorThrownOnSend !== null) {
+            call_user_func($this->errorThrownOnSend, $socket, $buf, $len, $flags);
+        }
+
         if ($this->returnErrorOnSend === true) {
           return false;
         }
