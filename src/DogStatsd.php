@@ -58,6 +58,10 @@ class DogStatsd
      * @var string The container ID field, used for origin detection
      */
     private $containerID;
+    /**
+     * @var (callable(\Throwable))|null The closure which is executed when there is a failure flushing metrics.
+     */
+    private $socketFailureHandler = null;
 
     // Telemetry
     private $disable_telemetry;
@@ -98,7 +102,8 @@ class DogStatsd
      *     metric_prefix?: string,
      *     disable_telemetry?: bool,
      *     container_id?: string,
-     *     origin_detection?: bool
+     *     origin_detection?: bool,
+     *     socket_failure_handler?: callable(\Throwable)
      * } $config
      */
     public function __construct(array $config = array())
@@ -180,6 +185,8 @@ class DogStatsd
 
         $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
         $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
+
+        $this->socketFailureHandler = isset($config['socket_failure_handler']) ? $config['socket_failure_handler'] : null;
     }
 
     /**
@@ -647,20 +654,28 @@ class DogStatsd
     {
         $message .= $this->flushTelemetry();
 
-        // Non - Blocking UDP I/O - Use IP Addresses!
-        if (!is_null($this->socketPath)) {
-            $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
-        } elseif (filter_var($this->host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
-            $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
-        } else {
-            $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
-        }
-        socket_set_nonblock($socket);
-
-        if (!is_null($this->socketPath)) {
-            $res = socket_sendto($socket, $message, strlen($message), 0, $this->socketPath);
-        } else {
-            $res = socket_sendto($socket, $message, strlen($message), 0, $this->host, $this->port);
+        try {
+            // Non - Blocking UDP I/O - Use IP Addresses!
+            if (!is_null($this->socketPath)) {
+                $socket = socket_create(AF_UNIX, SOCK_DGRAM, 0);
+            } elseif (filter_var($this->host, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6)) {
+                $socket = socket_create(AF_INET6, SOCK_DGRAM, SOL_UDP);
+            } else {
+                $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
+            }
+            socket_set_nonblock($socket);
+    
+            if (!is_null($this->socketPath)) {
+                $res = socket_sendto($socket, $message, strlen($message), 0, $this->socketPath);
+            } else {
+                $res = socket_sendto($socket, $message, strlen($message), 0, $this->host, $this->port);
+            }
+        } catch (\Throwable $e) {
+            if ($this->socketFailureHandler === null) {
+                throw $e;
+            }
+            call_user_func($this->socketFailureHandler, $e);
+            $res = false;
         }
 
         if ($res !== false) {
