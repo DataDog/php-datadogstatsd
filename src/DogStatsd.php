@@ -3,6 +3,7 @@
 namespace DataDog;
 
 use DataDog\OriginDetection;
+use Throwable;
 
 /**
  * Datadog implementation of StatsD
@@ -89,7 +90,8 @@ class DogStatsd
      * metric_prefix,
      * disable_telemetry,
      * container_id,
-     * origin_detecion
+     * origin_detection
+     * socket_failure_handler
      *
      * @param array{
      *     host?: string,
@@ -103,7 +105,7 @@ class DogStatsd
      *     disable_telemetry?: bool,
      *     container_id?: string,
      *     origin_detection?: bool,
-     *     socket_failure_handler?: callable(\Throwable)
+     *     socket_failure_handler?: callable
      * } $config
      */
     public function __construct(array $config = array())
@@ -186,7 +188,9 @@ class DogStatsd
         $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
         $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
 
-        $this->socketFailureHandler = isset($config['socket_failure_handler']) ? $config['socket_failure_handler'] : null;
+        $this->socketFailureHandler = isset($config['socket_failure_handler'])
+            ? $config['socket_failure_handler']
+            : null;
     }
 
     /**
@@ -664,7 +668,7 @@ class DogStatsd
                 $socket = socket_create(AF_INET, SOCK_DGRAM, SOL_UDP);
             }
             socket_set_nonblock($socket);
-    
+
             if (!is_null($this->socketPath)) {
                 $res = socket_sendto($socket, $message, strlen($message), 0, $this->socketPath);
             } else {
@@ -687,7 +691,9 @@ class DogStatsd
             $this->packets_dropped += 1;
         }
 
-        socket_close($socket);
+        if (isset($socket)) {
+            socket_close($socket);
+        }
     }
 
      /**
