@@ -95,7 +95,7 @@ class DogStatsd
      * disable_telemetry,
      * container_id,
      * origin_detection
-     * socket_failure_handler
+     * flush_failure_handler
      *
      * @param array{
      *     host?: string,
@@ -109,7 +109,7 @@ class DogStatsd
      *     disable_telemetry?: bool,
      *     container_id?: string,
      *     origin_detection?: bool,
-     *     socket_failure_handler?: callable
+     *     flush_failure_handler?: callable
      * } $config
      */
     public function __construct(array $config = array())
@@ -192,8 +192,8 @@ class DogStatsd
         $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
         $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
 
-        $this->flushFailureHandler = isset($config['socket_failure_handler'])
-            ? $config['socket_failure_handler']
+        $this->flushFailureHandler = isset($config['flush_failure_handler'])
+            ? $config['flush_failure_handler']
             : null;
 
         $this->phpVersionHasThrowableInterface = version_compare(PHP_VERSION, '7.0.0', '>=');
@@ -671,22 +671,22 @@ class DogStatsd
             try {
                 $res = $this->writeToSocket($message);
             } catch (\Throwable $e) {
-                $res = false;
-                if ($this->flushFailureHandler !== null) {
-                    call_user_func($this->flushFailureHandler, $e, $message);
-                } else {
+                if ($this->flushFailureHandler === null) {
                     throw $e;
+                } else {
+                    call_user_func($this->flushFailureHandler, $e, $message);
+                    $res = false;
                 }
             }
         } else {
             try {
                 $res = $this->writeToSocket($message);
             } catch (Exception $e) {
-                $res = false;
-                if ($this->flushFailureHandler !== null) {
-                    call_user_func($this->flushFailureHandler, $e, $message);
-                } else {
+                if ($this->flushFailureHandler === null) {
                     throw $e;
+                } else {
+                    call_user_func($this->flushFailureHandler, $e, $message);
+                    $res = false;
                 }
             }
         }

@@ -1507,7 +1507,7 @@ class SocketsTest extends SocketSpyTestCase
         $this->disableOriginDetectionLinux();
 
         $errorStore = null;
-        $dog = new DogStatsd(array("disable_telemetry" => false, "socket_failure_handler" => function ($err) use (&$errorStore) {
+        $dog = new DogStatsd(array("disable_telemetry" => false, "flush_failure_handler" => function ($err) use (&$errorStore) {
             $errorStore = $err;
         }));
 
