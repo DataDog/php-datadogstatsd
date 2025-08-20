@@ -3,7 +3,7 @@
 namespace DataDog;
 
 use DataDog\OriginDetection;
-use Throwable;
+use Exception;
 
 /**
  * Datadog implementation of StatsD
@@ -60,9 +60,13 @@ class DogStatsd
      */
     private $containerID;
     /**
-     * @var (callable(\Throwable))|null The closure which is executed when there is a failure flushing metrics.
+     * @var (callable(\Throwable, string))|null The closure which is executed when there is a failure flushing metrics.
      */
-    private $socketFailureHandler = null;
+    private $flushFailureHandler = null;
+    /**
+     * @var bool Whether the PHP Version of the app has the Throwable interface (>7.0))
+     */
+    private $phpVersionHasThrowableInterface = false;
 
     // Telemetry
     private $disable_telemetry;
@@ -188,9 +192,11 @@ class DogStatsd
         $containerID = isset($config["container_id"]) ? $config["container_id"] : "";
         $this->containerID = $originDetection->getContainerID($containerID, $originDetectionEnabled);
 
-        $this->socketFailureHandler = isset($config['socket_failure_handler'])
+        $this->flushFailureHandler = isset($config['socket_failure_handler'])
             ? $config['socket_failure_handler']
             : null;
+
+        $this->phpVersionHasThrowableInterface = version_compare(PHP_VERSION, '7.0.0', '>=');
     }
 
     /**
@@ -654,10 +660,54 @@ class DogStatsd
         $this->flush($message);
     }
 
+    /**
+     * @throws \Exception|\Throwable
+     */
     public function flush($message)
     {
         $message .= $this->flushTelemetry();
 
+        if ($this->phpVersionHasThrowableInterface) {
+            try {
+                $res = $this->writeToSocket($message);
+            } catch (\Throwable $e) {
+                $res = false;
+                if ($this->flushFailureHandler !== null) {
+                    call_user_func($this->flushFailureHandler, $e, $message);
+                } else {
+                    throw $e;
+                }
+            }
+        } else {
+            try {
+                $res = $this->writeToSocket($message);
+            } catch (Exception $e) {
+                $res = false;
+                if ($this->flushFailureHandler !== null) {
+                    call_user_func($this->flushFailureHandler, $e, $message);
+                } else {
+                    throw $e;
+                }
+            }
+        }
+
+        if ($res !== false) {
+            $this->resetTelemetry();
+            $this->bytes_sent += strlen($message);
+            $this->packets_sent += 1;
+        } else {
+            $this->bytes_dropped += strlen($message);
+            $this->packets_dropped += 1;
+        }
+    }
+
+    /**
+     * @param string $message
+     * @return false|int
+     * @throws \Exception|\Throwable
+     */
+    protected function writeToSocket($message)
+    {
         try {
             // Non - Blocking UDP I/O - Use IP Addresses!
             if (!is_null($this->socketPath)) {
@@ -674,27 +724,15 @@ class DogStatsd
             } else {
                 $res = socket_sendto($socket, $message, strlen($message), 0, $this->host, $this->port);
             }
-        } catch (\Throwable $e) {
-            if ($this->socketFailureHandler === null) {
-                throw $e;
+
+            return $res;
+        } finally {
+            if (isset($socket)) {
+                socket_close($socket);
             }
-            call_user_func($this->socketFailureHandler, $e);
-            $res = false;
-        }
-
-        if ($res !== false) {
-            $this->resetTelemetry();
-            $this->bytes_sent += strlen($message);
-            $this->packets_sent += 1;
-        } else {
-            $this->bytes_dropped += strlen($message);
-            $this->packets_dropped += 1;
-        }
-
-        if (isset($socket)) {
-            socket_close($socket);
         }
     }
+
 
      /**
      * Formats $vals array into event for submission to Datadog via UDP
