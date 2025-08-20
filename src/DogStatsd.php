@@ -63,10 +63,6 @@ class DogStatsd
      * @var (callable(\Throwable, string))|null The closure which is executed when there is a failure flushing metrics.
      */
     private $flushFailureHandler = null;
-    /**
-     * @var bool Whether the PHP Version of the app has the Throwable interface (>7.0))
-     */
-    private $phpVersionHasThrowableInterface = false;
 
     // Telemetry
     private $disable_telemetry;
@@ -195,8 +191,6 @@ class DogStatsd
         $this->flushFailureHandler = isset($config['flush_failure_handler'])
             ? $config['flush_failure_handler']
             : null;
-
-        $this->phpVersionHasThrowableInterface = version_compare(PHP_VERSION, '7.0.0', '>=');
     }
 
     /**
@@ -667,27 +661,21 @@ class DogStatsd
     {
         $message .= $this->flushTelemetry();
 
-        if ($this->phpVersionHasThrowableInterface) {
-            try {
-                $res = $this->writeToSocket($message);
-            } catch (\Throwable $e) {
-                if ($this->flushFailureHandler === null) {
-                    throw $e;
-                } else {
-                    call_user_func($this->flushFailureHandler, $e, $message);
-                    $res = false;
-                }
+        try {
+            $res = $this->writeToSocket($message);
+        } catch (\Throwable $e) {
+            if ($this->flushFailureHandler === null) {
+                throw $e;
+            } else {
+                call_user_func($this->flushFailureHandler, $e, $message);
+                $res = false;
             }
-        } else {
-            try {
-                $res = $this->writeToSocket($message);
-            } catch (Exception $e) {
-                if ($this->flushFailureHandler === null) {
-                    throw $e;
-                } else {
-                    call_user_func($this->flushFailureHandler, $e, $message);
-                    $res = false;
-                }
+        } catch (Exception $e) {
+            if ($this->flushFailureHandler === null) {
+                throw $e;
+            } else {
+                call_user_func($this->flushFailureHandler, $e, $message);
+                $res = false;
             }
         }
 
