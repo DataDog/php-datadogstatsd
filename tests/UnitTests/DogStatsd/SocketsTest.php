@@ -3,6 +3,7 @@
 namespace DataDog\UnitTests\DogStatsd;
 
 use DateTime;
+use ErrorException;
 use ReflectionProperty;
 use DataDog\DogStatsd;
 use DataDog\TestHelpers\SocketSpyTestCase;
@@ -42,6 +43,7 @@ class SocketsTest extends SocketSpyTestCase
         $this->oldOriginDetectionEnabled = getenv("DD_ORIGIN_DETECTION_ENABLED");
 
         putenv("DD_EXTERNAL_ENV");
+        $this->getSocketSpy()->errorThrownOnSend = null;
     }
 
     protected function tear_down() {
@@ -349,7 +351,7 @@ class SocketsTest extends SocketSpyTestCase
     public function testGauge()
     {
         $this->disableOriginDetectionLinux();
-        
+
         $stat = 'some.gauge_metric';
         $value = 5;
         $sampleRate = 1.0;
@@ -1498,6 +1500,28 @@ class SocketsTest extends SocketSpyTestCase
         # force flush to get the telemetry about the last message sent
         $dog->flush("");
         $this->assertSameWithTelemetry('', $this->getSocketSpy()->argsFromSocketSendtoCalls[1][1], "", array("bytes_sent" => 677, "packets_sent" => 1, "metrics" => 0));
+    }
+
+    public function testCustomSocketFailureHandler()
+    {
+        $this->disableOriginDetectionLinux();
+
+        $errorStore = null;
+        $dog = new DogStatsd(array("disable_telemetry" => false, "flush_failure_handler" => function ($err) use (&$errorStore) {
+            $errorStore = $err;
+        }));
+
+        $this->getSocketSpy()->errorThrownOnSend = function () {
+            trigger_error(
+                'ErrorException: socket_sendto(): Unable to write to socket [111]: Connection refused',
+                E_USER_WARNING
+            );
+        };
+        $dog->increment('test');
+        $this->assertNotNull($errorStore);
+        $this->getSocketSpy()->errorThrownOnSend = null;
+        $dog->flush('');
+        $this->assertSameWithTelemetry('', $this->getSocketSpy()->argsFromSocketSendtoCalls[0][1], "", array("bytes_dropped" => 673, "packets_sent" => 0, "metrics" => 1, 'packets_dropped' => 1));
     }
 
     public function testDecimalNormalization()
