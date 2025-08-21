@@ -351,7 +351,7 @@ class SocketsTest extends SocketSpyTestCase
     public function testGauge()
     {
         $this->disableOriginDetectionLinux();
-        
+
         $stat = 'some.gauge_metric';
         $value = 5;
         $sampleRate = 1.0;
@@ -1512,7 +1512,10 @@ class SocketsTest extends SocketSpyTestCase
         }));
 
         $this->getSocketSpy()->errorThrownOnSend = function () {
-            throw new ErrorException('ErrorException: socket_sendto(): Unable to write to socket [111]: Connection refused');
+            trigger_error(
+                'ErrorException: socket_sendto(): Unable to write to socket [111]: Connection refused',
+                E_USER_WARNING
+            );
         };
         $dog->increment('test');
         $this->assertNotNull($errorStore);
