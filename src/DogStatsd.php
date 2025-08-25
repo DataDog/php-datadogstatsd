@@ -76,7 +76,7 @@ class DogStatsd
     private $packets_dropped;
 
     // Used for the telemetry tags
-    public static $version = '1.7.0';
+    public static $version = '1.7.1';
 
     /**
      * DogStatsd constructor, takes a configuration array. The configuration can take any of the following values:

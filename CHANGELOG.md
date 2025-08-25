@@ -3,6 +3,9 @@ CHANGELOG
 
 [//]: # (comment: Don't forget to update src/DogStatsd.php:DogStatsd::version when releasing a new version)
 
+# 1.7.1 / 2025-08-25
+* Allow error handler to be defined for socket errors. (#169) [@cosmastech][]
+
 # 1.7.0 / 2025-07-11
 * Fix the array shape for configuration (#159) [@lcobucci][]
 * Fix Windows errors caused by 1.6.3 (#162)
@@ -139,6 +142,7 @@ CHANGELOG
 [#156]: https://github.com/DataDog/php-datadogstatsd/pull/156
 [#157]: https://github.com/DataDog/php-datadogstatsd/pull/157
 [#163]: https://github.com/DataDog/php-datadogstatsd/pull/162
+[#169]: https://github.com/DataDog/php-datadogstatsd/pull/169
 [@bigthyme]: https://github.com/bigthyme
 [@obradovic]: https://github.com/obradovic
 [@shadowhand]: https://github.com/shadowhand
