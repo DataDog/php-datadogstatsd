@@ -90,8 +90,9 @@ class DogStatsd
      * metric_prefix,
      * disable_telemetry,
      * container_id,
-     * origin_detection
-     * flush_failure_handler
+     * origin_detection,
+     * flush_failure_handler,
+     * filter_global_tags_callback
      *
      * @param array{
      *     host?: string,
@@ -105,7 +106,8 @@ class DogStatsd
      *     disable_telemetry?: bool,
      *     container_id?: string,
      *     origin_detection?: bool,
-     *     flush_failure_handler?: callable
+     *     flush_failure_handler?: callable,
+     *     filter_global_tags_callback?: (callable(array<array-key, mixed>): array<array-key, mixed>),
      * } $config
      */
     public function __construct(array $config = array())
@@ -149,7 +151,7 @@ class DogStatsd
 
         $this->decimalPrecision = isset($config['decimal_precision']) ? $config['decimal_precision'] : 2;
 
-        $this->globalTags = isset($config['global_tags']) ? $config['global_tags'] : array();
+        $this->globalTags = $this->normalizeTags(isset($config['global_tags']) ? $config['global_tags'] : array());
         if (getenv('DD_ENTITY_ID')) {
             $this->globalTags['dd.internal.entity_id'] = getenv('DD_ENTITY_ID');
         }
@@ -161,6 +163,9 @@ class DogStatsd
         }
         if (getenv('DD_VERSION')) {
             $this->globalTags['version'] = getenv('DD_VERSION');
+        }
+        if (isset($config['filter_global_tags_callback'])) {
+            $this->globalTags = call_user_func($config['filter_global_tags_callback'], $this->globalTags);
         }
 
         $this->metricPrefix = isset($config['metric_prefix']) ? "$config[metric_prefix]." : '';

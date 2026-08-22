@@ -1750,6 +1750,133 @@ class SocketsTest extends SocketSpyTestCase
         );
     }
 
+    public function testFilterGlobalTagsCallbackReceivesConfigAndEnvTags()
+    {
+        putenv("DD_VERSION=1.2.3");
+        putenv("DD_ENV=prod");
+        putenv("DD_SERVICE=myService");
+        $this->disableOriginDetectionLinux();
+
+        $receivedTags = null;
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+            'disable_telemetry' => false,
+            'filter_global_tags_callback' => function ($tags) use (&$receivedTags) {
+                $receivedTags = $tags;
+                unset($tags['env']);
+                $tags['service'] = 'filteredService';
+                $tags['callback_tag'] = 'callback_value';
+
+                return $tags;
+            }
+        ));
+
+        $this->assertSame(
+            array(
+                'my_tag' => 'tag_value',
+                'env' => 'prod',
+                'service' => 'myService',
+                'version' => '1.2.3'
+            ),
+            $receivedTags
+        );
+
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#my_tag:tag_value,service:filteredService,version:1.2.3,callback_tag:callback_value';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            "",
+            array("tags" => "my_tag:tag_value,service:filteredService,version:1.2.3,callback_tag:callback_value")
+        );
+    }
+
+    public function testFilterGlobalTagsCallbackCanRemoveAllTags()
+    {
+        putenv("DD_VERSION=1.2.3");
+        putenv("DD_ENV=prod");
+        putenv("DD_SERVICE=myService");
+        $this->disableOriginDetectionLinux();
+
+        $dog = new DogStatsd(array(
+            'global_tags' => array(
+                'my_tag' => 'tag_value',
+            ),
+            'disable_telemetry' => false,
+            'filter_global_tags_callback' => function ($tags) {
+                return array();
+            }
+        ));
+
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1]
+        );
+    }
+
+    public function testFilterGlobalTagsCallbackReceivesNormalizedStringTags()
+    {
+        $this->disableOriginDetectionLinux();
+
+        $receivedTags = null;
+        $dog = new DogStatsd(array(
+            'global_tags' => 'env:prod,service:web,version',
+            'disable_telemetry' => false,
+            'filter_global_tags_callback' => function (array $tags) use (&$receivedTags) {
+                $receivedTags = $tags;
+                $tags['service'] = 'filteredService';
+
+                return $tags;
+            }
+        ));
+
+        $this->assertSame(
+            array(
+                'env' => 'prod',
+                'service' => 'web',
+                'version' => null
+            ),
+            $receivedTags
+        );
+
+        $dog->timing('metric', 42, 1.0);
+        $spy = $this->getSocketSpy();
+        $this->assertSame(
+            1,
+            count($spy->argsFromSocketSendtoCalls),
+            'Should send 1 UDP message'
+        );
+        $expectedUdpMessage = 'metric:42|ms|#env:prod,service:filteredService,version';
+        $argsPassedToSocketSendTo = $spy->argsFromSocketSendtoCalls[0];
+
+        $this->assertSameWithTelemetry(
+            $expectedUdpMessage,
+            $argsPassedToSocketSendTo[1],
+            "",
+            array("tags" => "env:prod,service:filteredService,version")
+        );
+    }
+
     public function testCardinality()
     {
         $dog = new DogStatsd(array("disable_telemetry" => false));
